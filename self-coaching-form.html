@@ -127,8 +127,8 @@
   </form>
 
   <div class="output" id="outputBox">
-    <h2>Your Recommended Split:</h2>
-    <p id="planOutput" class="editable" contenteditable="true"></p>
+    <h2>Your Training Plan:</h2>
+    <div id="planOutput" class="editable" contenteditable="true"></div>
     <p><em>You can now edit your plan manually above.</em></p>
   </div>
 
@@ -137,19 +137,54 @@
     const outputBox = document.getElementById("outputBox");
     const planOutput = document.getElementById("planOutput");
 
+    const trainingPlans = {
+      "1–2": [
+        { day: "Day 1", type: "Full Body", exercises: ["Machine Chest Press", "Lat Pulldown", "Leg Press", "Seated Hamstring Curl", "Bicep Curl Machine", "Triceps Pushdown"] },
+        { day: "Day 2", type: "Full Body", exercises: ["Incline Chest Press Machine", "Cable Row", "Leg Extensions", "Seated Calf Raise", "Lateral Raise Machine", "Plank"] }
+      ],
+      "3–4": [
+        { day: "Day 1", type: "Upper", exercises: ["Chest Press Machine", "Lat Pulldown", "Shoulder Press", "Cable Bicep Curl", "Cable Triceps Extension"] },
+        { day: "Day 2", type: "Lower", exercises: ["Leg Press", "Leg Curl", "Adductor", "Calf Raise", "Crunch Machine"] },
+        { day: "Day 3", type: "Upper", exercises: ["Incline DB Press", "Seated Row", "Lateral Raise", "Barbell Curl", "Skullcrushers"] },
+        { day: "Day 4", type: "Lower", exercises: ["Smith Squat", "Ham Curl Machine", "Leg Extensions", "Calf Machine", "Plank"] }
+      ],
+      "5": [
+        { day: "Day 1", type: "Upper", exercises: ["Incline DB Press", "Pulldown", "Lateral Raise", "EZ Bar Curl", "Triceps Pushdown"] },
+        { day: "Day 2", type: "Lower", exercises: ["Leg Press", "Leg Curl", "Leg Extension", "Calves", "Abs"] },
+        { day: "Day 3", type: "Rest", exercises: [] },
+        { day: "Day 4", type: "Push", exercises: ["Smith Incline Press", "Cable Lateral Raise", "Overhead Triceps Ext."] },
+        { day: "Day 5", type: "Pull", exercises: ["Seated Cable Row", "Rear Delt Fly", "Hammer Curl"] },
+        { day: "Day 6", type: "Legs", exercises: ["Hack Squat", "Romanian Deadlift", "Calves", "Abs"] }
+      ],
+      "5+": [
+        { day: "Day 1", type: "Push – Ham Focus", exercises: ["Incline DB Press", "Side Lateral Raise", "Lying Ham Curl"] },
+        { day: "Day 2", type: "Pull", exercises: ["Pull-ups", "Seated Row", "Cable Curl"] },
+        { day: "Day 3", type: "Legs – Quad Focus", exercises: ["Front Squat", "Leg Extension", "Calves"] },
+        { day: "Day 4", type: "Push", exercises: ["Flat Smith Press", "Overhead DB Press", "Rope Pushdowns"] },
+        { day: "Day 5", type: "Pull", exercises: ["Lat Pulldown", "Rear Delt Machine", "EZ Bar Curl"] },
+        { day: "Day 6", type: "Legs", exercises: ["Leg Press", "Romanian Deadlift", "Standing Calf Raise"] }
+      ]
+    };
+
     form.onsubmit = function(e) {
       e.preventDefault();
       const freq = form.frequency.value;
-      let plan = "";
-      switch(freq) {
-        case "1–2": plan = "Full Body x1–2/week"; break;
-        case "3–4": plan = "Upper / Lower Split"; break;
-        case "5": plan = "Mixed Split: Upper, Lower, Rest, Push, Pull, Legs"; break;
-        case "5+": plan = "Rotating PPL: Push, Pull, Legs (Ham focus / Quad focus)"; break;
+      const selectedPlan = trainingPlans[freq];
+      let planHTML = "";
+      if (selectedPlan) {
+        selectedPlan.forEach(day => {
+          planHTML += `<strong>${day.day} – ${day.type}</strong><ul>`;
+          day.exercises.forEach(ex => {
+            planHTML += `<li>${ex}</li>`;
+          });
+          planHTML += `</ul>`;
+        });
+      } else {
+        planHTML = "Your custom plan is coming soon.";
       }
-      planOutput.innerText = plan;
+      planOutput.innerHTML = planHTML;
       outputBox.style.display = "block";
-    }
+    };
   </script>
 </body>
 </html>
