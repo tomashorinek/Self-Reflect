@@ -89,10 +89,10 @@
 
     <label for="frequency">How many days per week can you train?</label>
     <select id="frequency">
-      <option>1–2</option>
-      <option>3–4</option>
-      <option>5</option>
-      <option>5+</option>
+      <option value="1-2">1–2</option>
+      <option value="3-4">3–4</option>
+      <option value="5">5</option>
+      <option value="5plus">5+</option>
     </select>
 
     <label for="equipment">What equipment do you have?</label>
@@ -138,11 +138,11 @@
     const planOutput = document.getElementById("planOutput");
 
     const trainingPlans = {
-      "1–2": [
+      "1-2": [
         { day: "Day 1", type: "Full Body", exercises: ["Machine Chest Press", "Lat Pulldown", "Leg Press", "Seated Hamstring Curl", "Bicep Curl Machine", "Triceps Pushdown"] },
         { day: "Day 2", type: "Full Body", exercises: ["Incline Chest Press Machine", "Cable Row", "Leg Extensions", "Seated Calf Raise", "Lateral Raise Machine", "Plank"] }
       ],
-      "3–4": [
+      "3-4": [
         { day: "Day 1", type: "Upper", exercises: ["Chest Press Machine", "Lat Pulldown", "Shoulder Press", "Cable Bicep Curl", "Cable Triceps Extension"] },
         { day: "Day 2", type: "Lower", exercises: ["Leg Press", "Leg Curl", "Adductor", "Calf Raise", "Crunch Machine"] },
         { day: "Day 3", type: "Upper", exercises: ["Incline DB Press", "Seated Row", "Lateral Raise", "Barbell Curl", "Skullcrushers"] },
@@ -156,7 +156,7 @@
         { day: "Day 5", type: "Pull", exercises: ["Seated Cable Row", "Rear Delt Fly", "Hammer Curl"] },
         { day: "Day 6", type: "Legs", exercises: ["Hack Squat", "Romanian Deadlift", "Calves", "Abs"] }
       ],
-      "5+": [
+      "5plus": [
         { day: "Day 1", type: "Push – Ham Focus", exercises: ["Incline DB Press", "Side Lateral Raise", "Lying Ham Curl"] },
         { day: "Day 2", type: "Pull", exercises: ["Pull-ups", "Seated Row", "Cable Curl"] },
         { day: "Day 3", type: "Legs – Quad Focus", exercises: ["Front Squat", "Leg Extension", "Calves"] },
