@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Tracker Program Selector</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+      color: white;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: #1f1f1f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 102, 0, 0.2);
+    }
+    label {
+      display: block;
+      margin-top: 1.5rem;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      background: #2b2b2b;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    input::placeholder {
+      color: #999;
+    }
+    button {
+      margin-top: 2rem;
+      padding: 1rem;
+      width: 100%;
+      background: #ff6600;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #e65c00;
+    }
+    .output {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(255, 102, 0, 0.1);
+      display: none;
+    }
+    .editable {
+      background-color: #292929;
+      border: 1px dashed #777;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Self-Coaching Plan Generator</h1>
+  <form id="trackerForm">
+    <label for="goal">What's your main goal?</label>
+    <select id="goal">
+      <option>Build muscle</option>
+      <option>Lose fat</option>
+      <option>Get stronger</option>
+      <option>Improve conditioning</option>
+    </select>
+
+    <label for="frequency">How many days per week can you train?</label>
+    <select id="frequency">
+      <option>1–2</option>
+      <option>3–4</option>
+      <option>5</option>
+      <option>5+</option>
+    </select>
+
+    <label for="equipment">What equipment do you have?</label>
+    <select id="equipment">
+      <option>Gym access</option>
+      <option>Dumbbells at home</option>
+      <option>Resistance bands</option>
+      <option>Bodyweight only</option>
+    </select>
+
+    <label for="experience">Your training experience level?</label>
+    <select id="experience">
+      <option>Beginner (0–3 months)</option>
+      <option>Intermediate (3 months – 1 year)</option>
+      <option>Advanced (1–2 years)</option>
+      <option>Advanced+ (2+ years)</option>
+    </select>
+
+    <label for="injuries">Any injuries or health issues?</label>
+    <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+
+    <label for="fixed">Do you want a fixed weekly routine?</label>
+    <select id="fixed">
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+
+    <label for="email">Where should we send your plan?</label>
+    <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
+
+    <button type="submit">Generate My Plan</button>
+  </form>
+
+  <div class="output" id="outputBox">
+    <h2>Your Recommended Split:</h2>
+    <p id="planOutput" class="editable" contenteditable="true"></p>
+    <p><em>You can now edit your plan manually above.</em></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("trackerForm");
+    const outputBox = document.getElementById("outputBox");
+    const planOutput = document.getElementById("planOutput");
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      const freq = form.frequency.value;
+      let plan = "";
+      switch(freq) {
+        case "1–2": plan = "Full Body x1–2/week"; break;
+        case "3–4": plan = "Upper / Lower Split"; break;
+        case "5": plan = "Mixed Split: Upper, Lower, Rest, Push, Pull, Legs"; break;
+        case "5+": plan = "Rotating PPL: Push, Pull, Legs (Ham focus / Quad focus)"; break;
+      }
+      planOutput.innerText = plan;
+      outputBox.style.display = "block";
+    }
+  </script>
+</body>
+</html>
