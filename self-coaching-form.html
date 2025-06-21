@@ -169,21 +169,38 @@
       }
 
       if (goal === "Get stronger") {
+        const warmupPresets = {
+          "Deadlift": ["Hamstring Leg Curl", "Lat Pulldown"],
+          "RDL": ["Hamstring Leg Curl", "Lat Pulldown"],
+          "Leg Press": ["Hamstring Leg Curl", "Leg Extension"],
+          "Hack Squat": ["Hamstring Leg Curl", "Leg Extension"],
+          "Bench Press": ["Lat Pulldown", "Triceps Pushdown"],
+          "Incline Press": ["Lat Pulldown", "Triceps Pushdown"]
+        };
+
         Object.entries(selectedPlan).forEach(([day, exercises]) => {
-          const mainLifts = ["Squat", "Bench Press", "Deadlift", "Overhead Press", "Barbell Row"];
-          let warmups = [];
-          let mainIdx = exercises.findIndex(ex => mainLifts.some(lift => ex.name.toLowerCase().includes(lift.toLowerCase())));
+          const mainLifts = Object.keys(warmupPresets);
+          const mainIdx = exercises.findIndex(ex => mainLifts.some(lift => ex.name.toLowerCase().includes(lift.toLowerCase())));
+
           if (mainIdx !== -1) {
             const mainLift = exercises[mainIdx];
-            exercises.splice(mainIdx, 1);
-            warmups = exercises.splice(0, 2).map(e => ({ ...e, sets: "1x10–12 (warm-up)" }));
+            const warmupNames = warmupPresets[mainLifts.find(lift => mainLift.name.toLowerCase().includes(lift.toLowerCase()))];
+
+            const warmups = warmupNames.map(name => ({
+              name,
+              sets: "1x10–12 (warm-up)",
+              alt: []
+            }));
+
             mainLift.sets = "4x3–6";
-            exercises = [
+
+            const remaining = exercises.filter((_, i) => i !== mainIdx && !warmupNames.includes(exercises[i].name));
+
+            selectedPlan[day] = [
               ...warmups,
               mainLift,
-              ...exercises.map(e => ({ ...e, sets: "3x10–15" }))
+              ...remaining.map(e => ({ ...e, sets: "3x10–15" }))
             ];
-            selectedPlan[day] = exercises;
           }
         });
       }
