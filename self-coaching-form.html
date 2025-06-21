@@ -140,7 +140,27 @@
     document.getElementById("trackerForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const frequency = document.getElementById("frequency").value;
+      const goal = document.getElementById("goal").value;
       const selectedPlan = trainingData[frequency];
+
+      if (goal === "Lose fat") {
+        Object.entries(selectedPlan).forEach(([day, exercises]) => {
+          exercises.unshift({
+            name: "Treadmill Warm-up",
+            sets: "10 min",
+            alt: ["Bike", "Rowing", "Walk uphill"]
+          });
+
+          const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+          if (!isLegDay) {
+            exercises.push({
+              name: "Post-Workout Cardio",
+              sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+              alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+            });
+          }
+        });
+      }
 
       const container = document.getElementById("training-container");
       container.innerHTML = "";
