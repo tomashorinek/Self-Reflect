@@ -143,6 +143,12 @@
       const goal = document.getElementById("goal").value;
       const selectedPlan = trainingData[frequency];
 
+      if (!selectedPlan) {
+        document.getElementById("outputBox").style.display = "block";
+        document.getElementById("training-container").innerHTML = "<p>No training plan available for this selection.</p>";
+        return;
+      }
+
       if (goal === "Lose fat") {
         Object.entries(selectedPlan).forEach(([day, exercises]) => {
           exercises.unshift({
@@ -166,11 +172,6 @@
       container.innerHTML = "";
       document.getElementById("outputBox").style.display = "block";
 
-      if (!selectedPlan) {
-        container.innerHTML = "<p>No training plan available for this selection.</p>";
-        return;
-      }
-
       Object.entries(selectedPlan).forEach(([day, exercises]) => {
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
@@ -183,8 +184,8 @@
           item.className = "exercise";
           item.innerHTML = `
             <div>
-              <strong>${ex.name}</strong> – ${ex.sets}<br>
-              <span class="alt-list">Alt: ${ex.alt.join(", ")}</span>
+              <strong>${ex.name}</strong> – ${ex.sets || "-"}<br>
+              <span class="alt-list">Alt: ${(ex.alt || []).join(", ")}</span>
             </div>
             <span class="alt-button" onclick="replaceExercise('${frequency}', '${day}', ${idx})">🔁</span>
           `;
@@ -203,6 +204,7 @@
 
     function replaceExercise(freq, day, idx) {
       const ex = trainingData[freq][day][idx];
+      if (!ex.alt || ex.alt.length === 0) return;
       const nextAlt = ex.alt.shift();
       ex.alt.push(ex.name);
       ex.name = nextAlt;
