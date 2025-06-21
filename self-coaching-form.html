@@ -168,6 +168,26 @@
         });
       }
 
+      if (goal === "Get stronger") {
+        Object.entries(selectedPlan).forEach(([day, exercises]) => {
+          const mainLifts = ["Squat", "Bench Press", "Deadlift", "Overhead Press", "Barbell Row"];
+          let warmups = [];
+          let mainIdx = exercises.findIndex(ex => mainLifts.some(lift => ex.name.toLowerCase().includes(lift.toLowerCase())));
+          if (mainIdx !== -1) {
+            const mainLift = exercises[mainIdx];
+            exercises.splice(mainIdx, 1);
+            warmups = exercises.splice(0, 2).map(e => ({ ...e, sets: "1x10–12 (warm-up)" }));
+            mainLift.sets = "4x3–6";
+            exercises = [
+              ...warmups,
+              mainLift,
+              ...exercises.map(e => ({ ...e, sets: "3x10–15" }))
+            ];
+            selectedPlan[day] = exercises;
+          }
+        });
+      }
+
       const container = document.getElementById("training-container");
       container.innerHTML = "";
       document.getElementById("outputBox").style.display = "block";
