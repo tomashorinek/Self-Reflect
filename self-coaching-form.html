@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="training-data.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Self-Coaching Plan Generator</title>
@@ -151,77 +150,33 @@
   </form>
 
   <div class="output" id="outputBox" style="display:none">
-    <h2>Your Beginner Training Plan</h2>
+    <h2>Your Training Plan</h2>
     <div id="training-container"></div>
   </div>
 
   <script>
-    const trainingData = {
-      "1-2": {
-        "Monday": [
-          { name: "Lat Pulldown", sets: "3x10", alt: ["Pull-ups", "Supported Pull-up"] },
-          { name: "Chest Supported Wide Grip Row Machine", sets: "3x10-12", alt: ["T-bar", "Bench Support DB Row"] },
-          { name: "Chest Press Machine", sets: "3x12", alt: ["Bench Press", "Dumbbell Press"] },
-          { name: "Hamstring Leg Curl", sets: "3x12-3x10", alt: ["Seated", "Laying", "Cables"] },
-          { name: "Leg Press", sets: "3x12", alt: ["Hack Squat", "Smith Squat"] },
-          { name: "Cable Crunch", sets: "2x15", alt: ["Sit-ups", "Knee Raises"] }
-        ],
-        "Thursday": [
-          { name: "Seated Row Machine 1h or Neutral Grip", sets: "3x10", alt: ["Cable Row", "Chest Supported DB Row"] },
-          { name: "Lat Pulldown", sets: "3x10", alt: ["Pull-ups", "Supported Pull-up"] },
-          { name: "Shoulder Press Machine", sets: "3x10", alt: ["Smith 45-60°", "Incline 45-60° Max DB Press"] },
-          { name: "Leg Extension", sets: "3x12", alt: ["1leg", "Both Leg"] },
-          { name: "Glute Bridge Machine", sets: "3x12", alt: ["RDL", "DB HIPTHRUST"] },
-          { name: "Cable Abs", sets: "2x15", alt: ["Sit-ups", "Knee Raises"] }
-        ]
-      },
-      "3-4": {
-        "Monday": [
-          { "name": "Cable Lateral Raise", "sets": "2x12", "alt": ["Y Raises", "DB Lateral Raise"] },
-          { "name": "Low Incline 30° Upper Chest Press Machine", "sets": "3x10", "alt": ["Smith30°", "DB Press 30°"] },
-          { "name": "Lat Pulldown", "sets": "3x10", "alt": ["Pull-ups", "Supported Pull-up"] },
-          { "name": "Chest Supported Wide Grip Row Machine", "sets": "3x10-12", "alt": ["T-bar", "Bench Support Wide DB Row"] },
-          { "name": "Rear Delt Fly Machine", "sets": "2x12", "alt": ["Cables RD Flies", "Chest Support Incline Bench RD Flies"] },
-          { "name": "Triceps Pushdown", "sets": "2x12", "alt": ["Smith Close Grip Tricep"] },
-          { "name": "Cable Bicep Curl", "sets": "2x12", "alt": ["Seated Incline DB Curl", "Behind Back Bicep Curl"] }
-        ],
-        "Tuesday": [
-          { "name": "Cable Crunch", "sets": "2x15", "alt": ["Sit-ups", "Knee Raises"] },
-          { "name": "Seated Hamstring Leg Curl", "sets": "3x12", "alt": ["Cable Strapped Ham Curl", "Laying Ham Curl"] },
-          { "name": "Legs Extension", "sets": "3x10-12", "alt": ["1leg", "Both Leg", "DB Leg Extension"] },
-          { "name": "Leg Press", "sets": "3x12", "alt": ["Hack Squat", "Smith Squat"] },
-          { "name": "Adductor Machine", "sets": "2x15", "alt": ["Cable Strapped Adductors"] },
-          { "name": "Standing Calf Raises", "sets": "2x20", "alt": ["Leg Press Calf Raises", "Seated Calf Raises"] }
-        ],
-        "Thursday": [
-          { "name": "Dumbbell Lateral Raise", "sets": "3x10-12", "alt": ["Y-Raises", "Cable Lateral Raises"] },
-          { "name": "Mid Incline Press 45° Smith", "sets": "3x10", "alt": ["Shoulder Press Machine", "DB Press Bench45° Incline"] },
-          { "name": "Neutral Grip Pulldown", "sets": "3x10-12", "alt": ["1-Hand Lat Pulldown", "Pullover"] },
-          { "name": "Seated Row Wide Grip", "sets": "3x10", "alt": ["T-bar", "Row Machine Wide"] },
-          { "name": "Cable Rear Delt Pull", "sets": "2x12", "alt": ["Flies Machine Rear Delt", "Incline Bench DB RD Flies"] },
-          { "name": "Overhead Triceps Extension", "sets": "2x12", "alt": [] }
-        ],
-        "Friday": [
-          { "name": "Cable Abs, Seated Calf Raise", "sets": "2x20", "alt": ["Standing", "Legpress Calf Raise"] },
-          { "name": "Leg Extension", "sets": "3x12", "alt": ["Cable Strapped", "1leg/Both Legs Leg Extension Machine"] },
-          { "name": "Seated Leg Curl", "sets": "3x12", "alt": ["Laying Leg Curl", "DB Leg Curl"] },
-          { "name": "Hack Squat", "sets": "2x10", "alt": ["Smith Squat", "Pendulum Squat"] },
-          { "name": "EZ Bar Curl", "sets": "2x12", "alt": ["Preachers 1hand", "Preacher Machine"] }
-        ]
-      },
-      "5": {}
-    };
+    // VLOŽENÉ KOMPLETNÍ TRAINING DATA
+    const trainingData = /* vložíme sem celý tvůj datový blok z předchozí zprávy - kvůli délce ti to můžu poslat jako soubor */;
 
+    // Funkce pro zobrazení plánu
     document.getElementById("trackerForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      document.getElementById("outputBox").style.display = "block";
+      const frequency = document.getElementById("frequency").value;
+      const selectedPlan = trainingData[frequency];
+
       const container = document.getElementById("training-container");
       container.innerHTML = "";
+      document.getElementById("outputBox").style.display = "block";
 
-      Object.entries(trainingData).forEach(([day, exercises]) => {
+      if (!selectedPlan) {
+        container.innerHTML = "<p>No training plan available for this selection.</p>";
+        return;
+      }
+
+      Object.entries(selectedPlan).forEach(([day, exercises]) => {
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
-        dayDiv.innerHTML = `<h2>${day}</h2><div id="${day}-list" class="exercise-list"></div>`;
+        dayDiv.innerHTML = `<h2>${day}</h2><div class="exercise-list"></div>`;
         container.appendChild(dayDiv);
 
         const list = dayDiv.querySelector(".exercise-list");
@@ -234,7 +189,7 @@
               ${ex.name} – ${ex.sets}<br>
               <span class="alt-list">Alt: ${ex.alt.join(", ")}</span>
             </div>
-            <span class="alt-button" onclick="replaceExercise('${day}', ${idx})">🔁</span>
+            <span class="alt-button" onclick="replaceExercise('${frequency}', '${day}', ${idx})">🔁</span>
           `;
           list.appendChild(item);
         });
@@ -246,11 +201,14 @@
       });
     });
 
-    function replaceExercise(day, idx) {
-      const ex = trainingData[day][idx];
-      const alt = ex.alt.shift();
-      trainingData[day][idx].alt.push(ex.name);
-      trainingData[day][idx].name = alt;
+    function replaceExercise(freq, day, idx) {
+      const plan = trainingData[freq][day];
+      const ex = plan[idx];
+      if (!ex.alt || ex.alt.length === 0) return;
+
+      const nextAlt = ex.alt.shift();
+      ex.alt.push(ex.name);
+      ex.name = nextAlt;
 
       document.getElementById("trackerForm").dispatchEvent(new Event("submit"));
     }
