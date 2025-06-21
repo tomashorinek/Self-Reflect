@@ -22,41 +22,30 @@
       background: #1f1f1f;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(255, 102, 0, 0.2);
     }
-    label {
+    label, select, input, textarea, button {
       display: block;
-      margin-top: 1.5rem;
-      font-weight: bold;
-    }
-    input, select, textarea {
       width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
+    }
+    select, input, textarea {
+      padding: 0.5rem;
       background: #2b2b2b;
       color: white;
       border: 1px solid #444;
       border-radius: 6px;
-      font-size: 1rem;
     }
-    input::placeholder {
-      color: #999;
+    input::placeholder, textarea::placeholder {
+      color: #888;
     }
     button {
-      margin-top: 2rem;
-      padding: 1rem;
-      width: 100%;
       background: #ff6600;
       color: white;
+      font-weight: bold;
+      padding: 1rem;
       border: none;
       border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #e65c00;
     }
     .output {
       max-width: 800px;
@@ -64,8 +53,6 @@
       background: #1a1a1a;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 0 8px rgba(255, 102, 0, 0.1);
-      animation: fadeIn 0.5s ease-in-out;
     }
     .day {
       background: #1e1e1e;
@@ -76,26 +63,18 @@
     .exercise {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       background: #2a2a2a;
       padding: 0.5rem 1rem;
       margin: 0.5rem 0;
       border-radius: 6px;
-      cursor: grab;
-    }
-    .exercise span.alt-button {
-      cursor: pointer;
-      color: #ff9900;
-      margin-left: 1rem;
     }
     .alt-list {
-      margin-top: 0.3rem;
-      font-size: 0.9rem;
       color: #ccc;
+      font-size: 0.9rem;
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .alt-button {
+      color: #ff9900;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -111,7 +90,8 @@
     </select>
 
     <label for="frequency">How many days per week can you train?</label>
-    <select id="frequency">
+    <select id="frequency" required>
+      <option value="">-- Select --</option>
       <option value="1-2">1–2</option>
       <option value="3-4">3–4</option>
       <option value="5">5</option>
@@ -154,11 +134,9 @@
     <div id="training-container"></div>
   </div>
 
-  <script>
-    // VLOŽENÉ KOMPLETNÍ TRAINING DATA
-    const trainingData = /* vložíme sem celý tvůj datový blok z předchozí zprávy - kvůli délce ti to můžu poslat jako soubor */;
+  <script src="trainingData.js"></script>
 
-    // Funkce pro zobrazení plánu
+  <script>
     document.getElementById("trackerForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const frequency = document.getElementById("frequency").value;
@@ -176,23 +154,25 @@
       Object.entries(selectedPlan).forEach(([day, exercises]) => {
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
-        dayDiv.innerHTML = `<h2>${day}</h2><div class="exercise-list"></div>`;
-        container.appendChild(dayDiv);
-
-        const list = dayDiv.querySelector(".exercise-list");
+        dayDiv.innerHTML = `<h3>${day}</h3>`;
+        const list = document.createElement("div");
+        list.className = "exercise-list";
 
         exercises.forEach((ex, idx) => {
           const item = document.createElement("div");
           item.className = "exercise";
           item.innerHTML = `
             <div>
-              ${ex.name} – ${ex.sets}<br>
+              <strong>${ex.name}</strong> – ${ex.sets}<br>
               <span class="alt-list">Alt: ${ex.alt.join(", ")}</span>
             </div>
             <span class="alt-button" onclick="replaceExercise('${frequency}', '${day}', ${idx})">🔁</span>
           `;
           list.appendChild(item);
         });
+
+        dayDiv.appendChild(list);
+        container.appendChild(dayDiv);
 
         new Sortable(list, {
           animation: 150,
@@ -202,14 +182,10 @@
     });
 
     function replaceExercise(freq, day, idx) {
-      const plan = trainingData[freq][day];
-      const ex = plan[idx];
-      if (!ex.alt || ex.alt.length === 0) return;
-
+      const ex = trainingData[freq][day][idx];
       const nextAlt = ex.alt.shift();
       ex.alt.push(ex.name);
       ex.name = nextAlt;
-
       document.getElementById("trackerForm").dispatchEvent(new Event("submit"));
     }
   </script>
