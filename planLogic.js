@@ -1,0 +1,76 @@
+// planLogic.js
+
+// Load correct training data based on selected goal
+function loadTrainingData(goal) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = goal === 'Get stronger' ? 'trainingData_strong.js' : 'trainingData.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject('Failed to load training data');
+    document.head.appendChild(script);
+  });
+}
+
+// Main generation logic
+async function generateTrainingPlan(formData) {
+  try {
+    await loadTrainingData(formData.goal);
+
+    const container = document.getElementById('training-container');
+    container.innerHTML = '';
+
+    const frequency = formData.frequency;
+    const plan = trainingData[frequency];
+
+    for (const [day, exercises] of Object.entries(plan)) {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'day';
+
+      const heading = document.createElement('h3');
+      heading.textContent = day;
+      dayDiv.appendChild(heading);
+
+      exercises.forEach((exercise) => {
+        const exDiv = document.createElement('div');
+        exDiv.className = 'exercise';
+        exDiv.innerHTML = `
+          <strong>${exercise.name}</strong>
+          <span>${exercise.sets || ''}</span>
+        `;
+
+        if (exercise.alt && exercise.alt.length > 0) {
+          const altList = document.createElement('div');
+          altList.className = 'alt-list';
+          altList.innerHTML = `Alternatives: ${exercise.alt.join(', ')}`;
+          exDiv.appendChild(altList);
+        }
+
+        dayDiv.appendChild(exDiv);
+      });
+
+      container.appendChild(dayDiv);
+    }
+
+    document.getElementById('outputBox').style.display = 'block';
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong loading your plan.');
+  }
+}
+
+// Handle form submission
+document.getElementById('trackerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const formData = {
+    goal: document.getElementById('goal').value,
+    frequency: document.getElementById('frequency').value,
+    equipment: document.getElementById('equipment').value,
+    experience: document.getElementById('experience').value,
+    injuries: document.getElementById('injuries').value,
+    fixed: document.getElementById('fixed').value,
+    email: document.getElementById('email').value,
+  };
+
+  generateTrainingPlan(formData);
+});
