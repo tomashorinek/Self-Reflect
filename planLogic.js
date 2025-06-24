@@ -23,7 +23,7 @@ function loadTrainingData(goal) {
 async function generateTrainingPlan(formData) {
   try {
     await loadTrainingData(formData.goal);
-
+console.log("🧠 Fetched trainingData object:", trainingData);
     const container = document.getElementById('training-container');
     container.innerHTML = '';
 
