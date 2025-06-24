@@ -1,10 +1,10 @@
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
-script.src = goal === 'Get stronger'
-  ? 'https://www.webbyfe.com/trainingData_strong.js'
-  : 'https://www.webbyfe.com/trainingData.js';
-    console.log("▶️ Trying to load:", script.src); // 🐞 Debug log
+    script.src = goal === 'Get stronger'
+      ? 'https://www.webbyfe.com/trainingData_strong.js'
+      : 'https://www.webbyfe.com/trainingData.js';
+    console.log("▶️ Trying to load:", script.src);
 
     script.onload = () => {
       if (window.trainingData) {
@@ -17,7 +17,7 @@ script.src = goal === 'Get stronger'
     };
 
     script.onerror = (e) => {
-      console.error("❌ Failed to load:", script.src, e); // ❌ error log
+      console.error("❌ Failed to load:", script.src, e);
       reject('Failed to load training data');
     };
 
@@ -29,16 +29,17 @@ script.src = goal === 'Get stronger'
 async function generateTrainingPlan(formData) {
   try {
     await loadTrainingData(formData.goal);
-console.log("🧠 Fetched trainingData object:", trainingData);
+    console.log("🧠 Fetched trainingData object:", trainingData);
     const container = document.getElementById('training-container');
     container.innerHTML = '';
 
     const frequency = formData.frequency;
     const plan = window.trainingData?.[frequency];
 
-if (!plan) {
-  throw new Error("❌ Training plan not found for frequency: " + frequency);
-}
+    if (!plan) {
+      throw new Error("❌ Training plan not found for frequency: " + frequency);
+    }
+
     // Add cardio for "Lose fat" goal
     if (formData.goal === "Lose fat") {
       Object.entries(plan).forEach(([day, exercises]) => {
@@ -68,9 +69,10 @@ if (!plan) {
       heading.textContent = day;
       dayDiv.appendChild(heading);
 
-      exercises.forEach((exercise) => {
+      exercises.forEach((exercise, exIndex) => {
         const exDiv = document.createElement('div');
         exDiv.className = 'exercise';
+        exDiv.setAttribute('draggable', true);
         exDiv.innerHTML = `
           <strong>${exercise.name}</strong>
           <span>${exercise.sets || ''}</span>
@@ -79,11 +81,48 @@ if (!plan) {
         if (exercise.alt && exercise.alt.length > 0) {
           const altList = document.createElement('div');
           altList.className = 'alt-list';
+
+          const altBtn = document.createElement('button');
+          altBtn.textContent = 'Swap to alternative';
+          altBtn.onclick = () => {
+            const altIndex = Math.floor(Math.random() * exercise.alt.length);
+            exercise.name = exercise.alt[altIndex];
+            generateTrainingPlan(formData);
+          };
+
           altList.innerHTML = `Alternatives: ${exercise.alt.join(', ')}`;
+          altList.appendChild(altBtn);
           exDiv.appendChild(altList);
         }
 
+        exDiv.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', `${day}|${exIndex}`);
+        });
+
         dayDiv.appendChild(exDiv);
+      });
+
+      dayDiv.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dayDiv.classList.add('drag-over');
+      });
+
+      dayDiv.addEventListener('dragleave', () => {
+        dayDiv.classList.remove('drag-over');
+      });
+
+      dayDiv.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dayDiv.classList.remove('drag-over');
+
+        const [fromDay, fromIndex] = e.dataTransfer.getData('text/plain').split('|');
+        const fromExercises = plan[fromDay];
+        const toExercises = plan[day];
+
+        const moved = fromExercises.splice(fromIndex, 1)[0];
+        toExercises.push(moved);
+
+        generateTrainingPlan(formData);
       });
 
       container.appendChild(dayDiv);
