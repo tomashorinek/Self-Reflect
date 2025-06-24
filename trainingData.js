@@ -1,3 +1,4 @@
+console.log("📥 Start loading trainingData.js");
 const trainingData = {
   "1-2": {
     "Monday": [
@@ -153,3 +154,6 @@ const trainingData = {
     ]
   }
 };
+console.log("📤 trainingData loaded:", trainingData);
+window.trainingData = trainingData;
+console.log("✅ trainingData assigned to window");
