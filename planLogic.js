@@ -1,12 +1,20 @@
-// planLogic.js
-
-// Load correct training data based on selected goal
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = goal === 'Get stronger' ? 'trainingData_strong.js' : 'trainingData.js';
-    script.onload = () => resolve();
-    script.onerror = () => reject('Failed to load training data');
+
+    console.log("▶️ Trying to load:", script.src); // 🐞 Debug log
+
+    script.onload = () => {
+      console.log("✅ Loaded:", script.src); // ✅ success log
+      resolve();
+    };
+
+    script.onerror = (e) => {
+      console.error("❌ Failed to load:", script.src, e); // ❌ error log
+      reject('Failed to load training data');
+    };
+
     document.head.appendChild(script);
   });
 }
