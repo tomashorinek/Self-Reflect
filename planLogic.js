@@ -33,11 +33,11 @@ async function generateTrainingPlan(formData) {
     const container = document.getElementById('training-container');
     container.innerHTML = '';
 
-    const frequency = formData.frequency;
-    const plan = window.trainingData?.[frequency];
+    const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+    const plan = window.trainingData?.[adjustedFreq];
 
     if (!plan) {
-      throw new Error("❌ Training plan not found for frequency: " + frequency);
+      throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
     }
 
     // Add cardio for "Lose fat" goal
@@ -78,7 +78,7 @@ async function generateTrainingPlan(formData) {
             <strong>${exercise.name}</strong> – ${exercise.sets}<br>
             <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
           </div>
-          <span class="alt-button" onclick="swapExercise('${frequency}', '${day}', ${index})">🔁</span>
+          <span class="alt-button" onclick="swapExercise('${adjustedFreq}', '${day}', ${index})">🔁</span>
         `;
 
         item.addEventListener('dragstart', (e) => {
@@ -110,7 +110,8 @@ async function generateTrainingPlan(formData) {
 }
 
 function swapExercise(freq, day, index) {
-  const exercise = window.trainingData?.[freq]?.[day]?.[index];
+  const realFreq = freq === "5plus" ? "5+" : freq;
+  const exercise = window.trainingData?.[realFreq]?.[day]?.[index];
   if (exercise?.alt && exercise.alt.length > 0) {
     const currentName = exercise.name;
     const altIndex = exercise.alt.indexOf(currentName);
