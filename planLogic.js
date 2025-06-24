@@ -64,67 +64,41 @@ async function generateTrainingPlan(formData) {
     for (const [day, exercises] of Object.entries(plan)) {
       const dayDiv = document.createElement('div');
       dayDiv.className = 'day';
+      dayDiv.innerHTML = `<h3>${day}</h3>`;
 
-      const heading = document.createElement('h3');
-      heading.textContent = day;
-      dayDiv.appendChild(heading);
+      const list = document.createElement('div');
+      list.className = 'exercise-list';
 
-      exercises.forEach((exercise, exIndex) => {
-        const exDiv = document.createElement('div');
-        exDiv.className = 'exercise';
-        exDiv.setAttribute('draggable', true);
-        exDiv.innerHTML = `
-          <strong>${exercise.name}</strong>
-          <span>${exercise.sets || ''}</span>
+      exercises.forEach((exercise, index) => {
+        const item = document.createElement('div');
+        item.className = 'exercise';
+        item.setAttribute('draggable', true);
+        item.innerHTML = `
+          <div>
+            <strong>${exercise.name}</strong> – ${exercise.sets}<br>
+            <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
+          </div>
+          <span class="alt-button" onclick="swapExercise('${frequency}', '${day}', ${index})">🔁</span>
         `;
 
-        if (exercise.alt && exercise.alt.length > 0) {
-          const altList = document.createElement('div');
-          altList.className = 'alt-list';
-
-          const altBtn = document.createElement('button');
-          altBtn.textContent = 'Swap to alternative';
-          altBtn.onclick = () => {
-            const altIndex = Math.floor(Math.random() * exercise.alt.length);
-            exercise.name = exercise.alt[altIndex];
-            generateTrainingPlan(formData);
-          };
-
-          altList.innerHTML = `Alternatives: ${exercise.alt.join(', ')}`;
-          altList.appendChild(altBtn);
-          exDiv.appendChild(altList);
-        }
-
-        exDiv.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', `${day}|${exIndex}`);
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', `${day}|${index}`);
         });
 
-        dayDiv.appendChild(exDiv);
+        list.appendChild(item);
       });
 
-      dayDiv.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dayDiv.classList.add('drag-over');
+      new Sortable(list, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: (evt) => {
+          const [removed] = plan[day].splice(evt.oldIndex, 1);
+          plan[day].splice(evt.newIndex, 0, removed);
+          generateTrainingPlan(formData);
+        }
       });
 
-      dayDiv.addEventListener('dragleave', () => {
-        dayDiv.classList.remove('drag-over');
-      });
-
-      dayDiv.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dayDiv.classList.remove('drag-over');
-
-        const [fromDay, fromIndex] = e.dataTransfer.getData('text/plain').split('|');
-        const fromExercises = plan[fromDay];
-        const toExercises = plan[day];
-
-        const moved = fromExercises.splice(fromIndex, 1)[0];
-        toExercises.push(moved);
-
-        generateTrainingPlan(formData);
-      });
-
+      dayDiv.appendChild(list);
       container.appendChild(dayDiv);
     }
 
@@ -132,6 +106,20 @@ async function generateTrainingPlan(formData) {
   } catch (err) {
     console.error(err);
     alert('Something went wrong loading your plan.');
+  }
+}
+
+function swapExercise(freq, day, index) {
+  const exercise = window.trainingData?.[freq]?.[day]?.[index];
+  if (exercise?.alt && exercise.alt.length > 0) {
+    const currentName = exercise.name;
+    const altIndex = exercise.alt.indexOf(currentName);
+    if (altIndex >= 0) {
+      exercise.alt.splice(altIndex, 1);
+    }
+    exercise.alt.push(exercise.name);
+    exercise.name = exercise.alt.shift();
+    document.getElementById("trackerForm").dispatchEvent(new Event("submit"));
   }
 }
 
