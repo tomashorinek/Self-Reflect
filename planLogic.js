@@ -6,8 +6,13 @@ function loadTrainingData(goal) {
     console.log("▶️ Trying to load:", script.src); // 🐞 Debug log
 
     script.onload = () => {
-      console.log("✅ Loaded:", script.src); // ✅ success log
-      resolve();
+      if (window.trainingData) {
+        console.log("✅ Loaded and trainingData is available:", script.src);
+        resolve();
+      } else {
+        console.error("❌ Script loaded but trainingData is missing");
+        reject("trainingData not available after script load.");
+      }
     };
 
     script.onerror = (e) => {
