@@ -1,8 +1,9 @@
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = goal === 'Get stronger' ? 'trainingData_strong.js' : 'trainingData.js';
-
+script.src = goal === 'Get stronger'
+  ? 'https://www.webbyfe.com/trainingData_strong.js'
+  : 'https://www.webbyfe.com/trainingData.js';
     console.log("▶️ Trying to load:", script.src); // 🐞 Debug log
 
     script.onload = () => {
