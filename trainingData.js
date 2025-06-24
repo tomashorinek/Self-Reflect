@@ -56,7 +56,7 @@ const trainingData = {
     "Monday": [
       { name: "Y-Raises", sets: "3x10-12", alt: ["incline bench Y raises DB", "cable lat raises from the waist"] },
       { name: "Low Incline Chest Press", sets: "3x8-10", alt: ["low incline smith", "low incline bench"] },
-      { name: "Neutral Grip Pulldown", sets: "-", alt: ["1h neutral grip pulldown", "DB or cable pullover"] },
+      { name: "Neutral Grip Pulldown", sets: "3x10-12", alt: ["1h neutral grip pulldown", "DB or cable pullover"] },
       { name: "Chest Support Upper Back Row Machine", sets: "3x10-12", alt: ["t-bar", "teres pulldown"] },
       { name: "Machine Lateral Raise", sets: "3x12", alt: ["cable lateral raise", "dumbbell lateral raise"] },
       { name: "Rear Delt Flies Machine", sets: "3x10-12", alt: ["RD cables", "RD incline bench flies"] },
@@ -83,9 +83,9 @@ const trainingData = {
     ],
     "Friday": [
       { name: "Neutral Grip Pulldown", sets: "3x10", alt: ["1hand pulldown", "cable pullover"] },
-      { name: "Chest Supported Row", sets: "-", alt: ["t-bar", "lower cable row"] },
-      { name: "Lat Row Close Neutral Grip", sets: "-", alt: ["SA lat row", "DB lat row"] },
-      { name: "Upper Back Chest Support Machine", sets: "2x12", alt: ["upper back row", "teres pulldown"] },
+      { name: "Chest Supported Row", sets: "3x10-12", alt: ["t-bar", "lower cable row"] },
+      { name: "Lat Row Close Neutral Grip", sets: "3x10-12", alt: ["SA lat row", "DB lat row"] },
+      { name: "Upper Back Chest Support Machine", sets: "3x12", alt: ["upper back row", "teres pulldown"] },
       { name: "Rear Delt Cable Fly", sets: "2x15", alt: ["RD machine flies", "RD DB incline bench flies"] },
       { name: "Hammer Curl", sets: "2x12", alt: ["cable hammer curl", "preacher hammer curl"] },
       { name: "Cable Biceps", sets: "2x12", alt: ["behind back cable bicep", "seated back support incline bench bicep curl"] }
@@ -102,7 +102,7 @@ const trainingData = {
   },
   "5+": {
     "Monday": [
-      { name: "Y Raises Cables", sets: "-", alt: ["DB y raise incline bench", "DB lateral raises"] },
+      { name: "Y Raises Cables", sets: "3x12-15", alt: ["DB y raise incline bench", "DB lateral raises"] },
       { name: "Machine Shoulder Press", sets: "3x10", alt: ["mid incline smith 45-60°", "DB mid incline press 45-60°"] },
       { name: "Low Incline Smith Press", sets: "3x10-12", alt: ["incline chest press machine", "low incline DB press"] },
       { name: "Cable Lateral Raise", sets: "2x15", alt: ["DB lateral raises", "bench DB y raises"] },
@@ -110,8 +110,8 @@ const trainingData = {
     ],
     "Tuesday": [
       { name: "Neutral Grip Pulldown", sets: "3x10", alt: ["1hand pulldown", "cable pullover"] },
-      { name: "Chest Supported Row", sets: "-", alt: ["T-bar", "lower cable row"] },
-      { name: "Lat Row Close Neutral Grip", sets: "-", alt: ["SA lat row", "DB lat row"] },
+      { name: "Chest Supported Row", sets: "3x10", alt: ["T-bar", "lower cable row"] },
+      { name: "Lat Row Close Neutral Grip", sets: "3x10-12", alt: ["SA lat row", "DB lat row"] },
       { name: "Upper Back Chest Support Machine", sets: "2x12", alt: ["upper back row", "teres pulldown"] },
       { name: "Rear Delt Cable Fly", sets: "2x15", alt: ["RD machine flies", "RD DB incline bench flies"] },
       { name: "Hammer Curl", sets: "2x12", alt: ["cable hammer curl", "preacher hammer curl"] },
@@ -135,8 +135,8 @@ const trainingData = {
     ],
     "Saturday": [
       { name: "Single Arm Lat Pulldown", sets: "3x10", alt: ["neutral grip pulldown", "cable pullover"] },
-      { name: "T-bar Bend Grip", sets: "-", alt: ["Chest Supported Row", "lower cable row"] },
-      { name: "Lat Row Close Neutral Grip", sets: "-", alt: ["SA lat row", "DB lat row"] },
+      { name: "T-bar Bend Grip", sets: "3x10", alt: ["Chest Supported Row", "lower cable row"] },
+      { name: "Lat Row Close Neutral Grip", sets: "3x12", alt: ["SA lat row", "DB lat row"] },
       { name: "Upper Inverted Row DB", sets: "2x12", alt: ["upper back row chest support", "teres pulldown"] },
       { name: "Rear Delt Machine Flies", sets: "2x15", alt: ["RD-cables flies", "RD DB incline bench flies"] },
       { name: "Cable Hammer Curl Bicep", sets: "2x12", alt: ["DB-hammer curl bicep", "preacher hammer curl"] },
