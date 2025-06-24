@@ -22,6 +22,27 @@ async function generateTrainingPlan(formData) {
     const frequency = formData.frequency;
     const plan = trainingData[frequency];
 
+    // Add cardio elements for "Lose fat" goal
+    if (formData.goal === "Lose fat") {
+      Object.entries(plan).forEach(([day, exercises]) => {
+        exercises.unshift({
+          name: "Treadmill Warm-up",
+          sets: "10 min",
+          alt: ["Bike", "Rowing", "Walk uphill"]
+        });
+
+        const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+        if (!isLegDay) {
+          exercises.push({
+            name: "Post-Workout Cardio",
+            sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+            alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+          });
+        }
+      });
+    }
+
+    // Render the training plan
     for (const [day, exercises] of Object.entries(plan)) {
       const dayDiv = document.createElement('div');
       dayDiv.className = 'day';
