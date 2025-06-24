@@ -1,4 +1,4 @@
-function loadTrainingData(goal) {
+function loadTrainingData(goal) {console.log("📤 Adding script:", script.src);
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = goal === 'Get stronger' ? 'trainingData_strong.js' : 'trainingData.js';
