@@ -151,3 +151,5 @@ document.getElementById('trackerForm').addEventListener('submit', (e) => {
 
   generateTrainingPlan(formData);
 });
+window.trainingData = trainingData;
+console.log("✅ trainingData assigned to window");
