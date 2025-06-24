@@ -1,3 +1,4 @@
+console.log("✅ trainingData_strong.js LOADED");
 const trainingData = {
   "1-2": {
     "Monday": [
@@ -171,3 +172,5 @@ const trainingData = {
       { name: "Cable Crunch", sets: "3x15", alt: ["Sit-ups", "Knee Raises"] }
     ]
   }
+console.log("✅ trainingData object:", trainingData);
+window.trainingData = trainingData;
