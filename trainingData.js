@@ -100,7 +100,7 @@ const trainingData = {
       { name: "Cable Crunch", sets: "2x15", alt: ["sit-ups", "knee raises"] }
     ]
   },
-  "5plus": {
+  "5+": {
     "Monday": [
       { name: "Y Raises Cables", sets: "-", alt: ["DB y raise incline bench", "DB lateral raises"] },
       { name: "Machine Shoulder Press", sets: "3x10", alt: ["mid incline smith 45-60°", "DB mid incline press 45-60°"] },
