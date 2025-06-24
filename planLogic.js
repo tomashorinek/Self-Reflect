@@ -22,7 +22,7 @@ async function generateTrainingPlan(formData) {
     const frequency = formData.frequency;
     const plan = trainingData[frequency];
 
-    // Add cardio elements for "Lose fat" goal
+    // Add cardio for "Lose fat" goal
     if (formData.goal === "Lose fat") {
       Object.entries(plan).forEach(([day, exercises]) => {
         exercises.unshift({
@@ -42,7 +42,7 @@ async function generateTrainingPlan(formData) {
       });
     }
 
-    // Render the training plan
+    // Render training plan
     for (const [day, exercises] of Object.entries(plan)) {
       const dayDiv = document.createElement('div');
       dayDiv.className = 'day';
