@@ -33,8 +33,11 @@ console.log("🧠 Fetched trainingData object:", trainingData);
     container.innerHTML = '';
 
     const frequency = formData.frequency;
-    const plan = trainingData[frequency];
+    const plan = window.trainingData?.[frequency];
 
+if (!plan) {
+  throw new Error("❌ Training plan not found for frequency: " + frequency);
+}
     // Add cardio for "Lose fat" goal
     if (formData.goal === "Lose fat") {
       Object.entries(plan).forEach(([day, exercises]) => {
