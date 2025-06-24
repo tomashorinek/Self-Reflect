@@ -171,6 +171,7 @@ const trainingData = {
       { name: "Standing Calf Raise", sets: "2x12-15", alt: ["Seated Calf Raise"] },
       { name: "Cable Crunch", sets: "3x15", alt: ["Sit-ups", "Knee Raises"] }
     ]
-  };
+};
+
 console.log("✅ trainingData object:", trainingData);
 window.trainingData = trainingData;
