@@ -1,4 +1,4 @@
-console.log("📦 Script trainingData_strong.js se spustil");
+
 console.log("✅ trainingData_strong.js LOADED");
 const trainingData = {
   "1-2": {
