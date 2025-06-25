@@ -228,7 +228,7 @@ window.generateTrainingPlan = async function (formData) {
       "Resistance bands": "bodyweight"
     };
     formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
-    const plan = window.conditioningFrequencies?.[formData.equipment]?.[formData.experience]?.[frequencyKey];
+      const plan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
     if (!plan) {
       alert("⚠️ Conditioning plan not found");
       return;
