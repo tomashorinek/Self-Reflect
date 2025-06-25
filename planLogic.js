@@ -54,6 +54,8 @@ function loadTrainingData(goal) {
     document.head.appendChild(script);
   });
 }
+
+// Load all data early to avoid second-load issues
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     await Promise.all([
@@ -67,38 +69,35 @@ window.addEventListener("DOMContentLoaded", async () => {
     console.error("❌ Preloading error:", err);
   }
 });
-// Main generation logic
-async function generateTrainingPlan(formData) {
-  try {
-    const isConditioning = formData.goal === "Improve conditioning";
 
-    if (isConditioning) {
-      await loadConditioningData();
-      const frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
-      const equipment = formData.equipment.toLowerCase().includes("gym") ? "gym" : "bodyweight";
-      const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+// === PATCH: Ensure fallback exercise added correctly for 2-item days ===
+function ensureConditioningDayHasEnoughExercises(plan) {
+  const fallback = {
+    mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
+    tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
+    wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
+    thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
+    fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
+    sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
+    sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] }
+  };
 
-      if (!plan) throw new Error("❌ Conditioning plan not found.");
+  Object.entries(plan).forEach(([day, exercises]) => {
+    const dayKey = day.slice(0, 3).toLowerCase();
+    if (Array.isArray(exercises) && exercises.length < 3 && fallback[dayKey]) {
+      exercises.push(fallback[dayKey]);
+    }
+  });
+}
 
-      Object.entries(plan).forEach(([day, exercises]) => {
-        const dayLower = day.toLowerCase();
-        if (exercises.length < 3) {
-          const extra = {
-            mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
-            tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
-            wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
-            thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
-            fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
-            sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
-            sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
-          };
-          for (const key in extra) {
-            if (dayLower.includes(key)) {
-              exercises.push(extra[key]);
-              break;
-            }
-          }
-        }
+// Run fix once conditioning data is available
+if (window.conditioningFrequencies) {
+  Object.values(window.conditioningFrequencies).forEach(freqs => {
+    Object.values(freqs).forEach(plan => {
+      if (typeof plan === 'object') ensureConditioningDayHasEnoughExercises(plan);
+    });
+  });
+}
 
         exercises.forEach(ex => {
           if (!ex.alt) ex.alt = [];
