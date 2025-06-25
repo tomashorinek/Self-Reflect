@@ -61,7 +61,32 @@ async function generateTrainingPlan(formData) {
       await loadConditioningData();
       const frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
       const equipment = formData.equipment.toLowerCase().includes("gym") ? "gym" : "bodyweight";
-      const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+      let plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+
+      // ✨ Auto-extend short conditioning days (min. 3 exercises per day)
+      if (typeof plan === 'object' && !Array.isArray(plan)) {
+        for (const [day, exercises] of Object.entries(plan)) {
+          if (exercises.length < 3) {
+            const dayLower = day.toLowerCase();
+            if (dayLower.includes('mon')) {
+              exercises.push({ name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up"] });
+            } else if (dayLower.includes('tue')) {
+              exercises.push({ name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] });
+            } else if (dayLower.includes('wed')) {
+              exercises.push({ name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] });
+            } else if (dayLower.includes('fri')) {
+              exercises.push({ name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] });
+            } else if (dayLower.includes('sat')) {
+              exercises.push({ name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] });
+            } else {
+              exercises.push({ name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] });
+            }
+          }
+        }
+      });
+          }
+        }
+      }
 
       if (!plan) throw new Error("❌ Conditioning plan not found.");
 
