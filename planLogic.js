@@ -83,6 +83,20 @@ async function generateTrainingPlan(formData) {
             }
           }
         }
+      };
+            } else if (dayLower.includes('tue')) {
+              exercises.push({ name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] });
+            } else if (dayLower.includes('wed')) {
+              exercises.push({ name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] });
+            } else if (dayLower.includes('fri')) {
+              exercises.push({ name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] });
+            } else if (dayLower.includes('sat')) {
+              exercises.push({ name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] });
+            } else {
+              exercises.push({ name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] });
+            }
+          }
+        }
       });
           }
         }
