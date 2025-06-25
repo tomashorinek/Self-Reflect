@@ -65,7 +65,6 @@ async function generateTrainingPlan(formData) {
 
       if (!plan) throw new Error("❌ Conditioning plan not found.");
 
-      // Auto-extend short conditioning days (min. 3 exercises)
       Object.entries(plan).forEach(([day, exercises]) => {
         const dayLower = day.toLowerCase();
         if (exercises.length < 3) {
@@ -86,7 +85,6 @@ async function generateTrainingPlan(formData) {
           }
         }
 
-        // ✨ Add extra alternatives to all exercises
         exercises.forEach(ex => {
           if (!ex.alt) ex.alt = [];
           const additional = {
@@ -164,7 +162,7 @@ function renderPlan(plan, freq, formData) {
           <strong>${exercise.name}</strong> – ${exercise.sets}<br>
           <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
         </div>
-        <span class="alt-button" onclick='swapExercise("${freq}", "${day}", ${index}, ${JSON.stringify(formData).replace(/"/g, '&quot;')})'>🔁</span>
+        <span class="alt-button" data-day="${day}" data-index="${index}">🔁</span>
       `;
 
       item.addEventListener('dragstart', (e) => {
@@ -187,19 +185,22 @@ function renderPlan(plan, freq, formData) {
     dayDiv.appendChild(list);
     container.appendChild(dayDiv);
   }
-}
 
-function swapExercise(freq, day, index, formData) {
-  const realFreq = freq === "5plus" ? "5+" : freq;
-  const conditioning = window.conditioningFrequencies?.gym?.[realFreq]?.[day] || window.conditioningFrequencies?.bodyweight?.[realFreq]?.[day];
-  const source = window.trainingData?.[realFreq]?.[day] || conditioning;
-  const exercise = source?.[index];
-  if (exercise?.alt && exercise.alt.length > 0) {
-    const alt = exercise.alt.shift();
-    exercise.alt.push(exercise.name);
-    exercise.name = alt;
-    renderPlan({ ...window.trainingData?.[realFreq], ...window.conditioningFrequencies?.gym?.[realFreq], ...window.conditioningFrequencies?.bodyweight?.[realFreq] }, realFreq, formData);
-  }
+  // Fix swap buttons
+  document.querySelectorAll('.alt-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const day = btn.getAttribute('data-day');
+      const index = parseInt(btn.getAttribute('data-index'));
+      const exercises = plan[day];
+      const current = exercises[index];
+      if (current.alt && current.alt.length > 0) {
+        const next = current.alt.shift();
+        current.alt.push(current.name);
+        current.name = next;
+        renderPlan(plan, freq, formData);
+      }
+    });
+  });
 }
 
 // Handle form submission
