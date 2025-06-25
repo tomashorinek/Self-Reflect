@@ -135,6 +135,52 @@ function loadConditioningData() {
         }
       }
     };
+
+    // Add tooltip to alert users about alternate swap feature
+    const observer = new MutationObserver(() => {
+      const container = document.querySelector(".training-day-header");
+      if (container && !document.querySelector(".alt-tip")) {
+        const tip = document.createElement("div");
+        tip.className = "alt-tip";
+        tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
+        tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
+        container.parentNode.insertBefore(tip, container.nextSibling);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
     resolve();
+  });
+}
+
+// === trainingData loader ===
+function loadTrainingData(goal) {
+  return new Promise((resolve, reject) => {
+    if (window.trainingData) {
+      resolve(); // Already loaded
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = goal === 'Get stronger'
+      ? 'https://www.webbyfe.com/trainingData_strong.js'
+      : 'https://www.webbyfe.com/trainingData.js';
+    console.log("▶️ Trying to load:", script.src);
+
+    script.onload = () => {
+      if (window.trainingData) {
+        console.log("✅ Loaded and trainingData is available:", script.src);
+        resolve();
+      } else {
+        console.error("❌ Script loaded but trainingData is missing");
+        reject("trainingData not available after script load.");
+      }
+    };
+
+    script.onerror = (e) => {
+      console.error("❌ Failed to load:", script.src, e);
+      reject('Failed to load training data');
+    };
+
+    document.head.appendChild(script);
   });
 }
