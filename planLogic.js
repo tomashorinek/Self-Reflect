@@ -5,6 +5,7 @@ function loadConditioningData() {
       resolve(); // Already loaded
       return;
     }
+
     const script = document.createElement('script');
     script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
     script.onload = () => {
@@ -12,10 +13,12 @@ function loadConditioningData() {
         console.log("✅ Conditioning data loaded");
         resolve();
       } else {
-        reject("❌ Conditioning data not available after script load");
+        console.error("❌ Conditioning data not available after script load");
+        reject("Conditioning data not found after script load");
       }
     };
     script.onerror = () => reject("❌ Failed to load conditioning data script");
+
     document.head.appendChild(script);
   });
 }
