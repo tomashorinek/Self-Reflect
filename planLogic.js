@@ -1,3 +1,22 @@
+// === conditioningFrequencies.js loader ===
+function loadConditioningData() {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
+    script.onload = () => {
+      if (window.conditioningFrequencies) {
+        console.log("✅ Conditioning data loaded");
+        resolve();
+      } else {
+        reject("❌ Conditioning data not available after script load");
+      }
+    };
+    script.onerror = () => reject("❌ Failed to load conditioning data script");
+    document.head.appendChild(script);
+  });
+}
+
+// === logic handler (planLogic.js) ===
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
@@ -28,78 +47,47 @@ function loadTrainingData(goal) {
 // Main generation logic
 async function generateTrainingPlan(formData) {
   try {
-    await loadTrainingData(formData.goal);
-    console.log("🧠 Fetched trainingData object:", trainingData);
-    const container = document.getElementById('training-container');
-    container.innerHTML = '';
+    const isConditioning = formData.goal === "Improve conditioning";
 
-    const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
-    const plan = window.trainingData?.[adjustedFreq];
+    if (isConditioning) {
+      await loadConditioningData();
+      const frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
+      const equipment = formData.equipment.toLowerCase().includes("gym") ? "gym" : "bodyweight";
+      const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
 
-    if (!plan) {
-      throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
-    }
+      if (!plan) throw new Error("❌ Conditioning plan not found.");
 
-    // Add cardio for "Lose fat" goal
-    if (formData.goal === "Lose fat") {
-      Object.entries(plan).forEach(([day, exercises]) => {
-        exercises.unshift({
-          name: "Treadmill Warm-up",
-          sets: "10 min",
-          alt: ["Bike", "Rowing", "Walk uphill"]
-        });
+      renderPlan(plan, frequency);
+    } else {
+      await loadTrainingData(formData.goal);
+      const container = document.getElementById('training-container');
+      container.innerHTML = '';
 
-        const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
-        if (!isLegDay) {
-          exercises.push({
-            name: "Post-Workout Cardio",
-            sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
-            alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+      const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+      const plan = window.trainingData?.[adjustedFreq];
+
+      if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
+
+      // Add cardio for "Lose fat" goal
+      if (formData.goal === "Lose fat") {
+        Object.entries(plan).forEach(([day, exercises]) => {
+          exercises.unshift({
+            name: "Treadmill Warm-up",
+            sets: "10 min",
+            alt: ["Bike", "Rowing", "Walk uphill"]
           });
-        }
-      });
-    }
-
-    // Render training plan
-    for (const [day, exercises] of Object.entries(plan)) {
-      const dayDiv = document.createElement('div');
-      dayDiv.className = 'day';
-      dayDiv.innerHTML = `<h3>${day}</h3>`;
-
-      const list = document.createElement('div');
-      list.className = 'exercise-list';
-
-      exercises.forEach((exercise, index) => {
-        const item = document.createElement('div');
-        item.className = 'exercise';
-        item.setAttribute('draggable', true);
-        item.innerHTML = `
-          <div>
-            <strong>${exercise.name}</strong> – ${exercise.sets}<br>
-            <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
-          </div>
-          <span class="alt-button" onclick="swapExercise('${adjustedFreq}', '${day}', ${index})">🔁</span>
-        `;
-
-        item.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', `${day}|${index}`);
+          const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+          if (!isLegDay) {
+            exercises.push({
+              name: "Post-Workout Cardio",
+              sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+              alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+            });
+          }
         });
+      }
 
-        list.appendChild(item);
-      });
-
-      new Sortable(list, {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        onEnd: (evt) => {
-          const [removed] = plan[day].splice(evt.oldIndex, 1);
-          plan[day].splice(evt.newIndex, 0, removed);
-          generateTrainingPlan(formData);
-        }
-      });
-
-      dayDiv.appendChild(list);
-      container.appendChild(dayDiv);
+      renderPlan(plan, adjustedFreq);
     }
 
     document.getElementById('outputBox').style.display = 'block';
@@ -109,15 +97,60 @@ async function generateTrainingPlan(formData) {
   }
 }
 
+function renderPlan(plan, freq) {
+  const container = document.getElementById('training-container');
+  container.innerHTML = '';
+
+  for (const [day, exercises] of Object.entries(plan)) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.innerHTML = `<h3>${day}</h3>`;
+
+    const list = document.createElement('div');
+    list.className = 'exercise-list';
+
+    exercises.forEach((exercise, index) => {
+      const item = document.createElement('div');
+      item.className = 'exercise';
+      item.setAttribute('draggable', true);
+      item.innerHTML = `
+        <div>
+          <strong>${exercise.name}</strong> – ${exercise.sets}<br>
+          <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
+        </div>
+        <span class="alt-button" onclick="swapExercise('${freq}', '${day}', ${index})">🔁</span>
+      `;
+
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', `${day}|${index}`);
+      });
+
+      list.appendChild(item);
+    });
+
+    new Sortable(list, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      onEnd: (evt) => {
+        const [removed] = plan[day].splice(evt.oldIndex, 1);
+        plan[day].splice(evt.newIndex, 0, removed);
+        generateTrainingPlan({ ...formData });
+      }
+    });
+
+    dayDiv.appendChild(list);
+    container.appendChild(dayDiv);
+  }
+}
+
 function swapExercise(freq, day, index) {
   const realFreq = freq === "5plus" ? "5+" : freq;
-  const exercise = window.trainingData?.[realFreq]?.[day]?.[index];
+  const source = window.trainingData?.[realFreq]?.[day] || window.conditioningFrequencies?.[realFreq]?.[day];
+  const exercise = source?.[index];
   if (exercise?.alt && exercise.alt.length > 0) {
     const currentName = exercise.name;
     const altIndex = exercise.alt.indexOf(currentName);
-    if (altIndex >= 0) {
-      exercise.alt.splice(altIndex, 1);
-    }
+    if (altIndex >= 0) exercise.alt.splice(altIndex, 1);
     exercise.alt.push(exercise.name);
     exercise.name = exercise.alt.shift();
     document.getElementById("trackerForm").dispatchEvent(new Event("submit"));
