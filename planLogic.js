@@ -1,6 +1,10 @@
 // === conditioningFrequencies.js loader ===
 function loadConditioningData() {
   return new Promise((resolve, reject) => {
+    if (window.conditioningFrequencies) {
+      resolve(); // Already loaded
+      return;
+    }
     const script = document.createElement('script');
     script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
     script.onload = () => {
@@ -16,9 +20,13 @@ function loadConditioningData() {
   });
 }
 
-// === logic handler (planLogic.js) ===
+// === trainingData loader ===
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
+    if (window.trainingData) {
+      resolve(); // Already loaded
+      return;
+    }
     const script = document.createElement('script');
     script.src = goal === 'Get stronger'
       ? 'https://www.webbyfe.com/trainingData_strong.js'
