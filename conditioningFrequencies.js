@@ -1,8 +1,7 @@
 // === conditioningFrequencies.js loader ===
-function loadConditioningData() {
-  return new Promise((resolve, reject) => {
-    window.conditioningFrequencies = {
-      gym: {
+window.conditioningFrequencies = {
+  gym: {
+    ...
         "1-2": [
           { name: "Full Body Circuit", sets: "3 rounds", alt: ["Full Body Machines", "Barbell Complex"] },
           { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] },
