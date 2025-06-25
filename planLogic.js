@@ -247,8 +247,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 });
 window.ensureConditioningDayHasEnoughExercises = ensureConditioningDayHasEnoughExercises;
-// ✅ ADD PATCH TO GENERATE FALLBACK WHEN CLICKING "GENERUJ"
-const originalGenerateTrainingPlan = window.generateTrainingPlan;
+window.originalGenerateTrainingPlan = window.generateTrainingPlan;
 window.generateTrainingPlan = async function (formData) {
   await loadConditioningData();
 
@@ -261,9 +260,8 @@ window.generateTrainingPlan = async function (formData) {
       return;
     }
     ensureConditioningDayHasEnoughExercises(plan);
-    renderPlan(plan, frequencyKey, formData);
+    window.renderPlan(plan, frequencyKey, formData);
   } else {
-    originalGenerateTrainingPlan(formData);
+    window.originalGenerateTrainingPlan(formData);
   }
 };
-
