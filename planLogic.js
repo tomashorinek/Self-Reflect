@@ -26,37 +26,39 @@ function loadConditioningData() {
 // === trainingData loader ===
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
-    const globalName = goal === 'Get stronger' ? 'trainingDataStrong'
-                     : goal === 'Build muscle' ? 'trainingDataMuscle'
-                     : goal === 'Lose fat' ? 'trainingDataFatLoss' : null;
+    let globalName, src;
 
-    if (!globalName) return reject('❌ Unknown goal: ' + goal);
+    if (goal === 'Get stronger') {
+      globalName = 'trainingDataStrong';
+      src = 'https://www.webbyfe.com/trainingData_strong.js';
+    } else {
+      globalName = 'trainingDataGeneral';
+      src = 'https://www.webbyfe.com/trainingData.js';
+    }
+
     if (window[globalName]) {
       resolve();
       return;
     }
 
     const script = document.createElement('script');
-    script.src = goal === 'Get stronger'
-      ? 'https://www.webbyfe.com/trainingData_strong.js'
-      : 'https://www.webbyfe.com/trainingData.js';
-    console.log("▶️ Trying to load:", script.src);
+    script.src = src;
 
     script.onload = () => {
       if (window.trainingData) {
         window[globalName] = window.trainingData;
         delete window.trainingData;
-        console.log(`✅ Loaded and mapped trainingData to ${globalName}`);
+        console.log(`✅ Loaded and mapped to ${globalName}`);
         resolve();
       } else {
-        console.error("❌ Script loaded but trainingData is missing");
-        reject("trainingData not available after script load.");
+        console.error("❌ trainingData missing after script load");
+        reject("trainingData not found");
       }
     };
 
     script.onerror = (e) => {
-      console.error("❌ Failed to load:", script.src, e);
-      reject('Failed to load training data');
+      console.error("❌ Failed to load training data", e);
+      reject("trainingData load error");
     };
 
     document.head.appendChild(script);
@@ -239,9 +241,15 @@ window.generateTrainingPlan = async function (formData) {
     ensureConditioningDayHasEnoughExercises(plan);
     renderPlan(plan, frequencyKey, formData);
   } else {
-    await loadTrainingData(formData.goal);
-    const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
-    const plan = window.trainingData?.[adjustedFreq];
+   await loadTrainingData(formData.goal);
+const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+
+let plan;
+if (formData.goal === "Get stronger") {
+  plan = window.trainingDataStrong?.[adjustedFreq];
+} else {
+  plan = window.trainingDataGeneral?.[adjustedFreq];
+}
 
     if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
 
