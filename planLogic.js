@@ -251,7 +251,10 @@ if (formData.goal === "Get stronger") {
   plan = window.trainingDataGeneral?.[adjustedFreq];
 }
 
-    if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
+    if (!plan) {
+  alert("❌ Training plan not found for frequency: " + adjustedFreq);
+  return;
+}
 
     if (formData.goal === "Lose fat") {
       Object.entries(plan).forEach(([day, exercises]) => {
