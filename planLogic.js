@@ -70,13 +70,13 @@ async function generateTrainingPlan(formData) {
         const dayLower = day.toLowerCase();
         if (exercises.length < 3) {
           const extra = {
-            mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up"] },
-            tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] },
-            wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] },
-            thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] },
-            fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] },
-            sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] },
-            sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] },
+            mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
+            tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
+            wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
+            thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
+            fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
+            sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
+            sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
           };
           for (const key in extra) {
             if (dayLower.includes(key)) {
@@ -144,7 +144,7 @@ function renderPlan(plan, freq, formData) {
           <strong>${exercise.name}</strong> – ${exercise.sets}<br>
           <span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
         </div>
-        <span class="alt-button" onclick="swapExercise('${freq}', '${day}', ${index})">🔁</span>
+        <span class="alt-button" onclick='swapExercise("${freq}", "${day}", ${index}, ${JSON.stringify(formData).replace(/"/g, '&quot;')})'>🔁</span>
       `;
 
       item.addEventListener('dragstart', (e) => {
@@ -160,7 +160,7 @@ function renderPlan(plan, freq, formData) {
       onEnd: (evt) => {
         const [removed] = plan[day].splice(evt.oldIndex, 1);
         plan[day].splice(evt.newIndex, 0, removed);
-        generateTrainingPlan({ ...formData });
+        generateTrainingPlan(formData);
       }
     });
 
@@ -169,17 +169,16 @@ function renderPlan(plan, freq, formData) {
   }
 }
 
-function swapExercise(freq, day, index) {
+function swapExercise(freq, day, index, formData) {
   const realFreq = freq === "5plus" ? "5+" : freq;
-  const source = window.trainingData?.[realFreq]?.[day] || window.conditioningFrequencies?.gym?.[realFreq]?.[day] || window.conditioningFrequencies?.bodyweight?.[realFreq]?.[day];
+  const conditioning = window.conditioningFrequencies?.gym?.[realFreq]?.[day] || window.conditioningFrequencies?.bodyweight?.[realFreq]?.[day];
+  const source = window.trainingData?.[realFreq]?.[day] || conditioning;
   const exercise = source?.[index];
   if (exercise?.alt && exercise.alt.length > 0) {
-    const currentName = exercise.name;
-    const altIndex = exercise.alt.indexOf(currentName);
-    if (altIndex >= 0) exercise.alt.splice(altIndex, 1);
+    const alt = exercise.alt.shift();
     exercise.alt.push(exercise.name);
-    exercise.name = exercise.alt.shift();
-    document.getElementById("trackerForm").dispatchEvent(new Event("submit"));
+    exercise.name = alt;
+    renderPlan({ ...window.trainingData?.[realFreq], ...window.conditioningFrequencies?.gym?.[realFreq], ...window.conditioningFrequencies?.bodyweight?.[realFreq] }, realFreq, formData);
   }
 }
 
