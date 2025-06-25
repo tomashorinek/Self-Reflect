@@ -218,4 +218,17 @@ document.getElementById('trackerForm').addEventListener('submit', (e) => {
   };
 
   generateTrainingPlan(formData);
+// === Tooltip observer for all training plans ===
+const observer = new MutationObserver(() => {
+  const container = document.querySelector(".training-day-header");
+  if (container && !document.querySelector(".alt-tip")) {
+    const tip = document.createElement("div");
+    tip.className = "alt-tip";
+    tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
+    tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
+    container.parentNode.insertBefore(tip, container.nextSibling);
+  }
+});
+observer.observe(document.body, { childList: true, subtree: true });
+
 });
