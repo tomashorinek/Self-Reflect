@@ -85,6 +85,26 @@ async function generateTrainingPlan(formData) {
             }
           }
         }
+
+        // ✨ Add extra alternatives to all exercises
+        exercises.forEach(ex => {
+          if (!ex.alt) ex.alt = [];
+          const additional = {
+            "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
+            "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
+            "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
+            "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
+            "Burpees": ["Jump Squats", "Sprawl to Jump"],
+            "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
+            "Plank Series": ["Side Plank", "Bird Dog"],
+            "Jump Rope": ["High Knees", "Jumping Jacks"]
+          };
+          if (additional[ex.name]) {
+            additional[ex.name].forEach(alt => {
+              if (!ex.alt.includes(alt)) ex.alt.push(alt);
+            });
+          }
+        });
       });
 
       renderPlan(plan, frequency, formData);
