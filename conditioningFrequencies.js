@@ -1,5 +1,5 @@
 const conditioningFrequencies = {
-  "gym": {
+  gym: {
     "1-2": [
       { name: "Full Body Circuit", sets: "3 rounds", alt: [] },
       { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] },
@@ -70,7 +70,7 @@ const conditioningFrequencies = {
       ]
     }
   },
-  "bodyweight": {
+  bodyweight: {
     "1-2": [
       { name: "Bodyweight Conditioning Circuit", sets: "3 rounds", alt: [] },
       { name: "Jumping Jacks", sets: "3x20", alt: [] },
@@ -132,3 +132,6 @@ const conditioningFrequencies = {
     }
   }
 };
+
+// Make it globally available
+window.conditioningFrequencies = conditioningFrequencies;
