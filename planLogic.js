@@ -54,7 +54,19 @@ function loadTrainingData(goal) {
     document.head.appendChild(script);
   });
 }
-
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await Promise.all([
+      loadConditioningData(),
+      loadTrainingData("Get stronger"),
+      loadTrainingData("Build muscle"),
+      loadTrainingData("Lose fat")
+    ]);
+    console.log("✅ All training and conditioning data preloaded");
+  } catch (err) {
+    console.error("❌ Preloading error:", err);
+  }
+});
 // Main generation logic
 async function generateTrainingPlan(formData) {
   try {
