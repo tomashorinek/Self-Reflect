@@ -221,6 +221,13 @@ window.generateTrainingPlan = async function (formData) {
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
   if (formData.goal === "Improve conditioning") {
+    const equipmentMap = {
+      "Gym access": "gym",
+      "Bodyweight only": "bodyweight",
+      "Dumbbells at home": "bodyweight",
+      "Resistance bands": "bodyweight"
+    };
+    formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
     const plan = window.conditioningFrequencies?.[formData.equipment]?.[formData.experience]?.[frequencyKey];
     if (!plan) {
       alert("⚠️ Conditioning plan not found");
