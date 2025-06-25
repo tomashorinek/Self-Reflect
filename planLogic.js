@@ -247,3 +247,23 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 });
 window.ensureConditioningDayHasEnoughExercises = ensureConditioningDayHasEnoughExercises;
+// ✅ ADD PATCH TO GENERATE FALLBACK WHEN CLICKING "GENERUJ"
+const originalGenerateTrainingPlan = window.generateTrainingPlan;
+window.generateTrainingPlan = async function (formData) {
+  await loadConditioningData();
+
+  const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
+
+  if (formData.goal === "Improve conditioning") {
+    const plan = window.conditioningFrequencies?.[formData.equipment]?.[formData.experience]?.[frequencyKey];
+    if (!plan) {
+      alert("⚠️ Conditioning plan not found");
+      return;
+    }
+    ensureConditioningDayHasEnoughExercises(plan);
+    renderPlan(plan, frequencyKey, formData);
+  } else {
+    originalGenerateTrainingPlan(formData);
+  }
+};
+
