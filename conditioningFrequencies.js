@@ -1,7 +1,7 @@
-// === conditioningFrequencies.js loader ===
-window.conditioningFrequencies = {
-  gym: {
-    ...
+function loadConditioningData() {
+  return new Promise((resolve, reject) => {
+    window.conditioningFrequencies = {
+      gym: {
         "1-2": [
           { name: "Full Body Circuit", sets: "3 rounds", alt: ["Full Body Machines", "Barbell Complex"] },
           { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] },
@@ -149,37 +149,5 @@ window.conditioningFrequencies = {
     observer.observe(document.body, { childList: true, subtree: true });
 
     resolve();
-  });
-}
-
-// === trainingData loader ===
-function loadTrainingData(goal) {
-  return new Promise((resolve, reject) => {
-    if (window.trainingData) {
-      resolve(); // Already loaded
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = goal === 'Get stronger'
-      ? 'https://www.webbyfe.com/trainingData_strong.js'
-      : 'https://www.webbyfe.com/trainingData.js';
-    console.log("▶️ Trying to load:", script.src);
-
-    script.onload = () => {
-      if (window.trainingData) {
-        console.log("✅ Loaded and trainingData is available:", script.src);
-        resolve();
-      } else {
-        console.error("❌ Script loaded but trainingData is missing");
-        reject("trainingData not available after script load.");
-      }
-    };
-
-    script.onerror = (e) => {
-      console.error("❌ Failed to load:", script.src, e);
-      reject('Failed to load training data');
-    };
-
-    document.head.appendChild(script);
   });
 }
