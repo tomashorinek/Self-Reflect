@@ -61,61 +61,40 @@ async function generateTrainingPlan(formData) {
       await loadConditioningData();
       const frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
       const equipment = formData.equipment.toLowerCase().includes("gym") ? "gym" : "bodyweight";
-      let plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+      const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
 
-      // ✨ Auto-extend short conditioning days (min. 3 exercises per day)
-      if (typeof plan === 'object' && !Array.isArray(plan)) {
-        for (const [day, exercises] of Object.entries(plan)) {
-          if (exercises.length < 3) {
-            const dayLower = day.toLowerCase();
-            if (dayLower.includes('mon')) {
-              exercises.push({ name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up"] });
-            } else if (dayLower.includes('tue')) {
-              exercises.push({ name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] });
-            } else if (dayLower.includes('wed')) {
-              exercises.push({ name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] });
-            } else if (dayLower.includes('fri')) {
-              exercises.push({ name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] });
-            } else if (dayLower.includes('sat')) {
-              exercises.push({ name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] });
-            } else {
-              exercises.push({ name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] });
-            }
-          }
-        }
-      };
-            } else if (dayLower.includes('tue')) {
-              exercises.push({ name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] });
-            } else if (dayLower.includes('wed')) {
-              exercises.push({ name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] });
-            } else if (dayLower.includes('fri')) {
-              exercises.push({ name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] });
-            } else if (dayLower.includes('sat')) {
-              exercises.push({ name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] });
-            } else {
-              exercises.push({ name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] });
+      if (!plan) throw new Error("❌ Conditioning plan not found.");
+
+      // Auto-extend short conditioning days (min. 3 exercises)
+      Object.entries(plan).forEach(([day, exercises]) => {
+        const dayLower = day.toLowerCase();
+        if (exercises.length < 3) {
+          const extra = {
+            mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up"] },
+            tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope"] },
+            wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers"] },
+            thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] },
+            fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats"] },
+            sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold"] },
+            sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers"] },
+          };
+          for (const key in extra) {
+            if (dayLower.includes(key)) {
+              exercises.push(extra[key]);
+              break;
             }
           }
         }
       });
-          }
-        }
-      }
 
-      if (!plan) throw new Error("❌ Conditioning plan not found.");
-
-      renderPlan(plan, frequency);
+      renderPlan(plan, frequency, formData);
     } else {
       await loadTrainingData(formData.goal);
-      const container = document.getElementById('training-container');
-      container.innerHTML = '';
-
       const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
       const plan = window.trainingData?.[adjustedFreq];
 
       if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
 
-      // Add cardio for "Lose fat" goal
       if (formData.goal === "Lose fat") {
         Object.entries(plan).forEach(([day, exercises]) => {
           exercises.unshift({
@@ -134,7 +113,7 @@ async function generateTrainingPlan(formData) {
         });
       }
 
-      renderPlan(plan, adjustedFreq);
+      renderPlan(plan, adjustedFreq, formData);
     }
 
     document.getElementById('outputBox').style.display = 'block';
@@ -144,7 +123,7 @@ async function generateTrainingPlan(formData) {
   }
 }
 
-function renderPlan(plan, freq) {
+function renderPlan(plan, freq, formData) {
   const container = document.getElementById('training-container');
   container.innerHTML = '';
 
@@ -192,7 +171,7 @@ function renderPlan(plan, freq) {
 
 function swapExercise(freq, day, index) {
   const realFreq = freq === "5plus" ? "5+" : freq;
-  const source = window.trainingData?.[realFreq]?.[day] || window.conditioningFrequencies?.[realFreq]?.[day];
+  const source = window.trainingData?.[realFreq]?.[day] || window.conditioningFrequencies?.gym?.[realFreq]?.[day] || window.conditioningFrequencies?.bodyweight?.[realFreq]?.[day];
   const exercise = source?.[index];
   if (exercise?.alt && exercise.alt.length > 0) {
     const currentName = exercise.name;
