@@ -2,7 +2,7 @@
 function loadConditioningData() {
   return new Promise((resolve, reject) => {
     if (window.conditioningFrequencies) {
-      resolve(); // Already loaded
+      resolve();
       return;
     }
 
@@ -27,7 +27,7 @@ function loadConditioningData() {
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
     if (window.trainingData) {
-      resolve(); // Already loaded
+      resolve();
       return;
     }
     const script = document.createElement('script');
@@ -99,67 +99,33 @@ if (window.conditioningFrequencies) {
   });
 }
 
-        exercises.forEach(ex => {
-          if (!ex.alt) ex.alt = [];
-          const additional = {
-            "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
-            "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
-            "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
-            "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
-            "Burpees": ["Jump Squats", "Sprawl to Jump"],
-            "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
-            "Plank Series": ["Side Plank", "Bird Dog"],
-            "Jump Rope": ["High Knees", "Jumping Jacks"]
-          };
-          if (additional[ex.name]) {
-            additional[ex.name].forEach(alt => {
-              if (!ex.alt.includes(alt)) ex.alt.push(alt);
-            });
-          }
-        });
-      });
-
-      renderPlan(plan, frequency, formData);
-    } else {
-      await loadTrainingData(formData.goal);
-      const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
-      const plan = window.trainingData?.[adjustedFreq];
-
-      if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
-
-      if (formData.goal === "Lose fat") {
-        Object.entries(plan).forEach(([day, exercises]) => {
-          exercises.unshift({
-            name: "Treadmill Warm-up",
-            sets: "10 min",
-            alt: ["Bike", "Rowing", "Walk uphill"]
-          });
-          const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
-          if (!isLegDay) {
-            exercises.push({
-              name: "Post-Workout Cardio",
-              sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
-              alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
-            });
-          }
-        });
-      }
-
-      renderPlan(plan, adjustedFreq, formData);
-    }
-
-    document.getElementById('outputBox').style.display = 'block';
-  } catch (err) {
-    console.error(err);
-    alert('Something went wrong loading your plan.');
-  }
-}
-
 function renderPlan(plan, freq, formData) {
   const container = document.getElementById('training-container');
   container.innerHTML = '';
 
   for (const [day, exercises] of Object.entries(plan)) {
+    // 🔧 Rozšíření alternativ u každého cviku
+    exercises.forEach(ex => {
+      if (!ex.alt) ex.alt = [];
+
+      const additional = {
+        "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
+        "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
+        "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
+        "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
+        "Burpees": ["Jump Squats", "Sprawl to Jump"],
+        "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
+        "Plank Series": ["Side Plank", "Bird Dog"],
+        "Jump Rope": ["High Knees", "Jumping Jacks"]
+      };
+
+      if (additional[ex.name]) {
+        additional[ex.name].forEach(alt => {
+          if (!ex.alt.includes(alt)) ex.alt.push(alt);
+        });
+      }
+    });
+
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
     dayDiv.innerHTML = `<h3>${day}</h3>`;
@@ -232,20 +198,21 @@ document.getElementById('trackerForm').addEventListener('submit', (e) => {
   };
 
   generateTrainingPlan(formData);
-// === Tooltip observer for all training plans ===
-const observer = new MutationObserver(() => {
-  const container = document.querySelector(".training-day-header");
-  if (container && !document.querySelector(".alt-tip")) {
-    const tip = document.createElement("div");
-    tip.className = "alt-tip";
-    tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
-    tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
-    container.parentNode.insertBefore(tip, container.nextSibling);
-  }
-});
-observer.observe(document.body, { childList: true, subtree: true });
 
+  // === Tooltip observer for all training plans ===
+  const observer = new MutationObserver(() => {
+    const container = document.querySelector(".training-day-header");
+    if (container && !document.querySelector(".alt-tip")) {
+      const tip = document.createElement("div");
+      tip.className = "alt-tip";
+      tip.textContent = "💡 Tip: Click 🖁 to swap this exercise for an alternative!";
+      tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
+      container.parentNode.insertBefore(tip, container.nextSibling);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 });
+
 window.ensureConditioningDayHasEnoughExercises = ensureConditioningDayHasEnoughExercises;
 window.originalGenerateTrainingPlan = window.generateTrainingPlan;
 window.generateTrainingPlan = async function (formData) {
@@ -260,8 +227,32 @@ window.generateTrainingPlan = async function (formData) {
       return;
     }
     ensureConditioningDayHasEnoughExercises(plan);
-    window.renderPlan(plan, frequencyKey, formData);
+    renderPlan(plan, frequencyKey, formData);
   } else {
-    window.originalGenerateTrainingPlan(formData);
+    await loadTrainingData(formData.goal);
+    const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+    const plan = window.trainingData?.[adjustedFreq];
+
+    if (!plan) throw new Error("❌ Training plan not found for frequency: " + adjustedFreq);
+
+    if (formData.goal === "Lose fat") {
+      Object.entries(plan).forEach(([day, exercises]) => {
+        exercises.unshift({
+          name: "Treadmill Warm-up",
+          sets: "10 min",
+          alt: ["Bike", "Rowing", "Walk uphill"]
+        });
+        const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+        if (!isLegDay) {
+          exercises.push({
+            name: "Post-Workout Cardio",
+            sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+            alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+          });
+        }
+      });
+    }
+
+    renderPlan(plan, adjustedFreq, formData);
   }
 };
