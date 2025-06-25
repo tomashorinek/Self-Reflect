@@ -26,10 +26,16 @@ function loadConditioningData() {
 // === trainingData loader ===
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
-    if (window.trainingData) {
+    const globalName = goal === 'Get stronger' ? 'trainingDataStrong'
+                     : goal === 'Build muscle' ? 'trainingDataMuscle'
+                     : goal === 'Lose fat' ? 'trainingDataFatLoss' : null;
+
+    if (!globalName) return reject('❌ Unknown goal: ' + goal);
+    if (window[globalName]) {
       resolve();
       return;
     }
+
     const script = document.createElement('script');
     script.src = goal === 'Get stronger'
       ? 'https://www.webbyfe.com/trainingData_strong.js'
@@ -38,7 +44,9 @@ function loadTrainingData(goal) {
 
     script.onload = () => {
       if (window.trainingData) {
-        console.log("✅ Loaded and trainingData is available:", script.src);
+        window[globalName] = window.trainingData;
+        delete window.trainingData;
+        console.log(`✅ Loaded and mapped trainingData to ${globalName}`);
         resolve();
       } else {
         console.error("❌ Script loaded but trainingData is missing");
@@ -58,13 +66,8 @@ function loadTrainingData(goal) {
 // Load all data early to avoid second-load issues
 window.addEventListener("DOMContentLoaded", async () => {
   try {
-    await Promise.all([
-      loadConditioningData(),
-      loadTrainingData("Get stronger"),
-      loadTrainingData("Build muscle"),
-      loadTrainingData("Lose fat")
-    ]);
-    console.log("✅ All training and conditioning data preloaded");
+    await loadConditioningData();
+    console.log("✅ Conditioning data preloaded");
   } catch (err) {
     console.error("❌ Preloading error:", err);
   }
