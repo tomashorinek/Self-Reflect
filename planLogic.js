@@ -77,6 +77,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 function renderPlan(plan, freq, formData) {
   const container = document.getElementById('training-container');
+  if (!container) {
+    console.error("❌ Container #training-container not found in DOM.");
+    return;
+  }
   container.innerHTML = '';
 
   for (const [day, exercises] of Object.entries(plan)) {
