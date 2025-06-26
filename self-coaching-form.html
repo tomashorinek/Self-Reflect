@@ -110,31 +110,32 @@
     <select id="experience">
       <option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
       <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
-      <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
-      <option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
-    </select>
-
-    <label for="injuries">Any injuries or health issues?</label>
-    <textarea id="injuries" placeholder="If yes, specify..."></textarea>
-
-    <label for="fixed">Do you want a fixed weekly routine?</label>
-    <select id="fixed">
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
-
-    <label for="email">Where should we send your plan?</label>
-    <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
-
-    <button type="submit">Generate My Plan</button>
-  </form>
-
-  <div class="output" id="outputBox" style="display:none">
-    <h2>Your Training Plan</h2>
-    <div id="training-container"></div>
-  </div>
-
-  <!-- ⚠️ přidáno správné verzování kvůli cache -->
-  <script src="https://www.webbyfe.com/planLogic.js?v=100"></script>
-</body>
-</html>
+       <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
+       <option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
+     </select>
+ 
+     <label for="injuries">Any injuries or health issues?</label>
+     <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+ 
+     <label for="fixed">Do you want a fixed weekly routine?</label>
+     <select id="fixed">
+       <option value="Yes">Yes</option>
+       <option value="No">No</option>
+     </select>
+ 
+     <label for="email">Where should we send your plan?</label>
+     <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
+ 
+     <button type="submit">Generate My Plan</button>
+   </form>
+ 
+   <div class="output" id="outputBox" style="display:none">
+     <h2>Your Training Plan</h2>
+     <div id="training-container"></div>
+   </div>
+ 
+   <!-- ⚠️ přidáno správné verzování kvůli cache -->
+-  <script src="https://www.webbyfe.com/planLogic.js?v=100"></script>
++  <script src="planLogic.js?v=100"></script>
+ </body>
+ </html>
