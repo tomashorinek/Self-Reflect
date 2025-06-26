@@ -75,60 +75,13 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// === PATCH: Ensure fallback exercise added correctly for 2-item days ===
-function ensureConditioningDayHasEnoughExercises(plan) {
-  const fallback = {
-    mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
-    tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
-    wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
-    thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
-    fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
-    sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
-    sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] }
-  };
-
-  Object.entries(plan).forEach(([day, exercises]) => {
-    const dayKey = day.slice(0, 3).toLowerCase();
-    if (Array.isArray(exercises) && exercises.length < 3 && fallback[dayKey]) {
-      exercises.push(fallback[dayKey]);
-    }
-  });
-}
-
-// Run fix once conditioning data is available
-if (window.conditioningFrequencies) {
-  Object.values(window.conditioningFrequencies).forEach(freqs => {
-    Object.values(freqs).forEach(plan => {
-      if (typeof plan === 'object') ensureConditioningDayHasEnoughExercises(plan);
-    });
-  });
-}
-
 function renderPlan(plan, freq, formData) {
   const container = document.getElementById('training-container');
   container.innerHTML = '';
 
   for (const [day, exercises] of Object.entries(plan)) {
-    // 🔧 Rozšíření alternativ u každého cviku
     exercises.forEach(ex => {
       if (!ex.alt) ex.alt = [];
-
-      const additional = {
-        "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
-        "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
-        "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
-        "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
-        "Burpees": ["Jump Squats", "Sprawl to Jump"],
-        "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
-        "Plank Series": ["Side Plank", "Bird Dog"],
-        "Jump Rope": ["High Knees", "Jumping Jacks"]
-      };
-
-      if (additional[ex.name]) {
-        additional[ex.name].forEach(alt => {
-          if (!ex.alt.includes(alt)) ex.alt.push(alt);
-        });
-      }
     });
 
     const dayDiv = document.createElement('div');
@@ -171,7 +124,6 @@ function renderPlan(plan, freq, formData) {
     container.appendChild(dayDiv);
   }
 
-  // Fix swap buttons
   document.querySelectorAll('.alt-button').forEach(btn => {
     btn.addEventListener('click', () => {
       const day = btn.getAttribute('data-day');
@@ -203,29 +155,13 @@ document.getElementById('trackerForm').addEventListener('submit', (e) => {
   };
 
   generateTrainingPlan(formData);
-
-  // === Tooltip observer for all training plans ===
-  const observer = new MutationObserver(() => {
-    const container = document.querySelector(".training-day-header");
-    if (container && !document.querySelector(".alt-tip")) {
-      const tip = document.createElement("div");
-      tip.className = "alt-tip";
-      tip.textContent = "💡 Tip: Click 🖁 to swap this exercise for an alternative!";
-      tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
-      container.parentNode.insertBefore(tip, container.nextSibling);
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
 });
 
-window.ensureConditioningDayHasEnoughExercises = ensureConditioningDayHasEnoughExercises;
-window.originalGenerateTrainingPlan = window.generateTrainingPlan;
 window.generateTrainingPlan = async function (formData) {
-  await loadConditioningData();
-
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
   if (formData.goal === "Improve conditioning") {
+    await loadConditioningData();
     const equipmentMap = {
       "Gym access": "gym",
       "Bodyweight only": "bodyweight",
@@ -233,28 +169,28 @@ window.generateTrainingPlan = async function (formData) {
       "Resistance bands": "bodyweight"
     };
     formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
-      const plan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+    const plan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+
     if (!plan) {
       alert("⚠️ Conditioning plan not found");
       return;
     }
-    ensureConditioningDayHasEnoughExercises(plan);
     renderPlan(plan, frequencyKey, formData);
   } else {
-   await loadTrainingData(formData.goal);
-const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+    await loadTrainingData(formData.goal);
+    const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
-let plan;
-if (formData.goal === "Get stronger") {
-  plan = window.trainingDataStrong?.[adjustedFreq];
-} else {
-  plan = window.trainingDataGeneral?.[adjustedFreq];
-}
+    let plan;
+    if (formData.goal === "Get stronger") {
+      plan = window.trainingDataStrong?.[adjustedFreq];
+    } else {
+      plan = window.trainingDataGeneral?.[adjustedFreq];
+    }
 
     if (!plan) {
-  alert("❌ Training plan not found for frequency: " + adjustedFreq);
-  return;
-}
+      alert("❌ Training plan not found for frequency: " + adjustedFreq);
+      return;
+    }
 
     if (formData.goal === "Lose fat") {
       Object.entries(plan).forEach(([day, exercises]) => {
