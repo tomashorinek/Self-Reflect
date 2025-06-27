@@ -1,39 +1,12 @@
-// === conditioningFrequencies.js loader ===
-let currentPlan = null;
-function loadConditioningData() {
-  return new Promise((resolve, reject) => {
-    if (window.conditioningFrequencies) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-    script.onload = () => {
-      if (window.conditioningFrequencies) {
-        console.log("✅ Conditioning data loaded");
-        resolve();
-      } else {
-        console.error("❌ Conditioning data not available after script load");
-        reject("Conditioning data not found after script load");
-      }
-    };
-    script.onerror = () => reject("❌ Failed to load conditioning data script");
-
-    document.head.appendChild(script);
-  });
-}
-
-// Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
- const extraArray = [
-    { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] }, // Mon
-    { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] }, // Tue
-    { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] }, // Wed
-    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] }, // Thu
-    { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] }, // Fri
-    { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] }, // Sat
-    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] } // Sun
+  const extraArray = [
+    { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
+    { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
+    { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
+    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
+    { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
+    { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
+    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] }
   ];
 
   const extras = {
@@ -46,24 +19,6 @@ function extendConditioningAlternatives(plan) {
     sun: extraArray[6]
   };
 
-  Object.entries(plan).forEach(([day, exercises], idx) => {
-    const dayName = day.toLowerCase();
-    let dayKey = dayName.slice(0, 3);
-
-    if (!extras[dayKey]) {
-      const seqKey = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][idx % 7];
-      dayKey = seqKey;
-    }
-
-    if (exercises.length < 3 && extras[dayKey]) {
-      exercises.push(JSON.parse(JSON.stringify(extras[dayKey])));
-    }
-
-    exercises.forEach(ex => {
-      if (!ex.alt) ex.alt = [];
-      });
-  });
-
   const baseAltMap = {
     "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
     "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
@@ -75,7 +30,7 @@ function extendConditioningAlternatives(plan) {
     "Jump Rope": ["High Knees", "Jumping Jacks"]
   };
 
-  // Make alternative map two-way so alternatives also get their own alternatives
+  // Zpětné alternativy
   Object.entries(baseAltMap).forEach(([main, alts]) => {
     alts.forEach(alt => {
       if (!baseAltMap[alt]) {
@@ -84,16 +39,45 @@ function extendConditioningAlternatives(plan) {
     });
   });
 
-  Object.values(plan).forEach(exercises => {
+  Object.entries(plan).forEach(([day, exercises], idx) => {
+    const dayName = day.toLowerCase();
+    let dayKey = dayName.slice(0, 3);
+
+    if (!extras[dayKey]) {
+      const seqKey = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][idx % 7];
+      dayKey = seqKey;
+    }
+
+    if (exercises.length < 3 && extras[dayKey]) {
+      const fallback = JSON.parse(JSON.stringify(extras[dayKey]));
+      // ✅ Aplikuj altMap i na fallback
+      if (!fallback.alt) fallback.alt = [];
+      const mapped = baseAltMap[fallback.name];
+      if (mapped) {
+        mapped.forEach(alt => {
+          if (!fallback.alt.includes(alt)) {
+            fallback.alt.push(alt);
+          }
+        });
+      }
+      exercises.push(fallback);
+    }
+
+    // ✅ Aplikuj altMap na každý cvik
     exercises.forEach(ex => {
-      if (baseAltMap[ex.name]) {
-        baseAltMap[ex.name].forEach(a => {
-          if (!ex.alt.includes(a)) ex.alt.push(a);
+      if (!ex.alt) ex.alt = [];
+      const mapped = baseAltMap[ex.name];
+      if (mapped) {
+        mapped.forEach(alt => {
+          if (!ex.alt.includes(alt)) {
+            ex.alt.push(alt);
+          }
         });
       }
     });
   });
 }
+
 
 // === trainingData loader ===
 function loadTrainingData(goal) {
