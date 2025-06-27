@@ -56,13 +56,9 @@ const seqKey = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][idx % 7];
 dayKey = seqKey;
 }
 
-if (exercises.length < 3 && extras[dayKey]) {
+while (exercises.length < 3 && extras[dayKey]) {
 exercises.push(JSON.parse(JSON.stringify(extras[dayKey])));
 }
-
-exercises.forEach(ex => {
-if (!ex.alt) ex.alt = [];
-});
 });
 
 const baseAltMap = {
