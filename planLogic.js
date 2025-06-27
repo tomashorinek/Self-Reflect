@@ -26,38 +26,69 @@ function loadConditioningData() {
 
 // Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
-const extra = {
-    mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
-    tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
-    wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
-    thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
-    fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
-    sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
-    sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
+ const extraArray = [
+    { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] }, // Mon
+    { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] }, // Tue
+    { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] }, // Wed
+    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] }, // Thu
+    { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] }, // Fri
+    { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] }, // Sat
+    { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] } // Sun
+  ];
+
+  const extras = {
+    mon: extraArray[0],
+    tue: extraArray[1],
+    wed: extraArray[2],
+    thu: extraArray[3],
+    fri: extraArray[4],
+    sat: extraArray[5],
+    sun: extraArray[6]
   };
 
-  Object.entries(plan).forEach(([day, exercises]) => {
-     const dayKey = day.toLowerCase().slice(0,3);
+  Object.entries(plan).forEach(([day, exercises], idx) => {
+    const dayName = day.toLowerCase();
+    let dayKey = dayName.slice(0, 3);
 
-    if (exercises.length < 3 && extra[dayKey]) {
-      exercises.push(extra[dayKey]);
+    if (!extras[dayKey]) {
+      const seqKey = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][idx % 7];
+      dayKey = seqKey;
+    }
+
+    if (exercises.length < 3 && extras[dayKey]) {
+      exercises.push(JSON.parse(JSON.stringify(extras[dayKey])));
     }
 
     exercises.forEach(ex => {
       if (!ex.alt) ex.alt = [];
-      const altMap = {
-        "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
-        "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
-        "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
-        "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
-        "Burpees": ["Jump Squats", "Sprawl to Jump"],
-        "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
-        "Plank Series": ["Side Plank", "Bird Dog"],
-        "Jump Rope": ["High Knees", "Jumping Jacks"]
-      };
-      if (altMap[ex.name]) {
-        altMap[ex.name].forEach(alt => {
-          if (!ex.alt.includes(alt)) ex.alt.push(alt);
+      });
+  });
+
+  const baseAltMap = {
+    "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
+    "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
+    "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
+    "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
+    "Burpees": ["Jump Squats", "Sprawl to Jump"],
+    "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
+    "Plank Series": ["Side Plank", "Bird Dog"],
+    "Jump Rope": ["High Knees", "Jumping Jacks"]
+  };
+
+  // Make alternative map two-way so alternatives also get their own alternatives
+  Object.entries(baseAltMap).forEach(([main, alts]) => {
+    alts.forEach(alt => {
+      if (!baseAltMap[alt]) {
+        baseAltMap[alt] = alts.filter(a => a !== alt).concat(main);
+      }
+    });
+  });
+
+  Object.values(plan).forEach(exercises => {
+    exercises.forEach(ex => {
+      if (baseAltMap[ex.name]) {
+        baseAltMap[ex.name].forEach(a => {
+          if (!ex.alt.includes(a)) ex.alt.push(a);
         });
       }
     });
