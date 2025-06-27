@@ -24,6 +24,50 @@ function loadConditioningData() {
   });
 }
 
+// Add fallback and alternative mappings for conditioning plans
+function extendConditioningAlternatives(plan) {
+  Object.entries(plan).forEach(([day, exercises]) => {
+    const dayLower = day.toLowerCase();
+
+    if (exercises.length < 3) {
+      const extra = {
+        mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
+        tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
+        wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
+        thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
+        fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
+        sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
+        sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
+      };
+      for (const key in extra) {
+        if (dayLower.includes(key)) {
+          exercises.push(extra[key]);
+          break;
+        }
+      }
+    }
+
+    exercises.forEach(ex => {
+      if (!ex.alt) ex.alt = [];
+      const altMap = {
+        "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
+        "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
+        "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
+        "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
+        "Burpees": ["Jump Squats", "Sprawl to Jump"],
+        "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
+        "Plank Series": ["Side Plank", "Bird Dog"],
+        "Jump Rope": ["High Knees", "Jumping Jacks"]
+      };
+      if (altMap[ex.name]) {
+        altMap[ex.name].forEach(alt => {
+          if (!ex.alt.includes(alt)) ex.alt.push(alt);
+        });
+      }
+    });
+  });
+}
+
 // === trainingData loader ===
 function loadTrainingData(goal) {
   return new Promise((resolve, reject) => {
@@ -132,6 +176,7 @@ function renderPlan(plan, freq, formData) {
   }
 
   document.querySelectorAll('.alt-button').forEach(btn => {
+      btn.setAttribute('title', 'switch for alternative');
     btn.addEventListener('click', () => {
       const day = btn.getAttribute('data-day');
       const index = parseInt(btn.getAttribute('data-index'));
@@ -183,6 +228,7 @@ window.generateTrainingPlan = async function (formData) {
       return;
     }
     currentPlan = JSON.parse(JSON.stringify(basePlan));
+      extendConditioningAlternatives(currentPlan);
     renderPlan(currentPlan, frequencyKey, formData);
   } else {
     await loadTrainingData(formData.goal);
