@@ -26,25 +26,21 @@ function loadConditioningData() {
 
 // Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
-  Object.entries(plan).forEach(([day, exercises]) => {
-    const dayLower = day.toLowerCase();
+const extra = {
+    mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
+    tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
+    wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
+    thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
+    fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
+    sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
+    sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
+  };
 
-    if (exercises.length < 3) {
-      const extra = {
-        mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
-        tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
-        wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
-        thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
-        fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
-        sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
-        sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
-      };
-      for (const key in extra) {
-        if (dayLower.includes(key)) {
-          exercises.push(extra[key]);
-          break;
-        }
-      }
+  Object.entries(plan).forEach(([day, exercises]) => {
+     const dayKey = day.toLowerCase().slice(0,3);
+
+    if (exercises.length < 3 && extra[dayKey]) {
+      exercises.push(extra[dayKey]);
     }
 
     exercises.forEach(ex => {
