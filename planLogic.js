@@ -1,101 +1,58 @@
-// === conditioningFrequencies.js loader ===
-let currentPlan = null;
-function loadConditioningData() {
-  return new Promise((resolve, reject) => {
-    if (window.conditioningFrequencies) {
-      resolve();
-      return;
+// V souboru, kde je funkce extendConditioningAlternatives, oprav tento blok:
+Object.entries(plan).forEach(([day, exercises]) => {
+  const dayKey = day.trim().slice(0, 3).toLowerCase();
+
+  if (exercises.length < 3 && fallbackExercises[dayKey]) {
+    const copy = JSON.parse(JSON.stringify(fallbackExercises[dayKey]));
+    exercises.push(copy); // <== sem přidej aplikaci altMap
+  }
+
+  exercises.forEach(ex => {
+    if (!ex.alt) ex.alt = [];
+    const mapped = altMap[ex.name];
+    if (mapped) {
+      mapped.forEach(alt => {
+        if (!ex.alt.includes(alt)) {
+          ex.alt.push(alt);
+        }
+      });
     }
-
-    const script = document.createElement('script');
-    script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-    script.onload = () => {
-      if (window.conditioningFrequencies) {
-        console.log("✅ Conditioning data loaded");
-        resolve();
-      } else {
-        console.error("❌ Conditioning data not available after script load");
-        reject("Conditioning data not found after script load");
-      }
-    };
-    script.onerror = () => reject("❌ Failed to load conditioning data script");
-
-    document.head.appendChild(script);
   });
-}
+});
 
-// Add fallback and alternative mappings for conditioning plans
-function extendConditioningAlternatives(plan) {
-  const fallbackExercises = {
-    mon: {
-      name: "Core Circuit Finisher",
-      sets: "3x40s plank + 10 crunches",
-      alt: ["Plank to Push-up", "Mountain Climbers"]
-    },
-    tue: {
-      name: "Air Bike Burnout",
-      sets: "4x20s all-out / 40s rest",
-      alt: ["Jump Rope", "Burpees"]
-    },
-    wed: {
-      name: "Bear Crawl Shuttle",
-      sets: "4x10m",
-      alt: ["Mountain Climbers", "Plank Shoulder Taps"]
-    },
-    thu: {
-      name: "Jumping Jacks Finisher",
-      sets: "3x30s",
-      alt: ["Mountain Climbers", "Skater Jumps"]
-    },
-    fri: {
-      name: "Burpees to Box",
-      sets: "3x12",
-      alt: ["Jump Squats", "Step Ups"]
-    },
-    sat: {
-      name: "Wall Sit Hold",
-      sets: "3x45s",
-      alt: ["Bodyweight Squat Hold", "Lunge Hold"]
-    },
-    sun: {
-      name: "Jumping Jacks Finisher",
-      sets: "3x30s",
-      alt: ["Mountain Climbers", "Jump Squats"]
+// Uprav takto (opravuje i fallback):
+Object.entries(plan).forEach(([day, exercises]) => {
+  const dayKey = day.trim().slice(0, 3).toLowerCase();
+
+  if (exercises.length < 3 && fallbackExercises[dayKey]) {
+    const fallback = JSON.parse(JSON.stringify(fallbackExercises[dayKey]));
+    // aplikuj altMap i na fallback cvik
+    if (!fallback.alt) fallback.alt = [];
+    const mappedFallback = altMap[fallback.name];
+    if (mappedFallback) {
+      mappedFallback.forEach(alt => {
+        if (!fallback.alt.includes(alt)) {
+          fallback.alt.push(alt);
+        }
+      });
     }
-  };
+    exercises.push(fallback);
+  }
 
-  const altMap = {
-    "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
-    "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
-    "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
-    "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
-    "Burpees": ["Jump Squats", "Sprawl to Jump"],
-    "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
-    "Plank Series": ["Side Plank", "Bird Dog"],
-    "Jump Rope": ["High Knees", "Jumping Jacks"]
-  };
-
-  Object.entries(plan).forEach(([day, exercises]) => {
-    const dayKey = day.trim().slice(0, 3).toLowerCase();
-
-    if (exercises.length < 3 && fallbackExercises[dayKey]) {
-      const copy = JSON.parse(JSON.stringify(fallbackExercises[dayKey]));
-      exercises.push(copy);
+  // klasické cviky
+  exercises.forEach(ex => {
+    if (!ex.alt) ex.alt = [];
+    const mapped = altMap[ex.name];
+    if (mapped) {
+      mapped.forEach(alt => {
+        if (!ex.alt.includes(alt)) {
+          ex.alt.push(alt);
+        }
+      });
     }
-
-    exercises.forEach(ex => {
-      if (!ex.alt) ex.alt = [];
-      const mapped = altMap[ex.name];
-      if (mapped) {
-        mapped.forEach(alt => {
-          if (!ex.alt.includes(alt)) {
-            ex.alt.push(alt);
-          }
-        });
-      }
-    });
   });
-}
+});
+
 
 // === trainingData loader ===
 function loadTrainingData(goal) {
