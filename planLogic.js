@@ -26,38 +26,71 @@ function loadConditioningData() {
 
 // Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
-const extra = {
-    mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
-    tue: { name: "Air Bike Burnout", sets: "4x20s all-out / 40s rest", alt: ["Jump Rope", "Burpees"] },
-    wed: { name: "Bear Crawl Shuttle", sets: "4x10m", alt: ["Mountain Climbers", "Plank Shoulder Taps"] },
-    thu: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Skater Jumps"] },
-    fri: { name: "Burpees to Box", sets: "3x12", alt: ["Jump Squats", "Step Ups"] },
-    sat: { name: "Wall Sit Hold", sets: "3x45s", alt: ["Bodyweight Squat Hold", "Lunge Hold"] },
-    sun: { name: "Jumping Jacks Finisher", sets: "3x30s", alt: ["Mountain Climbers", "Jump Squats"] },
+  const fallbackExercises = {
+    mon: {
+      name: "Core Circuit Finisher",
+      sets: "3x40s plank + 10 crunches",
+      alt: ["Plank to Push-up", "Mountain Climbers"]
+    },
+    tue: {
+      name: "Air Bike Burnout",
+      sets: "4x20s all-out / 40s rest",
+      alt: ["Jump Rope", "Burpees"]
+    },
+    wed: {
+      name: "Bear Crawl Shuttle",
+      sets: "4x10m",
+      alt: ["Mountain Climbers", "Plank Shoulder Taps"]
+    },
+    thu: {
+      name: "Jumping Jacks Finisher",
+      sets: "3x30s",
+      alt: ["Mountain Climbers", "Skater Jumps"]
+    },
+    fri: {
+      name: "Burpees to Box",
+      sets: "3x12",
+      alt: ["Jump Squats", "Step Ups"]
+    },
+    sat: {
+      name: "Wall Sit Hold",
+      sets: "3x45s",
+      alt: ["Bodyweight Squat Hold", "Lunge Hold"]
+    },
+    sun: {
+      name: "Jumping Jacks Finisher",
+      sets: "3x30s",
+      alt: ["Mountain Climbers", "Jump Squats"]
+    }
+  };
+
+  const altMap = {
+    "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
+    "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
+    "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
+    "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
+    "Burpees": ["Jump Squats", "Sprawl to Jump"],
+    "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
+    "Plank Series": ["Side Plank", "Bird Dog"],
+    "Jump Rope": ["High Knees", "Jumping Jacks"]
   };
 
   Object.entries(plan).forEach(([day, exercises]) => {
-     const dayKey = day.toLowerCase().slice(0,3);
+    const dayKey = day.trim().slice(0, 3).toLowerCase();
 
-    if (exercises.length < 3 && extra[dayKey]) {
-      exercises.push(extra[dayKey]);
+    if (exercises.length < 3 && fallbackExercises[dayKey]) {
+      const copy = JSON.parse(JSON.stringify(fallbackExercises[dayKey]));
+      exercises.push(copy);
     }
 
     exercises.forEach(ex => {
       if (!ex.alt) ex.alt = [];
-      const altMap = {
-        "Push-ups": ["Incline Push-ups", "Kneeling Push-ups"],
-        "Air Bike Burnout": ["Mountain Climbers", "Jumping Jacks"],
-        "Core Circuit Finisher": ["V-Ups", "Hollow Hold"],
-        "Bear Crawl Shuttle": ["Crab Walks", "Lateral Bear Crawls"],
-        "Burpees": ["Jump Squats", "Sprawl to Jump"],
-        "Wall Sit Hold": ["Isometric Lunge Hold", "Chair Hold"],
-        "Plank Series": ["Side Plank", "Bird Dog"],
-        "Jump Rope": ["High Knees", "Jumping Jacks"]
-      };
-      if (altMap[ex.name]) {
-        altMap[ex.name].forEach(alt => {
-          if (!ex.alt.includes(alt)) ex.alt.push(alt);
+      const mapped = altMap[ex.name];
+      if (mapped) {
+        mapped.forEach(alt => {
+          if (!ex.alt.includes(alt)) {
+            ex.alt.push(alt);
+          }
         });
       }
     });
