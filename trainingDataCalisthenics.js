@@ -170,6 +170,7 @@ const loseFatHome = {
     ]
   }
 };
+trainingDataCalisthenics.fatloss = loseFatHome;
 console.log("✅ Calisthenics Data Loaded:", trainingDataCalisthenics);
 Object.keys(trainingDataCalisthenics).forEach(freq => {
   Object.keys(trainingDataCalisthenics[freq]).forEach(day => {
@@ -180,5 +181,4 @@ Object.keys(trainingDataCalisthenics).forEach(freq => {
     });
   });
 });
-window.trainingDataCalisthenics = trainingDataCalisthenics;
-console.log("✅ trainingDataCalisthenics assigned to window");
+export default trainingDataCalisthenics;
