@@ -155,5 +155,4 @@ const trainingData = {
   }
 };
 console.log("📤 trainingData loaded:", trainingData);
-window.trainingData = trainingData;
-console.log("✅ trainingData assigned to window");
+export default trainingData;
