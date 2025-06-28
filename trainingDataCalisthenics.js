@@ -47,7 +47,7 @@ const trainingDataCalisthenics = {
       { name: "Step-ups", sets: "3x10/leg", alt: ["Split Squats", "Chair Squats"] },
       { name: "Backpack Romanian Deadlifts", sets: "3x10-12", alt: ["Good Mornings", "Single Leg Deadlift"] },
       { name: "Glute Bridge", sets: "3x15", alt: ["Single Leg Glute Bridge", "Hip Thrust on Couch"] },
-      { name: "loaded backpack squats", sets: "3x30s", alt: ["bodyweight squats", "Split Squats"] },
+      { name: "loaded backpack squats", sets: "3x10-12", alt: ["bodyweight squats", "Split Squats"] },
       { name: "Calf Raises (Step/Edge)", sets: "3x20", alt: ["Single Leg Calf Raise", "Wall Calf Push"] },
       { name: "Leg Raises + Plank", sets: "2x (15 reps + 45s)", alt: ["Mountain Climbers", "Hollow Hold"] }
     ]
