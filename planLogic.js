@@ -83,13 +83,35 @@ baseAltMap[alt] = alts.filter(a => a !== alt).concat(main);
 
 Object.values(plan).forEach(exercises => {
 exercises.forEach(ex => {
-if (baseAltMap[ex.name]) {
-baseAltMap[ex.name].forEach(a => {
-if (!ex.alt.includes(a)) ex.alt.push(a);
+    if (baseAltMap[ex.name]) {
+      baseAltMap[ex.name].forEach(a => {
+        if (!ex.alt.includes(a)) ex.alt.push(a);
+      });
+    }
+  });
 });
 }
-});
-});
+
+// Utility to select a unique alternative if the main exercise already exists
+function getUniqueExercise(existing, exercise) {
+  const options = [exercise.name, ...(exercise.alt || [])];
+  for (const opt of options) {
+    if (!existing.includes(opt)) return opt;
+  }
+  // fallback
+  return exercise.name;
+}
+
+// Replace duplicate exercise names within a day's plan with alternatives
+function enforceUniqueExercises(plan) {
+  Object.values(plan).forEach(dayExercises => {
+    const chosen = [];
+    dayExercises.forEach(ex => {
+      const unique = getUniqueExercise(chosen, ex);
+      chosen.push(unique);
+      ex.name = unique;
+    });
+  });
 }
 
 // === trainingData loader ===
@@ -253,6 +275,7 @@ return;
 }
 currentPlan = JSON.parse(JSON.stringify(basePlan));
 extendConditioningAlternatives(currentPlan);
+enforceUniqueExercises(currentPlan);
 renderPlan(currentPlan, frequencyKey, formData);
 } else {
 await loadTrainingData(formData.goal);
@@ -271,7 +294,7 @@ return;
 }
 currentPlan = JSON.parse(JSON.stringify(basePlan));
 
-if (formData.goal === "Lose fat") {
+  if (formData.goal === "Lose fat") {
 Object.entries(currentPlan).forEach(([day, exercises]) => {
 exercises.unshift({
 name: "Treadmill Warm-up",
@@ -287,9 +310,9 @@ alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
 });
 }
 });
-}
-
-renderPlan(currentPlan, adjustedFreq, formData);
+  }
+  enforceUniqueExercises(currentPlan);
+  renderPlan(currentPlan, adjustedFreq, formData);
 }
 };
 
