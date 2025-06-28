@@ -144,6 +144,32 @@ const trainingDataCalisthenics = {
   ]
 }
 };
+
+const loseFatHome = {
+  "1-2": {
+    "Monday": [
+      {
+        name: "Warm-Up Cardio (Low Intensity)",
+        sets: "10–20 min",
+        alt: [
+          "Walking (indoor or outdoor)",
+          "Bike ride (easy pace)",
+          "Stair walk (5–10 min)"
+        ]
+      },
+      {
+        name: "Post-Training Cardio (Moderate–High Intensity)",
+        sets: "20–30 min",
+        alt: [
+          "Bike Intervals: 5 min 120–140 bpm + 1 min 140–160 bpm (repeat)",
+          "Skating / Rollerblades",
+          "Running or Jogging",
+          "Uphill Walk or Incline Hike"
+        ]
+      }
+    ]
+  }
+};
 console.log("✅ Calisthenics Data Loaded:", trainingDataCalisthenics);
 Object.keys(trainingDataCalisthenics).forEach(freq => {
   Object.keys(trainingDataCalisthenics[freq]).forEach(day => {
