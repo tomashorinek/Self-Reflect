@@ -261,10 +261,8 @@ const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 if (formData.goal === "Improve conditioning") {
 await loadConditioningData();
 const equipmentMap = {
-"Gym access": "gym",
-"Bodyweight only": "bodyweight",
-"Dumbbells at home": "bodyweight",
-"Resistance bands": "bodyweight"
+  gym: "gym",
+  home: "bodyweight"
 };
 formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
 const basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
