@@ -213,21 +213,32 @@ renderPlan(plan, freq, formData);
 }
 
 // Handle form submission
-document.getElementById('trackerForm').addEventListener('submit', (e) => {
-e.preventDefault();
+function attachFormHandler() {
+  const form = document.getElementById('trackerForm');
+  if (!form) return;
 
-const formData = {
-goal: document.getElementById('goal').value,
-frequency: document.getElementById('frequency').value,
-equipment: document.getElementById('equipment').value,
-experience: document.getElementById('experience').value,
-injuries: document.getElementById('injuries').value,
-fixed: document.getElementById('fixed').value,
-email: document.getElementById('email').value,
-};
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-window.generateTrainingPlan(formData);
-});
+    const formData = {
+      goal: document.getElementById('goal').value,
+      frequency: document.getElementById('frequency').value,
+      equipment: document.getElementById('equipment').value,
+      experience: document.getElementById('experience').value,
+      injuries: document.getElementById('injuries').value,
+      fixed: document.getElementById('fixed').value,
+      email: document.getElementById('email').value,
+    };
+
+    window.generateTrainingPlan(formData);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachFormHandler);
+} else {
+  attachFormHandler();
+}
 
 window.generateTrainingPlan = async function (formData) {
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
@@ -245,7 +256,7 @@ window.generateTrainingPlan = async function (formData) {
     currentPlan = JSON.parse(JSON.stringify(basePlan));
     extendConditioningAlternatives(currentPlan);
   } else {
-  let dataSource = (formData.goal === 'Get stronger')
+ let dataSource = (formData.goal === 'Get stronger')
       ? trainingDataStrong
       : (formData.equipment === 'gym' ? trainingDataGym : trainingDataCalisthenics);
     
