@@ -226,7 +226,7 @@ fixed: document.getElementById('fixed').value,
 email: document.getElementById('email').value,
 };
 
-generateTrainingPlan(formData);
+window.generateTrainingPlan(formData);
 });
 
 window.generateTrainingPlan = async function (formData) {
@@ -248,7 +248,7 @@ window.generateTrainingPlan = async function (formData) {
   let dataSource = (formData.goal === 'Get stronger')
       ? trainingDataStrong
       : (formData.equipment === 'gym' ? trainingDataGym : trainingDataCalisthenics);
-   
+    
     if (!dataSource) {
       await loadTrainingData(formData.goal);
       dataSource = window[(formData.goal === 'Get stronger') ? 'trainingDataStrong' : 'trainingDataGeneral'];
