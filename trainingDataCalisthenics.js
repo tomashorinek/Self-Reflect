@@ -1,4 +1,5 @@
-onst trainingDataCalisthenics = {
+console.log("📥 Start loading trainingDataCalisthenics.js");
+const trainingDataCalisthenics = {
   "1-2": {
     "Monday": [
       { name: "Incline Push-ups", sets: "3x10-12", alt: ["Kneeling Push-ups", "Wall Push-ups"] },
@@ -92,6 +93,7 @@ onst trainingDataCalisthenics = {
       { name: "Calf Raises (Edge)", sets: "3x20", alt: ["Single Leg Raise", "Wall Push Calf"] },
       { name: "Leg Raises + Plank", sets: "2x (15 reps + 45s)", alt: ["Mountain Climbers", "Hollow Hold"] }
     ],
+  },
     "5+": {
   "Monday": [ // Upper
     { name: "Incline Push-ups", sets: "3x12", alt: ["Wall Push-ups", "Kneeling Push-ups"] },
@@ -141,5 +143,16 @@ onst trainingDataCalisthenics = {
     { name: "Stretching + Foam Rolling", sets: "10–15 min", alt: ["Yoga Flow", "Dynamic Mobility"] }
   ]
 }
-  }
 };
+console.log("✅ Calisthenics Data Loaded:", trainingDataCalisthenics);
+Object.keys(trainingDataCalisthenics).forEach(freq => {
+  Object.keys(trainingDataCalisthenics[freq]).forEach(day => {
+    trainingDataCalisthenics[freq][day].forEach(ex => {
+      if (!ex.name || !ex.sets) {
+        console.warn("⚠️ Missing exercise data:", ex);
+      }
+    });
+  });
+});
+window.trainingDataCalisthenics = trainingDataCalisthenics;
+console.log("✅ trainingDataCalisthenics assigned to window");
