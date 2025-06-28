@@ -115,41 +115,62 @@ function enforceUniqueExercises(plan) {
 }
 
 // === trainingData loader ===
-function loadTrainingData(goal) {
+function loadTrainingData(goal, equipment) {
 return new Promise((resolve, reject) => {
-let globalName, src;
-
-if (goal === 'Get stronger') {
-globalName = 'trainingDataStrong';
-src = 'https://www.webbyfe.com/trainingData_strong.js';
+let globalName, src, modulePath, useScript = true;
+if (equipment === 'home') {
+  useScript = false;
+  if (goal === 'Get stronger') {
+    globalName = 'trainingDataStrongHome';
+    modulePath = './trainingDataStrongHome.js';
+  } else {
+    globalName = 'trainingDataCalisthenics';
+    modulePath = './trainingDataCalisthenics.js';
+  }
+} else if (goal === 'Get stronger') {
+  globalName = 'trainingDataStrong';
+  src = 'https://www.webbyfe.com/trainingData_strong.js';
 } else {
-globalName = 'trainingDataGeneral';
-src = 'https://www.webbyfe.com/trainingData.js';
+  globalName = 'trainingDataGeneral';
+  src = 'https://www.webbyfe.com/trainingData.js';
 }
 
 if (window[globalName]) {
-resolve();
-return;
+  resolve();
+  return;
+}
+if (!useScript) {
+  import(modulePath)
+    .then(mod => {
+      window[globalName] = mod.default || mod.trainingDataCalisthenics || mod;
+      console.log(`✅ Imported ${globalName}`);
+      resolve();
+    })
+    .catch(err => {
+      console.error('❌ Failed to import training data', err);
+      reject('trainingData import error');
+    });
+  return;
 }
 
 const script = document.createElement('script');
 script.src = src;
 
 script.onload = () => {
-if (window.trainingData) {
-window[globalName] = window.trainingData;
-delete window.trainingData;
-console.log(`✅ Loaded and mapped to ${globalName}`);
-resolve();
-} else {
-console.error("❌ trainingData missing after script load");
-reject("trainingData not found");
-}
+  if (window.trainingData) {
+    window[globalName] = window.trainingData;
+    delete window.trainingData;
+    console.log(`✅ Loaded and mapped to ${globalName}`);
+    resolve();
+  } else {
+    console.error("❌ trainingData missing after script load");
+    reject("trainingData not found");
+  }
 };
 
 script.onerror = (e) => {
-console.error("❌ Failed to load training data", e);
-reject("trainingData load error");
+  console.error("❌ Failed to load training data", e);
+  reject("trainingData load error");
 };
 
 document.head.appendChild(script);
@@ -276,15 +297,21 @@ extendConditioningAlternatives(currentPlan);
 enforceUniqueExercises(currentPlan);
 renderPlan(currentPlan, frequencyKey, formData);
 } else {
-await loadTrainingData(formData.goal);
-const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
+  await loadTrainingData(formData.goal, formData.equipment);
+  const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
-let basePlan;
-if (formData.goal === "Get stronger") {
-basePlan = window.trainingDataStrong?.[adjustedFreq];
-} else {
-basePlan = window.trainingDataGeneral?.[adjustedFreq];
-}
+  let basePlan;
+  if (formData.equipment === "home") {
+    if (formData.goal === "Get stronger") {
+      basePlan = window.trainingDataStrongHome?.strong?.[adjustedFreq];
+    } else {
+      basePlan = window.trainingDataCalisthenics?.[adjustedFreq];
+    }
+  } else if (formData.goal === "Get stronger") {
+    basePlan = window.trainingDataStrong?.[adjustedFreq];
+  } else {
+    basePlan = window.trainingDataGeneral?.[adjustedFreq];
+  }
 
 if (!basePlan) {
 alert("❌ Training plan not found for frequency: " + adjustedFreq);
@@ -294,20 +321,36 @@ currentPlan = JSON.parse(JSON.stringify(basePlan));
 
   if (formData.goal === "Lose fat") {
 Object.entries(currentPlan).forEach(([day, exercises]) => {
-exercises.unshift({
-name: "Treadmill Warm-up",
-sets: "10 min",
-alt: ["Bike", "Rowing", "Walk uphill"]
-});
-const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
-if (!isLegDay) {
-exercises.push({
-name: "Post-Workout Cardio",
-sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
-alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
-});
-}
-});
+      if (formData.equipment === "home") {
+        exercises.unshift(JSON.parse(JSON.stringify({
+          name: "Bodyweight Warm-up",
+          sets: "3 min light jumping",
+          alt: ["Marching", "Jumping Jacks"]
+        })));
+        const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+        if (!isLegDay) {
+          exercises.push(JSON.parse(JSON.stringify({
+            name: "Bodyweight Cardio Finisher",
+            sets: "3x (45s work / 15s rest)",
+            alt: ["Burpees", "Shadow boxing", "Mountain Climbers"]
+          })));
+        }
+      } else {
+        exercises.unshift({
+          name: "Treadmill Warm-up",
+          sets: "10 min",
+          alt: ["Bike", "Rowing", "Walk uphill"]
+        });
+        const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+        if (!isLegDay) {
+          exercises.push({
+            name: "Post-Workout Cardio",
+            sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+            alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+          });
+        }
+      }
+    });
   }
   enforceUniqueExercises(currentPlan);
   renderPlan(currentPlan, adjustedFreq, formData);
