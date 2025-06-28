@@ -1,29 +1,12 @@
 
+import trainingDataGym from './trainingData.js';
+import trainingDataCalisthenics from './trainingDataCalisthenics.js';
+import conditioningFrequencies from './conditioningFrequencies.js';
+
+let trainingData;
+
 // === conditioningFrequencies.js loader ===
 let currentPlan = null;
-function loadConditioningData() {
-return new Promise((resolve, reject) => {
-if (window.conditioningFrequencies) {
-resolve();
-return;
-}
-
-const script = document.createElement('script');
-script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-script.onload = () => {
-if (window.conditioningFrequencies) {
-console.log("✅ Conditioning data loaded");
-resolve();
-} else {
-console.error("❌ Conditioning data not available after script load");
-reject("Conditioning data not found after script load");
-}
-};
-script.onerror = () => reject("❌ Failed to load conditioning data script");
-
-document.head.appendChild(script);
-});
-}
 
 // Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
@@ -156,15 +139,7 @@ document.head.appendChild(script);
 });
 }
 
-// Load all data early to avoid second-load issues
-window.addEventListener("DOMContentLoaded", async () => {
-try {
-await loadConditioningData();
-console.log("✅ Conditioning data preloaded");
-} catch (err) {
-console.error("❌ Preloading error:", err);
-}
-});
+// Data is imported statically so no preloading is required
 
 function renderPlan(plan, freq, formData) {
 const container = document.getElementById('training-container');
@@ -255,62 +230,45 @@ email: document.getElementById('email').value,
 generateTrainingPlan(formData);
 });
 
-window.generateTrainingPlan = async function (formData) {
-const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
+window.generateTrainingPlan = function (formData) {
+  const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
-if (formData.goal === "Improve conditioning") {
-await loadConditioningData();
-const equipmentMap = {
-  gym: "gym",
-  home: "bodyweight"
-};
-formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
-const basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
-
-if (!basePlan) {
-alert("⚠️ Conditioning plan not found");
-return;
-}
-currentPlan = JSON.parse(JSON.stringify(basePlan));
-extendConditioningAlternatives(currentPlan);
-enforceUniqueExercises(currentPlan);
-renderPlan(currentPlan, frequencyKey, formData);
-} else {
-await loadTrainingData(formData.goal);
-const adjustedFreq = formData.frequency === "5plus" ? "5+" : formData.frequency;
-
-let basePlan;
-if (formData.goal === "Get stronger") {
-basePlan = window.trainingDataStrong?.[adjustedFreq];
-} else {
-basePlan = window.trainingDataGeneral?.[adjustedFreq];
-}
-
-if (!basePlan) {
-alert("❌ Training plan not found for frequency: " + adjustedFreq);
-return;
-}
-currentPlan = JSON.parse(JSON.stringify(basePlan));
-
-  if (formData.goal === "Lose fat") {
-Object.entries(currentPlan).forEach(([day, exercises]) => {
-exercises.unshift({
-name: "Treadmill Warm-up",
-sets: "10 min",
-alt: ["Bike", "Rowing", "Walk uphill"]
-});
-const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
-if (!isLegDay) {
-exercises.push({
-name: "Post-Workout Cardio",
-sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
-alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
-});
-}
-});
+  if (formData.goal === 'improve') {
+    trainingData = conditioningFrequencies[formData.equipment];
+  } else {
+    trainingData = (formData.equipment === 'gym') ? trainingDataGym : trainingDataCalisthenics;
   }
-  enforceUniqueExercises(currentPlan);
-  renderPlan(currentPlan, adjustedFreq, formData);
+
+  const basePlan = trainingData?.[frequencyKey];
+
+if (!basePlan) {
+    alert("⚠️ Training plan not found for frequency: " + frequencyKey);
+    return;
+  }
+
+currentPlan = JSON.parse(JSON.stringify(basePlan));
+
+  if (formData.goal === 'improve') {
+    extendConditioningAlternatives(currentPlan);
+  } else if (formData.goal === 'fatloss') {
+    Object.entries(currentPlan).forEach(([day, exercises]) => {
+      exercises.unshift({
+        name: "Treadmill Warm-up",
+        sets: "10 min",
+        alt: ["Bike", "Rowing", "Walk uphill"]
+      });
+      const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+      if (!isLegDay) {
+        exercises.push({
+          name: "Post-Workout Cardio",
+          sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+          alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+        });
+      }
+    });
+  }
+  
+    enforceUniqueExercises(currentPlan);
+    renderPlan(currentPlan, frequencyKey, formData);
 }
-};
 
