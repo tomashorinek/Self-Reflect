@@ -1,9 +1,8 @@
 
 import trainingDataGym from './trainingData.js';
 import trainingDataCalisthenics from './trainingDataCalisthenics.js';
+import trainingDataStrong from './trainingDataStrong.js'; // if needed
 import conditioningFrequencies from './conditioningFrequencies.js';
-
-let trainingData;
 
 // === conditioningFrequencies.js loader ===
 let currentPlan = null;
@@ -232,43 +231,54 @@ generateTrainingPlan(formData);
 
 window.generateTrainingPlan = function (formData) {
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
+  if (formData.goal === 'Lose fat') formData.goal = 'fatloss';
+  if (formData.goal === 'Improve conditioning') formData.goal = 'improve';
 
+  let basePlan;
   if (formData.goal === 'improve') {
-    trainingData = conditioningFrequencies[formData.equipment];
-  } else {
-    trainingData = (formData.equipment === 'gym') ? trainingDataGym : trainingDataCalisthenics;
-  }
 
-  const basePlan = trainingData?.[frequencyKey];
-
-if (!basePlan) {
-    alert("⚠️ Training plan not found for frequency: " + frequencyKey);
-    return;
-  }
-
-currentPlan = JSON.parse(JSON.stringify(basePlan));
-
-  if (formData.goal === 'improve') {
+      basePlan = conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+    if (!basePlan) {
+      alert("⚠️ Conditioning plan not found");
+      return;
+    }
+    currentPlan = JSON.parse(JSON.stringify(basePlan));
     extendConditioningAlternatives(currentPlan);
-  } else if (formData.goal === 'fatloss') {
-    Object.entries(currentPlan).forEach(([day, exercises]) => {
-      exercises.unshift({
-        name: "Treadmill Warm-up",
-        sets: "10 min",
-        alt: ["Bike", "Rowing", "Walk uphill"]
-      });
-      const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
-      if (!isLegDay) {
-        exercises.push({
-          name: "Post-Workout Cardio",
-          sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
-          alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+  } else {
+   const trainingData = (formData.goal === 'Get stronger')
+      ? trainingDataStrong
+      : (formData.equipment === 'gym' ? trainingDataGym : trainingDataCalisthenics);
+    basePlan = trainingData?.[formData.goal]?.[frequencyKey] || trainingData?.[frequencyKey];
+
+    if (!basePlan) {
+      alert("⚠️ Training plan not found for goal/frequency: " + formData.goal + "/" + frequencyKey);
+      return;
+    }
+ 
+      currentPlan = JSON.parse(JSON.stringify(basePlan));
+      
+ // Optional: only apply warm-up and post-cardio if it's gym-based plan
+    if (formData.goal === 'fatloss' && formData.equipment === 'gym') {
+      Object.entries(currentPlan).forEach(([day, exercises]) => {
+        exercises.unshift({
+          name: "Treadmill Warm-up",
+          sets: "10 min",
+          alt: ["Bike", "Rowing", "Walk uphill"]
         });
-      }
-    });
+
+const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
+        if (!isLegDay) {
+          exercises.push({
+            name: "Post-Workout Cardio",
+            sets: "3x (5 min 120–140 bpm, 1 min >160 bpm)",
+            alt: ["Bike intervals", "Rowing sprints", "Shadow boxing"]
+          });
+        }
+      });
+     }
   }
   
-    enforceUniqueExercises(currentPlan);
-    renderPlan(currentPlan, frequencyKey, formData);
+  enforceUniqueExercises(currentPlan);
+  renderPlan(currentPlan, frequencyKey, formData);
 }
 
