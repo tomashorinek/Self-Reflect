@@ -38,7 +38,7 @@ const trainingDataCalisthenics = {
     "Thursday": [
       { name: "Push-ups", sets: "3x12", alt: ["Incline Push-ups", "Kneeling Push-ups"] },
       { name: "Resistance Band Rows", sets: "3x12", alt: ["Towel Rows", "Table Rows"] },
-      { name: "Wall Pike Push-ups", sets: "3x10", alt: ["Pike Push-ups", "Shoulder Press with Band"] },
+      { name: "Pull UP home bar", sets: "3x10", alt: ["negative pullup", "Home-made lat pulldown"] },
       { name: "Incline Backpack Press", sets: "3x10", alt: ["Push-ups", "Wall Push-ups"] },
       { name: "Chair Dips", sets: "3x10", alt: ["Close Push-ups", "Band Triceps Extensions"] },
       { name: "Plank Variations", sets: "2x40s", alt: ["Side Plank", "Plank with Reach"] }
@@ -47,7 +47,7 @@ const trainingDataCalisthenics = {
       { name: "Step-ups", sets: "3x10/leg", alt: ["Split Squats", "Chair Squats"] },
       { name: "Backpack Romanian Deadlifts", sets: "3x10-12", alt: ["Good Mornings", "Single Leg Deadlift"] },
       { name: "Glute Bridge", sets: "3x15", alt: ["Single Leg Glute Bridge", "Hip Thrust on Couch"] },
-      { name: "Wall Sit + Backpack", sets: "3x30s", alt: ["Wall Sit", "Split Squats"] },
+      { name: "loaded backpack squats", sets: "3x30s", alt: ["bodyweight squats", "Split Squats"] },
       { name: "Calf Raises (Step/Edge)", sets: "3x20", alt: ["Single Leg Calf Raise", "Wall Calf Push"] },
       { name: "Leg Raises + Plank", sets: "2x (15 reps + 45s)", alt: ["Mountain Climbers", "Hollow Hold"] }
     ]
