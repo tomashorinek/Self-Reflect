@@ -177,3 +177,4 @@ const trainingDataCalisthenics = {
   }
 };
 
+export default trainingDataCalisthenics;
