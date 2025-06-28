@@ -229,7 +229,7 @@ email: document.getElementById('email').value,
 generateTrainingPlan(formData);
 });
 
-window.generateTrainingPlan = function (formData) {
+window.generateTrainingPlan = async function (formData) {
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
   if (formData.goal === 'Lose fat') formData.goal = 'fatloss';
   if (formData.goal === 'Improve conditioning') formData.goal = 'improve';
@@ -245,10 +245,16 @@ window.generateTrainingPlan = function (formData) {
     currentPlan = JSON.parse(JSON.stringify(basePlan));
     extendConditioningAlternatives(currentPlan);
   } else {
-   const trainingData = (formData.goal === 'Get stronger')
+  let dataSource = (formData.goal === 'Get stronger')
       ? trainingDataStrong
       : (formData.equipment === 'gym' ? trainingDataGym : trainingDataCalisthenics);
-    basePlan = trainingData?.[formData.goal]?.[frequencyKey] || trainingData?.[frequencyKey];
+   
+    if (!dataSource) {
+      await loadTrainingData(formData.goal);
+      dataSource = window[(formData.goal === 'Get stronger') ? 'trainingDataStrong' : 'trainingDataGeneral'];
+    }
+
+    basePlan = dataSource?.[formData.goal]?.[frequencyKey] || dataSource?.[frequencyKey];
 
     if (!basePlan) {
       alert("⚠️ Training plan not found for goal/frequency: " + formData.goal + "/" + frequencyKey);
