@@ -300,7 +300,12 @@ const equipmentMap = {
   home: "bodyweight"
 };
 formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
-const basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+let basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+
+// If a frequency entry is just an array of exercises, wrap it in a single day
+if (Array.isArray(basePlan)) {
+  basePlan = { "Full Body": basePlan };
+}
 
 if (!basePlan) {
   console.warn("⚠️ Conditioning plan undefined for", formData.equipment, frequencyKey);
