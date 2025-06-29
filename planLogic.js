@@ -338,16 +338,16 @@ currentPlan = JSON.parse(JSON.stringify(basePlan));
 Object.entries(currentPlan).forEach(([day, exercises]) => {
       if (formData.equipment === "home") {
         exercises.unshift(JSON.parse(JSON.stringify({
-          name: "Bodyweight Warm-up",
-          sets: "3 min light jumping",
-          alt: ["Marching", "Jumping Jacks"]
+          name: "fast walking 10-15minutes",
+          sets: "light effort (still comfortable, can talk)",
+          alt: ["uphill walking 5minutes", "cycling 10-15 minutes"]
         })));
         const isLegDay = day.toLowerCase().includes("leg") || day.toLowerCase().includes("lower");
         if (!isLegDay) {
           exercises.push(JSON.parse(JSON.stringify({
-            name: "Bodyweight Cardio Finisher",
-            sets: "3x (45s work / 15s rest)",
-            alt: ["Burpees", "Shadow boxing", "Mountain Climbers"]
+            name: " uphill walking",
+            sets: "20-30 minutes moderate intensity",
+            alt: ["fast walking", "Shadow boxing", "walking up the stairs"]
           })));
         }
       } else {
