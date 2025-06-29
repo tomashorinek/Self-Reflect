@@ -131,8 +131,11 @@ if (equipment === 'home') {
   globalName = 'trainingDataStrong';
   src = 'https://www.webbyfe.com/trainingData_strong.js';
 } else {
-  globalName = 'trainingDataGeneral';
-  src = 'https://www.webbyfe.com/trainingData.js';
+  // Build muscle or Lose fat with gym access
+  globalName = 'trainingDataGym';
+  modulePath = './trainingData.js';
+  useScript = false;
+  src = 'https://www.webbyfe.com/trainingData.js'; // fallback if needed
 }
 
 if (window[globalName]) {
@@ -310,7 +313,7 @@ renderPlan(currentPlan, frequencyKey, formData);
   } else if (formData.goal === "Get stronger") {
     basePlan = window.trainingDataStrong?.[adjustedFreq];
   } else {
-    basePlan = window.trainingDataGeneral?.[adjustedFreq];
+   basePlan = window.trainingDataGym?.[adjustedFreq];
   }
 
 if (!basePlan) {
