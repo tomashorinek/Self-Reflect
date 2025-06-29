@@ -10,14 +10,25 @@ return;
 
 const script = document.createElement('script');
 script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-script.onload = () => {
-if (window.conditioningFrequencies) {
-console.log("✅ Conditioning data loaded");
-resolve();
-} else {
-console.error("❌ Conditioning data not available after script load");
-reject("Conditioning data not found after script load");
-}
+script.onload = async () => {
+  try {
+    if (window.conditioningFrequencies) {
+      console.log("✅ Conditioning loaded", window.conditioningFrequencies);
+      resolve();
+      return;
+    }
+    if (window.loadConditioningData) {
+      await window.loadConditioningData();
+      console.log("✅ Conditioning loaded", window.conditioningFrequencies);
+      resolve();
+    } else {
+      console.error("❌ Conditioning data not available after script load");
+      reject("Conditioning data not found after script load");
+    }
+  } catch (err) {
+    console.error("❌ Error initializing conditioning data", err);
+    reject(err);
+  }
 };
 script.onerror = () => reject("❌ Failed to load conditioning data script");
 
@@ -292,8 +303,9 @@ formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
 const basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
 
 if (!basePlan) {
-alert("⚠️ Conditioning plan not found");
-return;
+  console.warn("⚠️ Conditioning plan undefined for", formData.equipment, frequencyKey);
+  alert("⚠️ Conditioning plan not found");
+  return;
 }
 currentPlan = JSON.parse(JSON.stringify(basePlan));
 extendConditioningAlternatives(currentPlan);
