@@ -173,12 +173,26 @@ const loseFatHome = {
 trainingDataCalisthenics.fatloss = loseFatHome;
 console.log("✅ Calisthenics Data Loaded:", trainingDataCalisthenics);
 Object.keys(trainingDataCalisthenics).forEach(freq => {
-  Object.keys(trainingDataCalisthenics[freq]).forEach(day => {
-    trainingDataCalisthenics[freq][day].forEach(ex => {
-      if (!ex.name || !ex.sets) {
-        console.warn("⚠️ Missing exercise data:", ex);
-      }
-    });
+    const days = trainingDataCalisthenics[freq];
+  Object.keys(days).forEach(day => {
+    const entries = days[day];
+    if (Array.isArray(entries)) {
+      entries.forEach(ex => {
+        if (!ex.name || !ex.sets) {
+          console.warn("⚠️ Missing exercise data:", ex);
+        }
+      });
+    } else if (entries && typeof entries === 'object') {
+      Object.values(entries).forEach(arr => {
+        if (Array.isArray(arr)) {
+          arr.forEach(ex => {
+            if (!ex.name || !ex.sets) {
+              console.warn("⚠️ Missing exercise data:", ex);
+            }
+          });
+        }
+      });
+    }
   });
 });
 export default trainingDataCalisthenics;
