@@ -47,6 +47,10 @@
       border-radius: 6px;
       cursor: pointer;
     }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .output {
       max-width: 800px;
       margin: 2rem auto;
@@ -76,6 +80,11 @@
       color: #ff9900;
       cursor: pointer;
     }
+    #statusMessage { /* Nový styl pro zprávy o stavu */
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -87,7 +96,7 @@
       <option value="Lose fat">Lose fat</option>
       <option value="Get stronger">Get stronger</option>
       <option value="Improve conditioning">Improve conditioning</option>
-    </select>
+    </select><br>
 
     <label for="frequency">How many days per week can you train?</label>
     <select id="frequency" required>
@@ -96,13 +105,13 @@
       <option value="3-4">3–4</option>
       <option value="5">5</option>
       <option value="5plus">5+</option>
-    </select>
+    </select><br>
 
    <label for="equipment">Select Equipment Access:</label>
     <select id="equipment" name="equipment">
       <option value="gym">Gym Access</option>
       <option value="home">Home Training</option>
-    </select>
+    </select><br>
 
     <label for="experience">Your training experience level?</label>
     <select id="experience">
@@ -110,38 +119,102 @@
       <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
        <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
        <option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
-     </select>
+     </select><br>
  
      <label for="injuries">Any injuries or health issues?</label>
-     <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+     <textarea id="injuries" placeholder="If yes, specify..."></textarea><br>
  
      <label for="fixed">Do you want a fixed weekly routine?</label>
      <select id="fixed">
        <option value="Yes">Yes</option>
        <option value="No">No</option>
-     </select>
+     </select><br>
  
      <label for="email">Where should we send your plan?</label>
-     <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
+     <input type="email" id="email" placeholder="e.g. you@selftracker.com" required /><br>
  
-     <button type="submit">Generate My Plan</button>
-   </form>
+     <button type="submit">Generate My Plan</button><br>
+   </form><br>
  
     <div class="output" id="outputBox" style="display:none">
     <h2>Your Training Plan</h2>
+    <textarea id="trainingPlanContent" rows="20" cols="80" style="width: 100%; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 6px; padding: 0.5rem; box-sizing: border-box; margin-bottom: 1rem;"></textarea>
+    
     <div id="training-container"></div>
-    <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button>
-  </div>
+    <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button><br>
+    <div id="statusMessage" style="color: yellow; margin-top: 20px;"></div> </div>
  
-  <!-- ⚠️ přidáno správné verzování kvůli cache -->
   <script type="module" src="planLogic.js?v=100"></script>
   <script>
-    function createLogbookAndGo() {
-      window.location.href = "/training-guide.html";
-    }
+    // URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
+    const appsScriptWebAppUrl = "ZDE_VLOZTE_URL_VAŠÍ_APPS_SCRIPT_WEB_APLIKACE"; // Např. https://script.google.com/macros/s/AKfycb.../exec
 
-    document.getElementById('exportPlanBtn')
-      .addEventListener('click', createLogbookAndGo);
+    // URL vaší cílové stránky (té s videi a popisem)
+    const targetPageUrl = "VASE_URL_K_CILOVE_STRANCE_S_VIDEI.html"; // Např. /training-guide.html nebo celá adresa
+
+    const exportPlanBtn = document.getElementById('exportPlanBtn');
+    const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán
+    const statusMessage = document.getElementById('statusMessage');
+
+    exportPlanBtn.addEventListener('click', async () => {
+        // Získání textu tréninkového plánu
+        const planText = trainingPlanContentElement.value.trim();
+
+        if (!planText) {
+            statusMessage.textContent = 'Please generate or enter a training plan first.';
+            statusMessage.style.color = 'red';
+            return;
+        }
+
+        statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
+        statusMessage.style.color = 'yellow';
+        exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
+
+        try {
+            // Příprava dat pro POST požadavek
+            const formData = new FormData();
+            formData.append('plan', planText); // Klíč 'plan' je to, co očekává Apps Script (e.parameter.plan)
+
+            // Odeslání požadavku do Apps Scriptu
+            const response = await fetch(appsScriptWebAppUrl, {
+                method: 'POST',
+                body: formData,
+                redirect: 'follow' // Důležité pro správné zpracování přesměrování
+            });
+
+            if (!response.ok) {
+                // Pokud HTTP status není OK (např. 404, 500), vyvoláme chybu
+                const errorText = await response.text();
+                throw new Error(`HTTP error! Status: ${response.status}. Detail: ${errorText}`);
+            }
+
+            // Odpověď z Apps Scriptu je URL nově vytvořeného Google Sheetu
+            const newLogbookUrl = await response.text();
+
+            // Uložíme URL do sessionStorage, aby k němu měla přístup další stránka
+            sessionStorage.setItem('logbookUrl', newLogbookUrl);
+            statusMessage.textContent = 'Logbook created! Redirecting...';
+            statusMessage.style.color = 'green';
+
+            // Přesměrujeme uživatele na cílovou stránku
+            window.location.href = targetPageUrl;
+
+        } catch (error) {
+            statusMessage.textContent = `Error: ${error.message}. Please try again.`;
+            statusMessage.style.color = 'red';
+            console.error('Error in plan generation process:', error);
+        } finally {
+            exportPlanBtn.disabled = false; // Znovu povolte tlačítko (i po chybě)
+        }
+    });
+
+    // Optional: Log, co je v training-container, pokud ho také chceme posílat nebo použít
+    // Pokud se generovaný plán objeví v div#training-container a má se odtud brát,
+    // pak je potřeba upravit `const planText = trainingPlanContentElement.value.trim();` na něco jako:
+    // const planText = document.getElementById('training-container').innerText.trim();
+    // A případně zkopírovat obsah z training-container do trainingPlanContentElement.value
+    // aby uživatel mohl text ještě upravit před odesláním.
+    // Prozatím předpokládáme, že uživatel upraví/vidí text přímo v textarea#trainingPlanContent.
   </script>
 </body>
 </html>
