@@ -129,10 +129,61 @@
  
    <div class="output" id="outputBox" style="display:none">
      <h2>Your Training Plan</h2>
-     <div id="training-container"></div>
-   </div>
+      <div id="training-container"></div>
+    <button id="continueBtn" style="display:none">Continue with this plan</button>
+  </div>
  
-   <!-- ⚠️ přidáno správné verzování kvůli cache -->
-   <script type="module" src="planLogic.js?v=100"></script>
+  <!-- ⚠️ přidáno správné verzování kvůli cache -->
+  <script type="module" src="planLogic.js?v=100"></script>
+  <script>
+    function getFinalPlan() {
+      const container = document.getElementById('training-container');
+      if (!container) return '';
+      let text = '';
+      container.querySelectorAll('.day').forEach(day => {
+        const dayName = day.querySelector('h3').textContent.trim();
+        text += dayName + '\n';
+        day.querySelectorAll('.exercise').forEach(ex => {
+          const line = ex.querySelector('div').innerText.split('\n')[0];
+          text += '  ' + line.trim() + '\n';
+        });
+        text += '\n';
+      });
+      return text;
+    }
+
+    async function exportPlan() {
+      const plan = getFinalPlan();
+      if (!plan) {
+        alert('Training plan is empty.');
+        return;
+      }
+      try {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        const data = await res.json();
+        if (data.url) {
+          sessionStorage.setItem('logbookUrl', data.url);
+          window.location.href = 'training-guide.html';
+        } else {
+          alert('Unexpected response from server.');
+        }
+      } catch (err) {
+        console.error('Export failed', err);
+        alert('Failed to export training plan.');
+      }
+    }
+
+    document.getElementById('trackerForm').addEventListener('submit', () => {
+      setTimeout(() => {
+        document.getElementById('continueBtn').style.display = 'block';
+      }, 400);
+    });
+
+    document.getElementById('continueBtn').addEventListener('click', exportPlan);
+  </script>
 </body>
 </html>
