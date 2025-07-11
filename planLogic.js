@@ -202,75 +202,78 @@ console.error("❌ Preloading error:", err);
 });
 
 function renderPlan(plan, freq, formData) {
-const container = document.getElementById('training-container');
-if (!container) {
-console.error("❌ Container #training-container not found in DOM.");
-return;
-}
-const outputBox = document.getElementById("outputBox");
-if (outputBox) outputBox.style.display = "block";
-container.innerHTML = '';
+  const container = document.getElementById('training-container');
+  if (!container) {
+    console.error("❌ Container #training-container not found in DOM.");
+    return;
+  }
+  const outputBox = document.getElementById("outputBox");
+  if (outputBox) outputBox.style.display = "block";
+  container.innerHTML = ''; // Vymaže předchozí obsah
 
-for (const [day, exercises] of Object.entries(plan)) {
-exercises.forEach(ex => {
-if (!ex.alt) ex.alt = [];
-});
+  for (const [day, exercises] of Object.entries(plan)) {
+    exercises.forEach(ex => {
+      if (!ex.alt) ex.alt = [];
+    });
 
-const dayDiv = document.createElement('div');
-dayDiv.className = 'day';
-dayDiv.innerHTML = `<h3>${day}</h3>`;
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.innerHTML = `<h3>${day}</h3>`;
 
-const list = document.createElement('div');
-list.className = 'exercise-list';
+    const list = document.createElement('div');
+    list.className = 'exercise-list';
 
-exercises.forEach((exercise, index) => {
-const item = document.createElement('div');
-item.className = 'exercise';
-item.setAttribute('draggable', true);
-item.innerHTML = `
-<div>
-<strong>${exercise.name}</strong> – ${exercise.sets}<br>
-<span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span>
-</div>
-<span class="alt-button" data-day="${day}" data-index="${index}">🔁</span>
-`;
+    exercises.forEach((exercise, index) => {
+      const item = document.createElement('div');
+      item.className = 'exercise';
+      item.setAttribute('draggable', true);
+      item.innerHTML = `
+        <div>
+          <strong>${exercise.name}</strong> – ${exercise.sets}<br><br><span class="alt-list">Alt: ${exercise.alt?.join(", ") || "None"}</span><br>
+        </div>
+        <span class="alt-button" data-day="${day}" data-index="${index}">🔁</span>
+      `;
 
-item.addEventListener('dragstart', (e) => {
-e.dataTransfer.setData('text/plain', `${day}|${index}`);
-});
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', `${day}|${index}`);
+      });
 
-list.appendChild(item);
-});
+      list.appendChild(item);
+    });
 
-new Sortable(list, {
-animation: 150,
-ghostClass: 'sortable-ghost',
-onEnd: (evt) => {
-const [removed] = plan[day].splice(evt.oldIndex, 1);
-plan[day].splice(evt.newIndex, 0, removed);
-renderPlan(plan, freq, formData);
-}
-});
+    new Sortable(list, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      onEnd: (evt) => {
+        const [removed] = plan[day].splice(evt.oldIndex, 1);
+        plan[day].splice(evt.newIndex, 0, removed);
+        renderPlan(plan, freq, formData); // Volá renderPlan znovu po přetažení
+      }
+    });
 
-dayDiv.appendChild(list);
-container.appendChild(dayDiv);
-}
+    dayDiv.appendChild(list);
+    container.appendChild(dayDiv);
+  }
 
-document.querySelectorAll('.alt-button').forEach(btn => {
-btn.setAttribute('title', 'switch for alternative');
-btn.addEventListener('click', () => {
-const day = btn.getAttribute('data-day');
-const index = parseInt(btn.getAttribute('data-index'));
-const exercises = plan[day];
-const current = exercises[index];
-if (current.alt && current.alt.length > 0) {
-const next = current.alt.shift();
-current.alt.push(current.name);
-current.name = next;
-renderPlan(plan, freq, formData);
-}
-});
-});
+  document.querySelectorAll('.alt-button').forEach(btn => {
+    btn.setAttribute('title', 'switch for alternative');
+    btn.addEventListener('click', () => {
+      const day = btn.getAttribute('data-day');
+      const index = parseInt(btn.getAttribute('data-index'));
+      const exercises = plan[day];
+      const current = exercises[index];
+      if (current.alt && current.alt.length > 0) {
+        const next = current.alt.shift();
+        current.alt.push(current.name);
+        current.name = next;
+        renderPlan(plan, freq, formData); // Volá renderPlan znovu po výměně
+      }
+    });
+  });
+
+  // --- ZDE PŘIDEJTE TENTO ŘÁDEK ---
+  populateTrainingPlanTextarea(); // Znovu naplní textarea po každém překreslení plánu
+  // --- Konec přidaného řádku ---
 }
 
 // Handle form submission
