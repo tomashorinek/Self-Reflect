@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Guide</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+      color: white;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 2rem;
+      color: #ccc;
+    }
+    button {
+      background: #ff6600;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #error {
+      color: #ff6565;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Training Guide</h1>
+  <p>Great job generating your plan! Follow the steps below to log your workouts and keep improving.</p>
+  <p>The logbook keeps all workout days in one place so you can track progress and stay on course.</p>
+  <button id="openLogbook">Open Logbook</button>
+  <div id="error" style="display:none">Logbook URL is not available.</div>
+  <script>
+    const url = sessionStorage.getItem('logbookUrl');
+    const btn = document.getElementById('openLogbook');
+    const err = document.getElementById('error');
+    if (!url) {
+      btn.disabled = true;
+      err.style.display = 'block';
+    }
+    btn.addEventListener('click', () => {
+      if (url) window.open(url, '_blank');
+    });
+  </script>
+</body>
+</html>
