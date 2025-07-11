@@ -152,27 +152,43 @@
       return text;
     }
 
-    async function exportPlan() {
+     async function createLogbookAndGo() 
       const plan = getFinalPlan();
-      if (!plan) {
+       if (!plan || !plan.trim()) {
+        console.error('No training plan to export');
         alert('Training plan is empty.');
         return;
       }
+    
+         const res = await fetch(url, {
+      const body = new URLSearchParams({ plan });
+
       try {
         const res = await fetch('https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan })
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body
         });
-        const data = await res.json();
-        if (data.url) {
-          sessionStorage.setItem('logbookUrl', data.url);
-          window.location.href = 'training-guide.html';
-        } else {
-          alert('Unexpected response from server.');
+  
+        const text = await res.text();
+        if (!res.ok) {
+          console.error('Server error:', res.status, text);
+          throw new Error('Request failed');
         }
+        
+        const logbookUrl = text.trim();
+        if (!logbookUrl) {
+          console.error('Empty response from server');
+          throw new Error('Invalid response');
+        }
+
+        sessionStorage.setItem('logbookUrl', logbookUrl);
+        window.location.href = '/training-guide';
       } catch (err) {
-        console.error('Export failed', err);
+        console.error('Failed to export training plan', err);
         alert('Failed to export training plan.');
       }
     }
@@ -183,7 +199,7 @@
       }, 400);
     });
 
-    document.getElementById('continueBtn').addEventListener('click', exportPlan);
+    document.getElementById('continueBtn').addEventListener('click', createLogbookAndGo);
   </script>
 </body>
 </html>
