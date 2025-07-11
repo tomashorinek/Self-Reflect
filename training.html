@@ -151,7 +151,7 @@
  
     <div class="output" id="outputBox" style="display:none">
     <h2>Your Training Plan</h2>
-    <textarea id="trainingPlanContent" rows="20" cols="80" readonly></textarea> 
+    <textarea id="trainingPlanContent" rows="20" cols="80"></textarea> 
     <div id="training-container"></div> 
     <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button><br>
     <div id="statusMessage"></div> </div>
@@ -188,20 +188,19 @@
             fullPlanText += dayTitle.innerText.trim() + "\n"; // Přidáme název dne (např. "Monday")
           }
 
-          // --- KLÍČOVÁ ZMĚNA ZDE: Vybereme .exercise-list a pak cvičení uvnitř něj ---
           const exerciseListContainer = dayBlock.querySelector('.exercise-list');
           if (exerciseListContainer) { // Ověříme, zda .exercise-list existuje
               const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
               exerciseBlocks.forEach(exerciseBlock => {
                 const mainExercise = exerciseBlock.querySelector('div:first-child'); // Hlavní řádek cvičení
-                const altExercise = exerciseBlock.querySelector('.alt-list'); // Alternativní cvičení
+                // const altExercise = exerciseBlock.querySelector('.alt-list'); // Alternativní cvičení - TENTO ŘÁDEK ODEBRÁN Z VÝPISU!
 
                 if (mainExercise) {
                   fullPlanText += "- " + mainExercise.innerText.trim() + "\n";
                 }
-                if (altExercise) {
-                  fullPlanText += "  " + altExercise.innerText.trim() + "\n"; // Odsazení pro alternativu
-                }
+                // if (altExercise) {
+                //   fullPlanText += "  " + altExercise.innerText.trim() + "\n"; // ODEBRÁN Z VÝPISU!
+                // }
               });
           }
           fullPlanText += "\n"; // Mezera mezi dny
@@ -223,17 +222,13 @@
       statusMessage.style.color = 'yellow';
       
       // Zde je klíčové místo pro spuštění VAŠÍ LOGIKY GENERÁTORU Z planLogic.js
-      // PŘÍKLAD: Předpokládejme, že máte funkci `generateAndDisplayPlan()` v planLogic.js
-      // A že tato funkce PŘÍMO VKLÁDÁ HTML DO `training-container`.
-      // Pokud je `planLogic.js` modul a exportuje funkce, musíte ji zde importovat a volat.
-      //
       // Následující blok je POUZE SIMULACE a měl by být nahrazen voláním VAŠEHO KÓDU.
-      // Pokud je `training-container` prázdný, vyplní ho testovacím obsahem.
-      if (trainingContainer.innerText.trim() === '' || true) { // Přidal jsem || true pro snadné testování
+      if (trainingContainer.innerText.trim() === '') { 
         trainingContainer.innerHTML = `
           <div class="day">
             <h3>Monday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Y-Raises – 3x10-12</div>
                   <div class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</div>
                   <span><button class="alt-button">🔁</button></span>
@@ -252,7 +247,8 @@
           </div>
           <div class="day">
             <h3>Tuesday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Deadlifts – 1x5</div>
                   <div class="alt-list">Alt: sumo deadlift, rack pulls</div>
                   <span><button class="alt-button">🔁</button></span>
@@ -271,14 +267,16 @@
           </div>
           <div class="day">
             <h3>Wednesday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Rest Day / Active Recovery</div>
                 </div>
             </div>
           </div>
           <div class="day">
             <h3>Thursday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Barbell Rows – 3x8-12</div>
                   <div class="alt-list">Alt: T-bar rows, cable rows</div>
                   <span><button class="alt-button">🔁</button></span>
@@ -302,7 +300,8 @@
           </div>
           <div class="day">
             <h3>Friday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Leg Press – 3x8-12</div>
                   <div class="alt-list">Alt: barbell squats, hack squat machine</div>
                   <span><button class="alt-button">🔁</button></span>
@@ -316,7 +315,8 @@
           </div>
           <div class="day">
             <h3>Saturday</h3>
-            <div class="exercise-list"> <div class="exercise">
+            <div class="exercise-list">
+                <div class="exercise">
                   <div>Push Press – 3x5</div>
                   <div class="alt-list">Alt: overhead press, dumbbell press</div>
                   <span><button class="alt-button">🔁</button></span>
@@ -324,7 +324,7 @@
                 <div class="exercise">
                   <div>Bent-Over Rows – 3x8-12</div>
                   <div class="alt-list">Alt: chest-supported rows, single-arm rows</div>
-                  <span><button class="alt-button">🔁</button>
+                  <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
           </div>
