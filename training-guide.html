@@ -41,21 +41,24 @@
 </head>
 <body>
   <h1>Your Training Guide</h1>
-   <p>Great job generating your plan! Follow the guide below to track your workouts and keep improving.</p>
+  <p>Great job generating your plan! Follow the guide below to track your workouts and keep improving.</p>
   <p>The logbook collects all of your training days in one place so you can stay consistent and see progress.</p>
+
   <button id="openLogbook">Open Logbook</button>
-  <div id="error" style="display:none">Logbook URL is not available.</div>
+  <div id="error" style="display:none">⚠️ Logbook URL was not found. Opening fallback template.</div>
+
   <script>
-   const fallback = "https://docs.google.com/spreadsheets/d/TV%C3%89_ID/edit";
-    const url = sessionStorage.getItem('logbookUrl') || fallback;
+    const fallback = "https://docs.google.com/spreadsheets/d/1AbCDefGhIjKlMnOpQrSTUVwxYz123456/edit"; // replace with your actual ID
+    const storedUrl = sessionStorage.getItem('logbookUrl');
+    const url = storedUrl || fallback;
 
     const btn = document.getElementById('openLogbook');
     const err = document.getElementById('error');
-  
-    if (!sessionStorage.getItem('logbookUrl')) {
+
+    if (!storedUrl) {
       err.style.display = 'block';
     }
-    
+
     btn.addEventListener('click', () => {
       window.open(url, '_blank');
     });
