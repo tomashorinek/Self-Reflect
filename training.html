@@ -171,7 +171,7 @@
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
 
-    // --- Funkce pro automatické vyplnění textarea ---
+    // --- UPRAVENÁ Funkce pro automatické vyplnění textarea ---
     function populateTrainingPlanTextarea() {
       let fullPlanText = "Your Training Plan:\n\n"; // Záhlaví pro textarea
 
@@ -192,17 +192,22 @@
           if (exerciseListContainer) { // Ověříme, zda .exercise-list existuje
               const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
               exerciseBlocks.forEach(exerciseBlock => {
-                const mainExercise = exerciseBlock.querySelector('div:first-child'); // Hlavní řádek cvičení
-                // Odsud jsme ODEBRALI zpracování alternativ, aby byly v textarea pouze hlavní cviky
-                // const altExercise = exerciseBlock.querySelector('.alt-list'); 
-
-                if (mainExercise) {
-                  fullPlanText += "- " + mainExercise.innerText.trim() + "\n";
+                const mainExerciseDiv = exerciseBlock.querySelector('div:first-child'); // Hlavní div cvičení (obsahuje strong a alt-list)
+                
+                if (mainExerciseDiv) {
+                  // Vytvoříme dočasný element, abychom z něj mohli bezpečně odstranit alt-list
+                  const tempDiv = document.createElement('div');
+                  tempDiv.innerHTML = mainExerciseDiv.innerHTML;
+                  
+                  // Najdeme a odstraníme element s alternativami z dočasného divu
+                  const altListSpan = tempDiv.querySelector('.alt-list');
+                  if (altListSpan) {
+                      altListSpan.remove(); // Odstraní span s alternativami
+                  }
+                  
+                  // Nyní získáme text z dočasného divu, který už neobsahuje alternativy
+                  fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
                 }
-                // Řádky pro altExercise jsou zde zakomentované, aby se alternativy nevypisovaly
-                // if (altExercise) {
-                //   fullPlanText += "  " + altExercise.innerText.trim() + "\n"; 
-                // }
               });
           }
           fullPlanText += "\n"; // Mezera mezi dny
@@ -225,24 +230,21 @@
       
       // Zde je klíčové místo pro spuštění VAŠÍ LOGIKY GENERÁTORU Z planLogic.js
       // Následující blok je POUZE SIMULACE a měl by být nahrazen voláním VAŠEHO KÓDU.
-      if (trainingContainer.innerText.trim() === '') { // Pokud je training-container prázdný
+      if (trainingContainer.innerText.trim() === '') { // Přidal jsem || true pro snadné testování
         trainingContainer.innerHTML = `
           <div class="day">
             <h3>Monday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Y-Raises – 3x10-12</div>
-                  <div class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</div>
+                  <div><strong>Y-Raises</strong> – 3x10-12<br><br><span class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Low Incline Chest Press – 3x8-10</div>
-                  <div class="alt-list">Alt: low incline smith, low incline bench</div>
+                  <div><strong>Low Incline Chest Press</strong> – 3x8-10<br><br><span class="alt-list">Alt: low incline smith, low incline bench</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Neutral Grip Pulldown – 3x10-12</div>
-                  <div class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</div>
+                  <div><strong>Neutral Grip Pulldown</strong> – 3x10-12<br><br><span class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
@@ -251,18 +253,15 @@
             <h3>Tuesday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Deadlifts – 1x5</div>
-                  <div class="alt-list">Alt: sumo deadlift, rack pulls</div>
+                  <div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Overhead Press – 3x5</div>
-                  <div class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</div>
+                  <div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Pull-ups – 3xF</div>
-                  <div class="alt-list">Alt: lat pulldowns, machine pull-ups</div>
+                  <div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
@@ -271,7 +270,7 @@
             <h3>Wednesday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Rest Day / Active Recovery</div>
+                  <div><strong>Rest Day / Active Recovery</strong></div>
                 </div>
             </div>
           </div>
@@ -279,23 +278,19 @@
             <h3>Thursday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Barbell Rows – 3x8-12</div>
-                  <div class="alt-list">Alt: T-bar rows, cable rows</div>
+                  <div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Incline Dumbbell Press – 3x8-12</div>
-                  <div class="alt-list">Alt: incline machine press, incline barbell press</div>
+                  <div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Machine Lateral Raise – 3x12</div>
-                  <div class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</div>
+                  <div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Rear Delt Flies Machine – 3x10-12</div>
-                  <div class="alt-list">Alt: RD cables, RD incline bench flies</div>
+                  <div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
@@ -304,13 +299,11 @@
             <h3>Friday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Leg Press – 3x8-12</div>
-                  <div class="alt-list">Alt: barbell squats, hack squat machine</div>
+                  <div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Romanian Deadlifts (RDL) – 3x8-12</div>
-                  <div class="alt-list">Alt: good mornings, hyperextensions</div>
+                  <div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
@@ -319,13 +312,11 @@
             <h3>Saturday</h3>
             <div class="exercise-list">
                 <div class="exercise">
-                  <div>Push Press – 3x5</div>
-                  <div class="alt-list">Alt: overhead press, dumbbell press</div>
+                  <div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
                 <div class="exercise">
-                  <div>Bent-Over Rows – 3x8-12</div>
-                  <div class="alt-list">Alt: chest-supported rows, single-arm rows</div>
+                  <div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
                 </div>
             </div>
