@@ -160,10 +160,10 @@
   
   <script>
     // URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
-    const appsScriptWebAppUrl = "https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec"; // Např. https://script.google.com/macros/s/AKfycb.../exec
+    const appsScriptWebAppUrl = "https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec";
 
     // URL vaší cílové stránky (té s videi a popisem)
-    const targetPageUrl = "training-guide.html"; // Např. /training-guide.html nebo celá adresa
+    const targetPageUrl = "training-guide.html"; 
 
     const exportPlanBtn = document.getElementById('exportPlanBtn');
     const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán k odeslání
@@ -171,7 +171,7 @@
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
 
-    // --- Funkce pro automatické vyplnění textarea ---
+    // --- UPRAVENÁ Funkce pro automatické vyplnění textarea ---
     function populateTrainingPlanTextarea() {
       let fullPlanText = "Your Training Plan:\n\n"; // Záhlaví pro textarea
 
@@ -187,18 +187,22 @@
             fullPlanText += dayTitle.innerText.trim() + "\n"; // Přidáme název dne (např. "Monday")
           }
 
-          const exerciseBlocks = dayBlock.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
-          exerciseBlocks.forEach(exerciseBlock => {
-            const mainExercise = exerciseBlock.querySelector('div:first-child'); // Hlavní řádek cvičení
-            const altExercise = exerciseBlock.querySelector('.alt-list'); // Alternativní cvičení
+          // --- KLÍČOVÁ ZMĚNA ZDE: Vybereme .exercise-list a pak cvičení uvnitř něj ---
+          const exerciseListContainer = dayBlock.querySelector('.exercise-list');
+          if (exerciseListContainer) {
+              const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
+              exerciseBlocks.forEach(exerciseBlock => {
+                const mainExercise = exerciseBlock.querySelector('div:first-child'); // Hlavní řádek cvičení
+                const altExercise = exerciseBlock.querySelector('.alt-list'); // Alternativní cvičení
 
-            if (mainExercise) {
-              fullPlanText += "- " + mainExercise.innerText.trim() + "\n";
-            }
-            if (altExercise) {
-              fullPlanText += "  " + altExercise.innerText.trim() + "\n"; // Odsazení pro alternativu
-            }
-          });
+                if (mainExercise) {
+                  fullPlanText += "- " + mainExercise.innerText.trim() + "\n";
+                }
+                if (altExercise) {
+                  fullPlanText += "  " + altExercise.innerText.trim() + "\n"; // Odsazení pro alternativu
+                }
+              });
+          }
           fullPlanText += "\n"; // Mezera mezi dny
         });
       }
@@ -224,61 +228,103 @@
       //
       // Následující blok je POUZE SIMULACE a měl by být nahrazen voláním VAŠEHO KÓDU.
       // Pokud je `training-container` prázdný, vyplní ho testovacím obsahem.
-      if (trainingContainer.innerText.trim() === '') {
+      if (trainingContainer.innerText.trim() === '' || true) { // Přidal jsem || true pro snadné testování
         trainingContainer.innerHTML = `
           <div class="day">
             <h3>Monday</h3>
-            <div class="exercise">
-              <div>Y-Raises – 3x10-12</div>
-              <div class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</div>
-              <span><button class="alt-button">🔁</button></span>
-            </div>
-            <div class="exercise">
-              <div>Low Incline Chest Press – 3x8-10</div>
-              <div class="alt-list">Alt: low incline smith, low incline bench</div>
-              <span><button class="alt-button">🔁</button></span>
-            </div>
-            <div class="exercise">
-              <div>Neutral Grip Pulldown – 3x10-12</div>
-              <div class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</div>
-              <span><button class="alt-button">🔁</button></span>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Y-Raises – 3x10-12</div>
+                  <div class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Low Incline Chest Press – 3x8-10</div>
+                  <div class="alt-list">Alt: low incline smith, low incline bench</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Neutral Grip Pulldown – 3x10-12</div>
+                  <div class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
             </div>
           </div>
           <div class="day">
             <h3>Tuesday</h3>
-            <div class="exercise">
-              <div>Deadlifts – 1x5</div>
-              <div class="alt-list">Alt: sumo deadlift, rack pulls</div>
-              <span><button class="alt-button">🔁</button></span>
-            </div>
-            <div class="exercise">
-              <div>Overhead Press – 3x5</div>
-              <div class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</div>
-              <span><button class="alt-button">🔁</button></span>
-            </div>
-            <div class="exercise">
-              <div>Pull-ups – 3xF</div>
-              <div class="alt-list">Alt: lat pulldowns, machine pull-ups</div>
-              <span><button class="alt-button">🔁</button></span>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Deadlifts – 1x5</div>
+                  <div class="alt-list">Alt: sumo deadlift, rack pulls</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Overhead Press – 3x5</div>
+                  <div class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Pull-ups – 3xF</div>
+                  <div class="alt-list">Alt: lat pulldowns, machine pull-ups</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
             </div>
           </div>
           <div class="day">
             <h3>Wednesday</h3>
-            <div class="exercise">
-              <div>Rest Day / Active Recovery</div>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Rest Day / Active Recovery</div>
+                </div>
             </div>
           </div>
           <div class="day">
             <h3>Thursday</h3>
-            <div class="exercise">
-              <div>Barbell Rows – 3x8-12</div>
-              <div class="alt-list">Alt: T-bar rows, cable rows</div>
-              <span><button class="alt-button">🔁</button></span>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Barbell Rows – 3x8-12</div>
+                  <div class="alt-list">Alt: T-bar rows, cable rows</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Incline Dumbbell Press – 3x8-12</div>
+                  <div class="alt-list">Alt: incline machine press, incline barbell press</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Machine Lateral Raise – 3x12</div>
+                  <div class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Rear Delt Flies Machine – 3x10-12</div>
+                  <div class="alt-list">Alt: RD cables, RD incline bench flies</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
             </div>
-            <div class="exercise">
-              <div>Incline Dumbbell Press – 3x8-12</div>
-              <div class="alt-list">Alt: incline machine press, incline barbell press</div>
-              <span><button class="alt-button">🔁</button></span>
+          </div>
+          <div class="day">
+            <h3>Friday</h3>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Leg Press – 3x8-12</div>
+                  <div class="alt-list">Alt: barbell squats, hack squat machine</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Romanian Deadlifts (RDL) – 3x8-12</div>
+                  <div class="alt-list">Alt: good mornings, hyperextensions</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Saturday</h3>
+            <div class="exercise-list"> <div class="exercise">
+                  <div>Push Press – 3x5</div>
+                  <div class="alt-list">Alt: overhead press, dumbbell press</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div>Bent-Over Rows – 3x8-12</div>
+                  <div class="alt-list">Alt: chest-supported rows, single-arm rows</div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
             </div>
           </div>
         `;
