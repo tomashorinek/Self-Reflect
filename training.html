@@ -173,35 +173,123 @@
 
     // --- Funkce pro automatické vyplnění textarea ---
     function populateTrainingPlanTextarea() {
-      // Získá text ze zobrazeného plánu (div#training-container)
-      const generatedPlanText = trainingContainer.innerText.trim();
+      let fullPlanText = "Your Training Plan:\n\n"; // Záhlaví pro textarea
+
+      // Získáme všechny bloky dní (.day)
+      const dayBlocks = trainingContainer.querySelectorAll('.day');
+
+      if (dayBlocks.length === 0) {
+        fullPlanText += "No training plan generated yet. Please use the generator above.";
+      } else {
+        dayBlocks.forEach(dayBlock => {
+          const dayTitle = dayBlock.querySelector('h3'); // Např. <h3>Monday</h3>
+          if (dayTitle) {
+            fullPlanText += dayTitle.innerText.trim() + "\n"; // Přidáme název dne (např. "Monday")
+          }
+
+          const exerciseBlocks = dayBlock.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
+          exerciseBlocks.forEach(exerciseBlock => {
+            const mainExercise = exerciseBlock.querySelector('div:first-child'); // Hlavní řádek cvičení
+            const altExercise = exerciseBlock.querySelector('.alt-list'); // Alternativní cvičení
+
+            if (mainExercise) {
+              fullPlanText += "- " + mainExercise.innerText.trim() + "\n";
+            }
+            if (altExercise) {
+              fullPlanText += "  " + altExercise.innerText.trim() + "\n"; // Odsazení pro alternativu
+            }
+          });
+          fullPlanText += "\n"; // Mezera mezi dny
+        });
+      }
       
-      // Vloží ho do textarea, aby ho mohl uživatel případně upravit a my ho odeslali
-      trainingPlanContentElement.value = generatedPlanText;
+      // Vloží sestavený text do textarea
+      trainingPlanContentElement.value = fullPlanText;
       console.log('Text tréninkového plánu automaticky vyplněn do textarea.');
       
-      // Zde můžete vynutit zobrazení outputBoxu, pokud ještě není viditelný
+      // Zobrazit outputBox, pokud už není viditelný
       outputBox.style.display = 'block'; 
     }
 
     // --- Posluchač pro GENERATE MY PLAN tlačítko ---
     trackerForm.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Zabraňte výchozímu odeslání formuláře (jinak se stránka reloadne)
-
-      // Zde byste měl mít logiku pro volání vašeho generátoru plánu z planLogic.js
-      // a jeho zobrazení do training-container.
-      // Příklad:
-      // await generatePlanFromPlanLogic(); // Předpokládaná funkce z planLogic.js
+      event.preventDefault(); // Zabraňte výchozímu odeslání formuláře
+      statusMessage.textContent = 'Generating your plan...';
+      statusMessage.style.color = 'yellow';
       
-      // Zde je simulace, že plán byl vygenerován a zobrazen v training-container
-      // TOTO MUSÍTE NAHRADIT VAŠÍ SKUTEČNOU LOGIKOU GENERÁTORU Z planLogic.js
-      if (trainingContainer.innerText.trim() === '') { // Pokud je training-container prázdný
-        trainingContainer.innerText = "Monday:\n- Squats 3x5\n- Bench Press 3x5\n- Rows 3x5\n\nTuesday:\n- Deadlifts 1x5\n- Overhead Press 3x5\n- Pull-ups 3xF";
+      // Zde je klíčové místo pro spuštění VAŠÍ LOGIKY GENERÁTORU Z planLogic.js
+      // PŘÍKLAD: Předpokládejme, že máte funkci `generateAndDisplayPlan()` v planLogic.js
+      // A že tato funkce PŘÍMO VKLÁDÁ HTML DO `training-container`.
+      // Pokud je `planLogic.js` modul a exportuje funkce, musíte ji zde importovat a volat.
+      //
+      // Následující blok je POUZE SIMULACE a měl by být nahrazen voláním VAŠEHO KÓDU.
+      // Pokud je `training-container` prázdný, vyplní ho testovacím obsahem.
+      if (trainingContainer.innerText.trim() === '') {
+        trainingContainer.innerHTML = `
+          <div class="day">
+            <h3>Monday</h3>
+            <div class="exercise">
+              <div>Y-Raises – 3x10-12</div>
+              <div class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+            <div class="exercise">
+              <div>Low Incline Chest Press – 3x8-10</div>
+              <div class="alt-list">Alt: low incline smith, low incline bench</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+            <div class="exercise">
+              <div>Neutral Grip Pulldown – 3x10-12</div>
+              <div class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Tuesday</h3>
+            <div class="exercise">
+              <div>Deadlifts – 1x5</div>
+              <div class="alt-list">Alt: sumo deadlift, rack pulls</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+            <div class="exercise">
+              <div>Overhead Press – 3x5</div>
+              <div class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+            <div class="exercise">
+              <div>Pull-ups – 3xF</div>
+              <div class="alt-list">Alt: lat pulldowns, machine pull-ups</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Wednesday</h3>
+            <div class="exercise">
+              <div>Rest Day / Active Recovery</div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Thursday</h3>
+            <div class="exercise">
+              <div>Barbell Rows – 3x8-12</div>
+              <div class="alt-list">Alt: T-bar rows, cable rows</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+            <div class="exercise">
+              <div>Incline Dumbbell Press – 3x8-12</div>
+              <div class="alt-list">Alt: incline machine press, incline barbell press</div>
+              <span><button class="alt-button">🔁</button></span>
+            </div>
+          </div>
+        `;
         console.log('Simulace generování plánu do training-container.');
       }
       
-      // Po vygenerování a zobrazení plánu (ať už reálně nebo simulovaně):
-      populateTrainingPlanTextarea(); // Automaticky vyplňte textarea
+      // Po dokončení generování plánu a jeho zobrazení v training-container:
+      // Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
+      populateTrainingPlanTextarea(); 
+      statusMessage.textContent = 'Plan generated. You can now continue!';
+      statusMessage.style.color = 'green';
     });
 
 
