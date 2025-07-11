@@ -136,55 +136,12 @@
   <!-- ⚠️ přidáno správné verzování kvůli cache -->
   <script type="module" src="planLogic.js?v=100"></script>
   <script>
-    function getFinalPlan() {
-      const container = document.getElementById('training-container');
-      if (!container) return '';
-      let text = '';
-      container.querySelectorAll('.day').forEach(day => {
-        const dayName = day.querySelector('h3').textContent.trim();
-        text += dayName + '\n';
-        day.querySelectorAll('.exercise').forEach(ex => {
-          const line = ex.querySelector('div').innerText.split('\n')[0];
-          text += '  ' + line.trim() + '\n';
-        });
-        text += '\n';
-      });
-      return text;
+    function createLogbookAndGo() {
+      window.location.href = "/training-guide.html";
     }
 
-   async function createLogbookAndGo() {
-      const plan = getFinalPlan();
-       if (!plan || !plan.trim()) {
-        console.error('No training plan to export');
-        alert('Training plan is empty.');
-        return;
-      }
-      try {
-        const url = 'https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec';
-        const params = new URLSearchParams({ plan });
-        const response = await fetch(url, {
-          method: 'POST',
-          body: params
-        });
-  
-               if (!response.ok) throw new Error('Failed to export training plan');
-        const logbookUrl = await response.text();
-
-        sessionStorage.setItem('logbookUrl', logbookUrl);
-        window.location.href = '/training-guide';
-      } catch (err) {
-        alert('Failed to export training plan.');
-        console.error(err);
-
-      }
-    }
-
-       document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('exportPlanBtn');
-      if (btn) {
-        btn.addEventListener('click', createLogbookAndGo);
-      }
-    });
+    document.getElementById('exportPlanBtn')
+      .addEventListener('click', createLogbookAndGo);
   </script>
 </body>
 </html>
