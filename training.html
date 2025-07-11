@@ -58,6 +58,19 @@
       padding: 2rem;
       border-radius: 12px;
     }
+    /* Styl pro textarea, kde se zobrazí plán */
+    #trainingPlanContent {
+        width: 100%;
+        background: #2b2b2b;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        min-height: 200px; /* Aby byla vidět */
+        white-space: pre-wrap; /* Zachová formátování textu */
+    }
     .day {
       background: #1e1e1e;
       padding: 1rem;
@@ -80,7 +93,7 @@
       color: #ff9900;
       cursor: pointer;
     }
-    #statusMessage { /* Nový styl pro zprávy o stavu */
+    #statusMessage { /* Styl pro zprávy o stavu */
       text-align: center;
       margin-top: 1rem;
       font-weight: bold;
@@ -138,13 +151,13 @@
  
     <div class="output" id="outputBox" style="display:none">
     <h2>Your Training Plan</h2>
-    <textarea id="trainingPlanContent" rows="20" cols="80" style="width: 100%; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 6px; padding: 0.5rem; box-sizing: border-box; margin-bottom: 1rem;"></textarea>
-    
-    <div id="training-container"></div>
+    <textarea id="trainingPlanContent" rows="20" cols="80" readonly></textarea> 
+    <div id="training-container"></div> 
     <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button><br>
-    <div id="statusMessage" style="color: yellow; margin-top: 20px;"></div> </div>
+    <div id="statusMessage"></div> </div>
  
   <script type="module" src="planLogic.js?v=100"></script>
+  
   <script>
     // URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
     const appsScriptWebAppUrl = "ZDE_VLOZTE_URL_VAŠÍ_APPS_SCRIPT_WEB_APLIKACE"; // Např. https://script.google.com/macros/s/AKfycb.../exec
@@ -153,11 +166,47 @@
     const targetPageUrl = "VASE_URL_K_CILOVE_STRANCE_S_VIDEI.html"; // Např. /training-guide.html nebo celá adresa
 
     const exportPlanBtn = document.getElementById('exportPlanBtn');
-    const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán
-    const statusMessage = document.getElementById('statusMessage');
+    const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán k odeslání
+    const trainingContainer = document.getElementById('training-container'); // Div, kde se zobrazuje strukturovaný plán
+    const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
+    const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
 
+    // --- Funkce pro automatické vyplnění textarea ---
+    function populateTrainingPlanTextarea() {
+      // Získá text ze zobrazeného plánu (div#training-container)
+      const generatedPlanText = trainingContainer.innerText.trim();
+      
+      // Vloží ho do textarea, aby ho mohl uživatel případně upravit a my ho odeslali
+      trainingPlanContentElement.value = generatedPlanText;
+      console.log('Text tréninkového plánu automaticky vyplněn do textarea.');
+      
+      // Zde můžete vynutit zobrazení outputBoxu, pokud ještě není viditelný
+      outputBox.style.display = 'block'; 
+    }
+
+    // --- Posluchač pro GENERATE MY PLAN tlačítko ---
+    trackerForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Zabraňte výchozímu odeslání formuláře (jinak se stránka reloadne)
+
+      // Zde byste měl mít logiku pro volání vašeho generátoru plánu z planLogic.js
+      // a jeho zobrazení do training-container.
+      // Příklad:
+      // await generatePlanFromPlanLogic(); // Předpokládaná funkce z planLogic.js
+      
+      // Zde je simulace, že plán byl vygenerován a zobrazen v training-container
+      // TOTO MUSÍTE NAHRADIT VAŠÍ SKUTEČNOU LOGIKOU GENERÁTORU Z planLogic.js
+      if (trainingContainer.innerText.trim() === '') { // Pokud je training-container prázdný
+        trainingContainer.innerText = "Monday:\n- Squats 3x5\n- Bench Press 3x5\n- Rows 3x5\n\nTuesday:\n- Deadlifts 1x5\n- Overhead Press 3x5\n- Pull-ups 3xF";
+        console.log('Simulace generování plánu do training-container.');
+      }
+      
+      // Po vygenerování a zobrazení plánu (ať už reálně nebo simulovaně):
+      populateTrainingPlanTextarea(); // Automaticky vyplňte textarea
+    });
+
+
+    // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
     exportPlanBtn.addEventListener('click', async () => {
-        // Získání textu tréninkového plánu
         const planText = trainingPlanContentElement.value.trim();
 
         if (!planText) {
@@ -171,7 +220,6 @@
         exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
 
         try {
-            // Příprava dat pro POST požadavek
             const formData = new FormData();
             formData.append('plan', planText); // Klíč 'plan' je to, co očekává Apps Script (e.parameter.plan)
 
@@ -179,11 +227,10 @@
             const response = await fetch(appsScriptWebAppUrl, {
                 method: 'POST',
                 body: formData,
-                redirect: 'follow' // Důležité pro správné zpracování přesměrování
+                redirect: 'follow' 
             });
 
             if (!response.ok) {
-                // Pokud HTTP status není OK (např. 404, 500), vyvoláme chybu
                 const errorText = await response.text();
                 throw new Error(`HTTP error! Status: ${response.status}. Detail: ${errorText}`);
             }
@@ -208,13 +255,10 @@
         }
     });
 
-    // Optional: Log, co je v training-container, pokud ho také chceme posílat nebo použít
-    // Pokud se generovaný plán objeví v div#training-container a má se odtud brát,
-    // pak je potřeba upravit `const planText = trainingPlanContentElement.value.trim();` na něco jako:
-    // const planText = document.getElementById('training-container').innerText.trim();
-    // A případně zkopírovat obsah z training-container do trainingPlanContentElement.value
-    // aby uživatel mohl text ještě upravit před odesláním.
-    // Prozatím předpokládáme, že uživatel upraví/vidí text přímo v textarea#trainingPlanContent.
+    // POZNÁMKA: Abyste zajistil, že se `populateTrainingPlanTextarea()` zavolá hned po vygenerování plánu,
+    // doporučuji volat ji přímo z vaší funkce v `planLogic.js`, která vkládá obsah do `training-container`.
+    // Nebo se ujistěte, že `trackerForm` submit listener (výše) správně volá vaši logiku pro generování
+    // a po jejím dokončení volá `populateTrainingPlanTextarea()`.
   </script>
 </body>
 </html>
