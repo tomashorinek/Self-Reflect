@@ -149,6 +149,8 @@
      <label for="email">Where should we send your plan?</label>
      <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
 
+     <label for="gymName">What gym do you primarily train at?</label>
+     <input type="text" id="gymName" placeholder="e.g. Fitness Centre Relax" required />
      <button type="submit">Generate My Plan</button>
 
    </form>
@@ -175,6 +177,7 @@
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
     const statusMessage = document.getElementById('statusMessage'); // Status zpráva
+    const gymNameInput = document.getElementById('gymName'); // NOVÝ: Reference na input pro název fitka
 
     // --- Funkce pro automatické vyplnění textarea --- (Beze změny)
     function populateTrainingPlanTextarea() {
@@ -331,21 +334,30 @@
 
 
     // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
-    exportPlanBtn.addEventListener('click', async () => { // Zde je async, protože používáme await fetch
+    exportPlanBtn.addEventListener('click', async () => {
       const planText = trainingPlanContentElement.value.trim();
+      // NOVÉ: Získání názvu fitka z inputu
+      const gymName = gymNameInput.value.trim(); 
 
       if (!planText) {
         statusMessage.textContent = 'Please generate or enter a training plan first.';
         statusMessage.style.color = 'red';
         return;
       }
+      // NOVÉ: Kontrola, zda je vyplněno jméno fitka
+      if (!gymName) {
+        statusMessage.textContent = 'Please enter your Gym Name.';
+        statusMessage.style.color = 'red';
+        return;
+      }
 
       statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
       statusMessage.style.color = 'yellow';
-      exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
+      exportPlanBtn.disabled = true;
 
       const formData = new FormData();
-      formData.append('plan', planText); // Klíč musí být 'plan'
+      formData.append('plan', planText);
+      formData.append('gymName', gymName); // NOVÉ: Přidání názvu fitka do dat
 
       try {
         const response = await fetch(appsScriptWebAppUrl, {
@@ -366,14 +378,13 @@
           statusMessage.textContent = 'Error: ' + sheetUrl.substring(6);
           statusMessage.style.color = 'red';
         } else {
-          // *** KLÍČOVÁ ZMĚNA ZDE: Dynamické vytvoření odkazu a programové kliknutí ***
           const link = document.createElement('a');
           link.href = sheetUrl;
-          link.target = '_blank'; // Otevřít v nové záložce
-          link.style.display = 'none'; // Skrýt odkaz
-          document.body.appendChild(link); // Přidat do DOM
-          link.click(); // Programově kliknout na odkaz
-          document.body.removeChild(link); // Odstranit odkaz z DOM
+          link.target = '_blank';
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
           statusMessage.textContent = 'Your training plan has been saved and opened in a new tab!';
           statusMessage.style.color = 'green';
@@ -385,12 +396,10 @@
         statusMessage.textContent = 'An unexpected error occurred. Check console for details.';
         statusMessage.style.color = 'red';
       } finally {
-        exportPlanBtn.disabled = false; // Znovu povolte tlačítko bez ohledu na výsledek
+        exportPlanBtn.disabled = false;
       }
     });
 
-    // Důležité: Ujistěte se, že `populateTrainingPlanTextarea()` je volána správně
-    // z planLogic.js nebo po generování plánu.
     window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
   </script>
 </body>
