@@ -177,7 +177,7 @@
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
     const statusMessage = document.getElementById('statusMessage'); // Status zpráva
-    const gymNameInput = document.getElementById('gymName'); // NOVÝ: Reference na input pro název fitka
+    const gymNameInput = document.getElementById('gymName'); // Reference na input pro název fitka
 
     // --- Funkce pro automatické vyplnění textarea --- (Beze změny)
     function populateTrainingPlanTextarea() {
@@ -332,11 +332,9 @@
       }, 500);
     });
 
-
     // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
     exportPlanBtn.addEventListener('click', async () => {
       const planText = trainingPlanContentElement.value.trim();
-      // NOVÉ: Získání názvu fitka z inputu
       const gymName = gymNameInput.value.trim(); 
 
       if (!planText) {
@@ -344,7 +342,6 @@
         statusMessage.style.color = 'red';
         return;
       }
-      // NOVÉ: Kontrola, zda je vyplněno jméno fitka
       if (!gymName) {
         statusMessage.textContent = 'Please enter your Gym Name.';
         statusMessage.style.color = 'red';
@@ -355,14 +352,19 @@
       statusMessage.style.color = 'yellow';
       exportPlanBtn.disabled = true;
 
-      const formData = new FormData();
-      formData.append('plan', planText);
-      formData.append('gymName', gymName); // NOVÉ: Přidání názvu fitka do dat
+      // *** KLÍČOVÁ ZMĚNA: Zde formátujeme data pro application/x-www-form-urlencoded ***
+      const params = new URLSearchParams();
+      params.append('plan', planText);
+      params.append('gymName', gymName);
+      const requestBody = params.toString();
 
       try {
         const response = await fetch(appsScriptWebAppUrl, {
           method: 'POST',
-          body: formData
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded' // DŮLEŽITÉ: Nastavíme Content-Type
+          },
+          body: requestBody // Nyní posíláme URL-enkódovaný string
         });
 
         if (!response.ok) {
