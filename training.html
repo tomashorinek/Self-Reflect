@@ -228,7 +228,6 @@
       statusMessage.style.color = 'yellow';
 
       // Simulace generování plánu (toto je statický HTML, který jste mi poslal)
-      // V reálné aplikaci by zde byla logická AI/backend pro generování plánu
       if (trainingContainer.innerText.trim() === '') {
         trainingContainer.innerHTML = `
           <div class="day">
@@ -323,19 +322,16 @@
         console.log('Simulace generování plánu do training-container.');
       }
 
-      // Po dokončení generování plánu a jeho zobrazení v training-container:
-      // Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
-      // Zde přidáváme setTimeout pro diagnostické účely
       setTimeout(() => {
         populateTrainingPlanTextarea();
         statusMessage.textContent = 'Plan generated. You can now continue!';
         statusMessage.style.color = 'green';
-      }, 500); // Zpoždění 500 ms (půl sekundy)
+      }, 500);
     });
 
 
     // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
-    exportPlanBtn.addEventListener('click', () => { // Zde není async, protože se nepřidává await
+    exportPlanBtn.addEventListener('click', async () => { // Zde je async, protože používáme await fetch
       const planText = trainingPlanContentElement.value.trim();
 
       if (!planText) {
@@ -348,32 +344,53 @@
       statusMessage.style.color = 'yellow';
       exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
 
-      // --- ZDE JE KLÍČOVÁ ZMĚNA PRO PŘÍMÉ ODESLÁNÍ FORMULÁŘE S target='_top' ---
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = appsScriptWebAppUrl; // Adresa Apps Scriptu
-      form.target = '_top'; // DŮLEŽITÉ: Pokusí se přesměrovat celou stránku
+      const formData = new FormData();
+      formData.append('plan', planText); // Klíč musí být 'plan'
 
-      const hiddenField = document.createElement('input');
-      hiddenField.type = 'hidden';
-      hiddenField.name = 'plan'; // Důležité: Jméno parametru, které očekává doPost
-      hiddenField.value = planText;
-      form.appendChild(hiddenField);
+      try {
+        const response = await fetch(appsScriptWebAppUrl, {
+          method: 'POST',
+          body: formData
+        });
 
-      document.body.appendChild(form); // Přidáme formulář do těla dokumentu (dočasně)
-      form.submit(); // Odešleme formulář! Prohlížeč bude přesměrován
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
 
-      // Status zpráva se po přesměrování už nezobrazí, ale to je očekávané chování
-      // Uživatel bude přesměrován na Google Sheet
-      console.log('Form submitted directly. Page will redirect to Google Sheet.');
-      // Tlačítko se povolí až po přesměrování (což uživatel neuvidí), ale je dobré ho mít
-      // v případě, že by se formulář z nějakého důvodu neodeslal.
-      setTimeout(() => { exportPlanBtn.disabled = false; }, 5000); // Povolit po 5s pro jistotu
+        const sheetUrl = await response.text();
+        console.log('Received URL from Apps Script:', sheetUrl);
+
+        if (sheetUrl.startsWith('ERROR:')) {
+          alert('An error occurred while saving the plan: ' + sheetUrl.substring(6));
+          statusMessage.textContent = 'Error: ' + sheetUrl.substring(6);
+          statusMessage.style.color = 'red';
+        } else {
+          // *** KLÍČOVÁ ZMĚNA ZDE: Dynamické vytvoření odkazu a programové kliknutí ***
+          const link = document.createElement('a');
+          link.href = sheetUrl;
+          link.target = '_blank'; // Otevřít v nové záložce
+          link.style.display = 'none'; // Skrýt odkaz
+          document.body.appendChild(link); // Přidat do DOM
+          link.click(); // Programově kliknout na odkaz
+          document.body.removeChild(link); // Odstranit odkaz z DOM
+
+          statusMessage.textContent = 'Your training plan has been saved and opened in a new tab!';
+          statusMessage.style.color = 'green';
+        }
+
+      } catch (error) {
+        console.error('Error during plan export:', error);
+        alert('An error occurred while exporting your plan. Please try again or contact support. Error: ' + error.message);
+        statusMessage.textContent = 'An unexpected error occurred. Check console for details.';
+        statusMessage.style.color = 'red';
+      } finally {
+        exportPlanBtn.disabled = false; // Znovu povolte tlačítko bez ohledu na výsledek
+      }
     });
 
     // Důležité: Ujistěte se, že `populateTrainingPlanTextarea()` je volána správně
     // z planLogic.js nebo po generování plánu.
-    // Pro spolehlivost můžete tuto funkci zpřístupnit globálně takto:
     window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
   </script>
 </body>
