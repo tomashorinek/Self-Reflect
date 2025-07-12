@@ -152,6 +152,7 @@
     <div class="output" id="outputBox" style="display:none">
     <h2>Your Training Plan</h2>
     <textarea id="trainingPlanContent" rows="20" cols="80"></textarea> 
+    
     <div id="training-container"></div> 
     <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button><br>
     <div id="statusMessage"></div> </div>
@@ -162,8 +163,8 @@
     // URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
     const appsScriptWebAppUrl = "https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec";
 
-    // URL vaší cílové stránky (té s videi a popisem)
-    const targetPageUrl = "training-guide.html"; 
+    // URL vaší cílové stránky (té s videi a popisem) - TATO STRÁNKA SE TEĎ BUDE PŘESKOČIT!
+    const targetPageUrl = "training-guide.html"; // Tato proměnná už se nebude používat pro přesměrování
 
     const exportPlanBtn = document.getElementById('exportPlanBtn');
     const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán k odeslání
@@ -171,66 +172,58 @@
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
 
-    // --- UPRAVENÁ Funkce pro automatické vyplnění textarea ---
+    // --- Funkce pro automatické vyplnění textarea --- (Beze změny)
     function populateTrainingPlanTextarea() {
-      let fullPlanText = "Your Training Plan:\n\n"; // Záhlaví pro textarea
+      let fullPlanText = "Your Training Plan:\n\n";
 
-      // Získáme všechny bloky dní (.day)
       const dayBlocks = trainingContainer.querySelectorAll('.day');
-      console.log(`populateTrainingPlanTextarea: Found ${dayBlocks.length} day blocks.`); // DIAGNOSTICKÝ LOG!
+      console.log(`populateTrainingPlanTextarea: Found ${dayBlocks.length} day blocks.`);
 
       if (dayBlocks.length === 0) {
         fullPlanText += "No training plan generated yet. Please use the generator above.";
       } else {
         dayBlocks.forEach(dayBlock => {
-          const dayTitle = dayBlock.querySelector('h3'); // Např. <h3>Monday</h3>
+          const dayTitle = dayBlock.querySelector('h3');
           if (dayTitle) {
-            fullPlanText += dayTitle.innerText.trim() + "\n"; // Přidáme název dne (např. "Monday")
+            fullPlanText += dayTitle.innerText.trim() + "\n";
           }
 
           const exerciseListContainer = dayBlock.querySelector('.exercise-list');
-          if (exerciseListContainer) { // Ověříme, zda .exercise-list existuje
-              const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise'); // Všechna cvičení v daném dni
+          if (exerciseListContainer) {
+              const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
               exerciseBlocks.forEach(exerciseBlock => {
-                const mainExerciseDiv = exerciseBlock.querySelector('div:first-child'); // Hlavní div cvičení (obsahuje strong a alt-list)
+                const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
                 
                 if (mainExerciseDiv) {
-                  // Vytvoříme dočasný element, abychom z něj mohli bezpečně odstranit alt-list
                   const tempDiv = document.createElement('div');
                   tempDiv.innerHTML = mainExerciseDiv.innerHTML;
                   
-                  // Najdeme a odstraníme element s alternativami z dočasného divu
                   const altListSpan = tempDiv.querySelector('.alt-list');
                   if (altListSpan) {
-                      altListSpan.remove(); // Odstraní span s alternativami
+                      altListSpan.remove();
                   }
                   
-                  // Nyní získáme text z dočasného divu, který už neobsahuje alternativy
                   fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
                 }
               });
           }
-          fullPlanText += "\n"; // Mezera mezi dny
+          fullPlanText += "\n";
         });
       }
       
-      // Vloží sestavený text do textarea
       trainingPlanContentElement.value = fullPlanText;
       console.log('Text tréninkového plánu automaticky vyplněn do textarea.');
       
-      // Zobrazit outputBox, pokud už není viditelný
       outputBox.style.display = 'block'; 
     }
 
-    // --- Posluchač pro GENERATE MY PLAN tlačítko ---
+    // --- Posluchač pro GENERATE MY PLAN tlačítko --- (Beze změny)
     trackerForm.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Zabraňte výchozímu odeslání formuláře
+      event.preventDefault();
       statusMessage.textContent = 'Generating your plan...';
       statusMessage.style.color = 'yellow';
       
-      // Zde je klíčové místo pro spuštění VAŠÍ LOGIKY GENERÁTORU Z planLogic.js
-      // Následující blok je POUZE SIMULACE a měl by být nahrazen voláním VAŠEHO KÓDU.
-      if (trainingContainer.innerText.trim() === '') { // Přidal jsem || true pro snadné testování
+      if (trainingContainer.innerText.trim() === '') {
         trainingContainer.innerHTML = `
           <div class="day">
             <h3>Monday</h3>
@@ -246,150 +239,140 @@
                 <div class="exercise">
                   <div><strong>Neutral Grip Pulldown</strong> – 3x10-12<br><br><span class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
-                </div>
-            </div>
-          </div>
-          <div class="day">
-            <h3>Tuesday</h3>
-            <div class="exercise-list">
-                <div class="exercise">
-                  <div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-            </div>
-          </div>
-          <div class="day">
-            <h3>Wednesday</h3>
-            <div class="exercise-list">
-                <div class="exercise">
-                  <div><strong>Rest Day / Active Recovery</strong></div>
-                </div>
-            </div>
-          </div>
-          <div class="day">
-            <h3>Thursday</h3>
-            <div class="exercise-list">
-                <div class="exercise">
-                  <div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-            </div>
-          </div>
-          <div class="day">
-            <h3>Friday</h3>
-            <div class="exercise-list">
-                <div class="exercise">
-                  <div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-            </div>
-          </div>
-          <div class="day">
-            <h3>Saturday</h3>
-            <div class="exercise-list">
-                <div class="exercise">
-                  <div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-                <div class="exercise">
-                  <div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
-                  <span><button class="alt-button">🔁</button></span>
-                </div>
-            </div>
-          </div>
-        `;
-        console.log('Simulace generování plánu do training-container.');
-      }
-      
-      // Po dokončení generování plánu a jeho zobrazení v training-container:
-      // Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
-      // Zde přidáváme setTimeout pro diagnostické účely
-      setTimeout(() => {
-          populateTrainingPlanTextarea(); 
-          statusMessage.textContent = 'Plan generated. You can now continue!';
-          statusMessage.style.color = 'green';
-      }, 500); // Zpoždění 500 ms (půl sekundy)
-    });
+                
+</div>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Tuesday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Wednesday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Rest Day / Active Recovery</strong></div>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Thursday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Friday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Saturday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+`;
+console.log('Simulace generování plánu do training-container.');
+}
+
+// Po dokončení generování plánu a jeho zobrazení v training-container:
+// Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
+// Zde přidáváme setTimeout pro diagnostické účely
+setTimeout(() => {
+populateTrainingPlanTextarea();
+statusMessage.textContent = 'Plan generated. You can now continue!';
+statusMessage.style.color = 'green';
+}, 500); // Zpoždění 500 ms (půl sekundy)
+});
 
 
-    // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
-    exportPlanBtn.addEventListener('click', async () => {
-        const planText = trainingPlanContentElement.value.trim();
+// --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
+exportPlanBtn.addEventListener('click', async () => {
+const planText = trainingPlanContentElement.value.trim();
 
-        if (!planText) {
-            statusMessage.textContent = 'Please generate or enter a training plan first.';
-            statusMessage.style.color = 'red';
-            return;
-        }
+if (!planText) {
+statusMessage.textContent = 'Please generate or enter a training plan first.';
+statusMessage.style.color = 'red';
+return;
+}
 
-        statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
-        statusMessage.style.color = 'yellow';
-        exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
+statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
+statusMessage.style.color = 'yellow';
+exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
 
-        try {
-            const formData = new FormData();
-            formData.append('plan', planText); // Klíč 'plan' je to, co očekává Apps Script (e.parameter.plan)
+// --- ZDE JE KLÍČOVÁ ZMĚNA PRO PŘÍMÉ ODESLÁNÍ FORMULÁŘE ---
+const form = document.createElement('form');
+form.method = 'POST';
+form.action = appsScriptWebAppUrl; // Adresa Apps Scriptu
 
-            // Odeslání požadavku do Apps Scriptu
-            const response = await fetch(appsScriptWebAppUrl, {
-                method: 'POST',
-                body: formData,
-                redirect: 'follow' 
-            });
+const hiddenField = document.createElement('input');
+hiddenField.type = 'hidden';
+hiddenField.name = 'plan'; // Důležité: Jméno parametru, které očekává doPost
+hiddenField.value = planText;
+form.appendChild(hiddenField);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status}. Detail: ${errorText}`);
-            }
+document.body.appendChild(form); // Přidáme formulář do těla dokumentu (dočasně)
+form.submit(); // Odešleme formulář! Prohlížeč bude přesměrován
 
-            // Odpověď z Apps Scriptu je URL nově vytvořeného Google Sheetu
-            const newLogbookUrl = await response.text();
+// Zde už není potřeba žádný fetch, ani response.text(), ani sessionStorage, ani přesměrování
+// Protože form.submit() už přesměruje prohlížeč
+// DŮLEŽITÉ: Následující kód by se neměl provést, protože stránka bude přesměrována.
+// Pokud byste chtěl vidět statusMessage, musel byste formulář odesílat přes AJAX a ne submit.
+// statusMessage.textContent = 'Logbook creation initiated. Redirecting...';
+// statusMessage.style.color = 'green';
 
-            // Uložíme URL do sessionStorage, aby k němu měla přístup další stránka
-            sessionStorage.setItem('logbookUrl', newLogbookUrl);
-            statusMessage.textContent = 'Logbook created! Redirecting...';
-            statusMessage.style.color = 'green';
+// console.log('Form submitted directly. Page will redirect.');
+});
 
-            // Přesměrujeme uživatele na cílovou stránku
-            window.location.href = targetPageUrl;
-
-        } catch (error) {
-            statusMessage.textContent = `Error: ${error.message}. Please try again.`;
-            statusMessage.style.color = 'red';
-            console.error('Error in plan generation process:', error);
-        } finally {
-            exportPlanBtn.disabled = false; // Znovu povolte tlačítko (i po chybě)
-        }
-    });
-
-    // POZNÁMKA: Abyste zajistil, že se `populateTrainingPlanTextarea()` zavolá hned po vygenerování plánu,
-    // doporučuji volat ji přímo z vaší funkce v `planLogic.js`, která vkládá obsah do `training-container`.
-    // Nebo se ujistěte, že `trackerForm` submit listener (výše) správně volá vaši logiku pro generování
-    // a po jejím dokončení volá `populateTrainingPlanTextarea()`.
-  </script>
+// POZNÁMKA: Abyste zajistil, že se `populateTrainingPlanTextarea()` zavolá hned po vygenerování plánu,
+// doporučuji volat ji přímo z vaší funkce v `planLogic.js`, která vkládá obsah do `training-container`.
+// Nebo se ujistěte, že `trackerForm` submit listener (výše) správně volá vaši logiku pro generování
+// a po jejím dokončení volá `populateTrainingPlanTextarea()`.
+</script>
 </body>
 </html>
