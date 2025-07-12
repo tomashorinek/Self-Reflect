@@ -109,7 +109,8 @@
       <option value="Lose fat">Lose fat</option>
       <option value="Get stronger">Get stronger</option>
       <option value="Improve conditioning">Improve conditioning</option>
-    </select><br>
+    </select>
+
 
     <label for="frequency">How many days per week can you train?</label>
     <select id="frequency" required>
@@ -118,13 +119,15 @@
       <option value="3-4">3–4</option>
       <option value="5">5</option>
       <option value="5plus">5+</option>
-    </select><br>
+    </select>
+
 
    <label for="equipment">Select Equipment Access:</label>
     <select id="equipment" name="equipment">
       <option value="gym">Gym Access</option>
       <option value="home">Home Training</option>
-    </select><br>
+    </select>
+
 
     <label for="experience">Your training experience level?</label>
     <select id="experience">
@@ -132,35 +135,38 @@
       <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
        <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
        <option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
-     </select><br>
- 
+     </select>
+
      <label for="injuries">Any injuries or health issues?</label>
-     <textarea id="injuries" placeholder="If yes, specify..."></textarea><br>
- 
+     <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+
      <label for="fixed">Do you want a fixed weekly routine?</label>
      <select id="fixed">
        <option value="Yes">Yes</option>
        <option value="No">No</option>
-     </select><br>
- 
+     </select>
+
      <label for="email">Where should we send your plan?</label>
-     <input type="email" id="email" placeholder="e.g. you@selftracker.com" required /><br>
- 
-     <button type="submit">Generate My Plan</button><br>
-   </form><br>
- 
+     <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
+
+     <button type="submit">Generate My Plan</button>
+
+   </form>
+
     <div class="output" id="outputBox" style="display:none">
     <h2>Your Training Plan</h2>
     <textarea id="trainingPlanContent" rows="20" cols="80"></textarea> 
-    
+
     <div id="training-container"></div> 
-    <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button><br>
+    <button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button>
+
     <div id="statusMessage"></div> </div>
- 
+
   <script type="module" src="planLogic.js?v=100"></script>
-  
+
   <script>
     // URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
+    // ZKONTROLUJTE, ZDA JE TOTO VAŠE AKTUÁLNÍ NASAZENÉ URL APPS SCRIPTU!
     const appsScriptWebAppUrl = "https://script.google.com/macros/s/AKfycbwxdZ_sSDbsYeVbvC626RUSUqEWtLV8c8DIRlaqDbrFDsJK7JzOTkqqruSZVfFBM2hLuA/exec";
 
     // URL vaší cílové stránky (té s videi a popisem) - TATO STRÁNKA SE TEĎ BUDE PŘESKOČIT!
@@ -171,6 +177,7 @@
     const trainingContainer = document.getElementById('training-container'); // Div, kde se zobrazuje strukturovaný plán
     const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
     const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
+    const statusMessage = document.getElementById('statusMessage'); // Status zpráva
 
     // --- Funkce pro automatické vyplnění textarea --- (Beze změny)
     function populateTrainingPlanTextarea() {
@@ -193,16 +200,16 @@
               const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
               exerciseBlocks.forEach(exerciseBlock => {
                 const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
-                
+
                 if (mainExerciseDiv) {
                   const tempDiv = document.createElement('div');
                   tempDiv.innerHTML = mainExerciseDiv.innerHTML;
-                  
+
                   const altListSpan = tempDiv.querySelector('.alt-list');
                   if (altListSpan) {
                       altListSpan.remove();
                   }
-                  
+
                   fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
                 }
               });
@@ -210,11 +217,11 @@
           fullPlanText += "\n";
         });
       }
-      
+
       trainingPlanContentElement.value = fullPlanText;
       console.log('Text tréninkového plánu automaticky vyplněn do textarea.');
-      
-      outputBox.style.display = 'block'; 
+
+      outputBox.style.display = 'block';
     }
 
     // --- Posluchač pro GENERATE MY PLAN tlačítko --- (Beze změny)
@@ -222,7 +229,9 @@
       event.preventDefault();
       statusMessage.textContent = 'Generating your plan...';
       statusMessage.style.color = 'yellow';
-      
+
+      // Simulace generování plánu (toto je statický HTML, který jste mi poslal)
+      // V reálné aplikaci by zde byla logická AI/backend pro generování plánu
       if (trainingContainer.innerText.trim() === '') {
         trainingContainer.innerHTML = `
           <div class="day">
@@ -239,140 +248,155 @@
                 <div class="exercise">
                   <div><strong>Neutral Grip Pulldown</strong> – 3x10-12<br><br><span class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</span><br></div>
                   <span><button class="alt-button">🔁</button></span>
-                
-</div>
-</div>
-</div>
-</div>
-<div class="day">
-<h3>Tuesday</h3>
-<div class="exercise-list">
-<div class="exercise">
-<div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-</div>
-</div>
-<div class="day">
-<h3>Wednesday</h3>
-<div class="exercise-list">
-<div class="exercise">
-<div><strong>Rest Day / Active Recovery</strong></div>
-</div>
-</div>
-</div>
-<div class="day">
-<h3>Thursday</h3>
-<div class="exercise-list">
-<div class="exercise">
-<div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-</div>
-</div>
-<div class="day">
-<h3>Friday</h3>
-<div class="exercise-list">
-<div class="exercise">
-<div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-</div>
-</div>
-<div class="day">
-<h3>Saturday</h3>
-<div class="exercise-list">
-<div class="exercise">
-<div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-<div class="exercise">
-<div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
-<span><button class="alt-button">🔁</button></span>
-</div>
-</div>
-</div>
-`;
-console.log('Simulace generování plánu do training-container.');
-}
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Tuesday</h3>
+            <div class="exercise-list">
+                <div class="exercise">
+                  <div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Wednesday</h3>
+            <div class="exercise-list">
+                <div class="exercise">
+                  <div><strong>Rest Day / Active Recovery</strong></div>
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Thursday</h3>
+            <div class="exercise-list">
+                <div class="exercise">
+                  <div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Friday</h3>
+            <div class="exercise-list">
+                <div class="exercise">
+                  <div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+            </div>
+          </div>
+          <div class="day">
+            <h3>Saturday</h3>
+            <div class="exercise-list">
+                <div class="exercise">
+                  <div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+                <div class="exercise">
+                  <div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
+                  <span><button class="alt-button">🔁</button></span>
+                </div>
+            </div>
+          </div>`;
+        console.log('Simulace generování plánu do training-container.');
+      }
 
-// Po dokončení generování plánu a jeho zobrazení v training-container:
-// Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
-// Zde přidáváme setTimeout pro diagnostické účely
-setTimeout(() => {
-populateTrainingPlanTextarea();
-statusMessage.textContent = 'Plan generated. You can now continue!';
-statusMessage.style.color = 'green';
-}, 500); // Zpoždění 500 ms (půl sekundy)
-});
+      // Po dokončení generování plánu a jeho zobrazení v training-container:
+      // Tato funkce se MUSÍ volat AŽ POTÉ, co je training-container NAPLNĚN.
+      // Zde přidáváme setTimeout pro diagnostické účely
+      setTimeout(() => {
+        populateTrainingPlanTextarea();
+        statusMessage.textContent = 'Plan generated. You can now continue!';
+        statusMessage.style.color = 'green';
+      }, 500); // Zpoždění 500 ms (půl sekundy)
+    });
 
 
-// --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
-exportPlanBtn.addEventListener('click', async () => {
-const planText = trainingPlanContentElement.value.trim();
+    // --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
+    // Tuto část kódu nahrazujeme fetch API implementací
+    exportPlanBtn.addEventListener('click', async () => {
+      const planText = trainingPlanContentElement.value.trim();
 
-if (!planText) {
-statusMessage.textContent = 'Please generate or enter a training plan first.';
-statusMessage.style.color = 'red';
-return;
-}
+      if (!planText) {
+        statusMessage.textContent = 'Please generate or enter a training plan first.';
+        statusMessage.style.color = 'red';
+        return;
+      }
 
-statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
-statusMessage.style.color = 'yellow';
-exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
+      statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
+      statusMessage.style.color = 'yellow';
+      exportPlanBtn.disabled = true; // Zakažte tlačítko, aby se neklikalo vícekrát
 
-// --- ZDE JE KLÍČOVÁ ZMĚNA PRO PŘÍMÉ ODESLÁNÍ FORMULÁŘE ---
-const form = document.createElement('form');
-form.method = 'POST';
-form.action = appsScriptWebAppUrl; // Adresa Apps Scriptu
+      // --- ZDE JE NOVÁ IMPLEMENTACE S FETCH API ---
+      const formData = new FormData();
+      formData.append('plan', planText); // Klíč musí být 'plan'
 
-const hiddenField = document.createElement('input');
-hiddenField.type = 'hidden';
-hiddenField.name = 'plan'; // Důležité: Jméno parametru, které očekává doPost
-hiddenField.value = planText;
-form.appendChild(hiddenField);
+      try {
+        const response = await fetch(appsScriptWebAppUrl, {
+          method: 'POST',
+          body: formData
+        });
 
-document.body.appendChild(form); // Přidáme formulář do těla dokumentu (dočasně)
-form.submit(); // Odešleme formulář! Prohlížeč bude přesměrován
+        // Kontrola, zda odpověď je OK (status 200)
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
 
-// Zde už není potřeba žádný fetch, ani response.text(), ani sessionStorage, ani přesměrování
-// Protože form.submit() už přesměruje prohlížeč
-// DŮLEŽITÉ: Následující kód by se neměl provést, protože stránka bude přesměrována.
-// Pokud byste chtěl vidět statusMessage, musel byste formulář odesílat přes AJAX a ne submit.
-// statusMessage.textContent = 'Logbook creation initiated. Redirecting...';
-// statusMessage.style.color = 'green';
+        const sheetUrl = await response.text();
+        console.log('Received URL from Apps Script:', sheetUrl); // Logování pro debug
 
-// console.log('Form submitted directly. Page will redirect.');
-});
+        // Kontrola, zda je odpověď opravdu URL nebo chyba z Apps Scriptu
+        if (sheetUrl.startsWith('ERROR:')) {
+          alert('An error occurred while saving the plan: ' + sheetUrl.substring(6));
+          statusMessage.textContent = 'Error: ' + sheetUrl.substring(6);
+          statusMessage.style.color = 'red';
+        } else {
+          // Otevření URL v nové záložce
+          window.open(sheetUrl, '_blank');
+          statusMessage.textContent = 'Your training plan has been saved and opened in a new tab!';
+          statusMessage.style.color = 'green';
+        }
 
-// POZNÁMKA: Abyste zajistil, že se `populateTrainingPlanTextarea()` zavolá hned po vygenerování plánu,
-// doporučuji volat ji přímo z vaší funkce v `planLogic.js`, která vkládá obsah do `training-container`.
-// Nebo se ujistěte, že `trackerForm` submit listener (výše) správně volá vaši logiku pro generování
-// a po jejím dokončení volá `populateTrainingPlanTextarea()`.
-</script>
+      } catch (error) {
+        console.error('Error during plan export:', error);
+        alert('An error occurred while exporting your plan. Please try again or contact support. Error: ' + error.message);
+        statusMessage.textContent = 'An unexpected error occurred. Check console for details.';
+        statusMessage.style.color = 'red';
+      } finally {
+        exportPlanBtn.disabled = false; // Znovu povolte tlačítko bez ohledu na výsledek
+      }
+    });
+
+    // POZNÁMKA: Abyste zajistil, že se `populateTrainingPlanTextarea()` zavolá hned po vygenerování plánu,
+    // doporučuji volat ji přímo z vaší funkce v `planLogic.js`, která vkládá obsah do `training-container`.
+    // Nebo se ujistěte, že `trackerForm` submit listener (výše) správně volá vaši logiku pro generování
+    // a po jejím dokončení volá `populateTrainingPlanTextarea()`.
+  </script>
 </body>
 </html>
