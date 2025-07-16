@@ -1,25 +1,410 @@
+
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self-Coaching Plan Generator</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Self-Coaching Plan Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+color: white;
+margin: 0;
+padding: 2rem;
+}
+h1, h2 {
+text-align: center;
+}
+form {
+max-width: 600px;
+margin: auto;
+background: #1f1f1f;
+padding: 2rem;
+border-radius: 12px;
+}
+label, select, input, textarea, button {
+display: block;
+width: 100%;
+margin-top: 1rem;
+}
+select, input, textarea {
+padding: 0.5rem;
+background: #2b2b2b;
+color: white;
+border: 1px solid #444;
+border-radius: 6px;
+}
+input::placeholder, textarea::placeholder {
+color: #888;
+}
+button {
+background: #ff6600;
+color: white;
+font-weight: bold;
+padding: 1rem;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+}
+button:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+.output {
+max-width: 800px;
+margin: 2rem auto;
+background: #1a1a1a;
+padding: 2rem;
+border-radius: 12px;
+}
+/* Styl pro textarea, kde se zobrazí plán */
+#trainingPlanContent {
+width: 100%;
+background: #2b2b2b;
+color: white;
+border: 1px solid #444;
+border-radius: 6px;
+padding: 0.5rem;
+box-sizing: border-box;
+margin-bottom: 1rem;
+min-height: 200px; /* Aby byla vidět */
+white-space: pre-wrap; /* Zachová formátování textu */
+}
+.day {
+background: #1e1e1e;
+padding: 1rem;
+margin-bottom: 1rem;
+border-radius: 8px;
+}
+.exercise {
+display: flex;
+justify-content: space-between;
+background: #2a2a2a;
+padding: 0.5rem 1rem;
+margin: 0.5rem 0;
+border-radius: 6px;
+}
+.alt-list {
+color: #ccc;
+font-size: 0.9rem;
+}
+.alt-button {
+color: #ff9900;
+cursor: pointer;
+}
+#statusMessage { /* Styl pro zprávy o stavu */
+text-align: center;
+margin-top: 1rem;
+font-weight: bold;
+}
+</style>
 </head>
 <body>
-    <iframe src="https://script.google.com/macros/s/AKfycbzETEYoaQSkgtm1mQ-9ICLpwGdjbY8gL51Kqe3uIawbrWMPouUnEddzgqbjg2kF_VnTqA/exec"></iframe>
+<h1>Self-Coaching Plan Generator</h1>
+<form id="trackerForm">
+<label for="goal">What's your main goal?</label>
+<select id="goal">
+<option value="Build muscle">Build muscle</option>
+<option value="Lose fat">Lose fat</option>
+<option value="Get stronger">Get stronger</option>
+<option value="Improve conditioning">Improve conditioning</option>
+</select>
+
+
+<label for="frequency">How many days per week can you train?</label>
+<select id="frequency" required>
+<option value="">-- Select --</option>
+<option value="1-2">1–2</option>
+<option value="3-4">3–4</option>
+<option value="5">5</option>
+<option value="5plus">5+</option>
+</select>
+
+
+<label for="equipment">Select Equipment Access:</label>
+<select id="equipment" name="equipment">
+<option value="gym">Gym Access</option>
+<option value="home">Home Training</option>
+</select>
+
+
+<label for="experience">Your training experience level?</label>
+<select id="experience">
+<option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
+<option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
+<option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
+<option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
+</select>
+
+<label for="injuries">Any injuries or health issues?</label>
+<textarea id="injuries" placeholder="If yes, specify..."></textarea>
+
+<label for="fixed">Do you want a fixed weekly routine?</label>
+<select id="fixed">
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
+
+<label for="email">Where should we send your plan?</label>
+<input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
+
+<label for="gymName">What gym do you primarily train at?</label>
+<input type="text" id="gymName" placeholder="e.g. Fitness Center Relax" required />
+<button type="submit">Generate My Plan</button>
+
+</form>
+
+<div class="output" id="outputBox" style="display:none">
+<h2>Your Training Plan</h2>
+<textarea id="trainingPlanContent" rows="20" cols="80"></textarea> 
+
+<div id="training-container"></div> 
+<button id="exportPlanBtn" style="background-color: orange; color: white; font-weight: bold; padding: 1em 2em; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Continue with this plan</button>
+
+<div id="statusMessage"></div> </div>
+
+<script type="module" src="planLogic.js?v=100"></script>
+
+<script>
+// URL vaší Apps Script Web App (projektu, který kopíruje a vyplňuje Sheet)
+// ZKONTROLUJTE, ZDA JE TOTO VAŠE AKTUÁLNÍ NASAZENÉ URL APPS SCRIPTU!
+const appsScriptWebAppUrl = "https://script.google.com/macros/s/AKfycbzETEYoaQSkgtm1mQ-9ICLpwGdjbY8gL51Kqe3uIawbrWMPouUnEddzgqbjg2kF_VnTqA/exec";
+
+const exportPlanBtn = document.getElementById('exportPlanBtn');
+const trainingPlanContentElement = document.getElementById('trainingPlanContent'); // Textarea pro finální plán k odeslání
+const trainingContainer = document.getElementById('training-container'); // Div, kde se zobrazuje strukturovaný plán
+const outputBox = document.getElementById('outputBox'); // Box, který se zobrazí po generování
+const trackerForm = document.getElementById('trackerForm'); // Váš formulář pro generování
+const statusMessage = document.getElementById('statusMessage'); // Status zpráva
+const gymNameInput = document.getElementById('gymName'); // Reference na input pro název fitka
+
+// --- Funkce pro automatické vyplnění textarea --- (Beze změny)
+function populateTrainingPlanTextarea() {
+let fullPlanText = "Your Training Plan:\n\n";
+
+const dayBlocks = trainingContainer.querySelectorAll('.day');
+console.log(`populateTrainingPlanTextarea: Found ${dayBlocks.length} day blocks.`);
+
+if (dayBlocks.length === 0) {
+fullPlanText += "No training plan generated yet. Please use the generator above.";
+} else {
+dayBlocks.forEach(dayBlock => {
+const dayTitle = dayBlock.querySelector('h3');
+if (dayTitle) {
+fullPlanText += dayTitle.innerText.trim() + "\n";
+}
+
+const exerciseListContainer = dayBlock.querySelector('.exercise-list');
+if (exerciseListContainer) {
+const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
+exerciseBlocks.forEach(exerciseBlock => {
+const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
+
+if (mainExerciseDiv) {
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = mainExerciseDiv.innerHTML;
+
+const altListSpan = tempDiv.querySelector('.alt-list');
+if (altListSpan) {
+altListSpan.remove();
+}
+
+fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
+}
+});
+}
+fullPlanText += "\n";
+});
+}
+
+trainingPlanContentElement.value = fullPlanText;
+console.log('Text tréninkového plánu automaticky vyplněn do textarea.');
+
+outputBox.style.display = 'block';
+}
+
+// --- Posluchač pro GENERATE MY PLAN tlačítko --- (Beze změny)
+trackerForm.addEventListener('submit', async (event) => {
+event.preventDefault();
+statusMessage.textContent = 'Generating your plan...';
+statusMessage.style.color = 'yellow';
+
+// Simulace generování plánu (toto je statický HTML, který jste mi poslal)
+if (trainingContainer.innerText.trim() === '') {
+trainingContainer.innerHTML = `
+<div class="day">
+<h3>Monday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Y-Raises</strong> – 3x10-12<br><br><span class="alt-list">Alt: incline bench Y raises DB, cable lat raises from the waist</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Low Incline Chest Press</strong> – 3x8-10<br><br><span class="alt-list">Alt: low incline smith, low incline bench</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Neutral Grip Pulldown</strong> – 3x10-12<br><br><span class="alt-list">Alt: 1h neutral grip pulldown, DB or cable pullover</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Tuesday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Deadlifts</strong> – 1x5<br><br><span class="alt-list">Alt: sumo deadlift, rack pulls</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Overhead Press</strong> – 3x5<br><br><span class="alt-list">Alt: dumbbell shoulder press, machine shoulder press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Pull-ups</strong> – 3xF<br><br><span class="alt-list">Alt: lat pulldowns, machine pull-ups</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Wednesday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Rest Day / Active Recovery</strong></div>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Thursday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Barbell Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: T-bar rows, cable rows</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Incline Dumbbell Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: incline machine press, incline barbell press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Machine Lateral Raise</strong> – 3x12<br><br><span class="alt-list">Alt: cable lateral raise, dumbbell lateral raise</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Rear Delt Flies Machine</strong> – 3x10-12<br><br><span class="alt-list">Alt: RD cables, RD incline bench flies</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Friday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Leg Press</strong> – 3x8-12<br><br><span class="alt-list">Alt: barbell squats, hack squat machine</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Romanian Deadlifts (RDL)</strong> – 3x8-12<br><br><span class="alt-list">Alt: good mornings, hyperextensions</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>
+<div class="day">
+<h3>Saturday</h3>
+<div class="exercise-list">
+<div class="exercise">
+<div><strong>Push Press</strong> – 3x5<br><br><span class="alt-list">Alt: overhead press, dumbbell press</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+<div class="exercise">
+<div><strong>Bent-Over Rows</strong> – 3x8-12<br><br><span class="alt-list">Alt: chest-supported rows, single-arm rows</span><br></div>
+<span><button class="alt-button">🔁</button></span>
+</div>
+</div>
+</div>`;
+console.log('Simulace generování plánu do training-container.');
+}
+
+setTimeout(() => {
+populateTrainingPlanTextarea();
+statusMessage.textContent = 'Plan generated. You can now continue!';
+statusMessage.style.color = 'green';
+}, 500);
+});
+
+// --- Posluchač pro CONTINUE WITH THIS PLAN tlačítko ---
+exportPlanBtn.addEventListener('click', async () => {
+const planText = trainingPlanContentElement.value.trim();
+const gymName = gymNameInput.value.trim(); 
+
+if (!planText) {
+statusMessage.textContent = 'Please generate or enter a training plan first.';
+statusMessage.style.color = 'red';
+return;
+}
+if (!gymName) {
+statusMessage.textContent = 'Please enter your Gym Name.';
+statusMessage.style.color = 'red';
+return;
+}
+
+statusMessage.textContent = 'Generating your personalized logbook... Please wait, this may take a moment.';
+statusMessage.style.color = 'yellow';
+exportPlanBtn.disabled = true;
+
+// *** KLÍČOVÁ ZMĚNA: Zde formátujeme data pro application/x-www-form-urlencoded ***
+const params = new URLSearchParams();
+params.append('plan', planText);
+params.append('gymName', gymName);
+const requestBody = params.toString();
+
+try {
+const response = await fetch(appsScriptWebAppUrl, {
+method: 'POST',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded' // DŮLEŽITÉ: Nastavíme Content-Type
+},
+body: requestBody // Nyní posíláme URL-enkódovaný string
+});
+
+if (!response.ok) {
+const errorText = await response.text();
+throw new Error(`Server error: ${response.status} - ${errorText}`);
+}
+
+const sheetUrl = await response.text();
+console.log('Received URL from Apps Script:', sheetUrl);
+
+if (sheetUrl.startsWith('ERROR:')) {
+alert('An error occurred while saving the plan: ' + sheetUrl.substring(6));
+statusMessage.textContent = 'Error: ' + sheetUrl.substring(6);
+statusMessage.style.color = 'red';
+} else {
+const link = document.createElement('a');
+link.href = sheetUrl;
+link.target = '_blank';
+link.style.display = 'none';
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+
+statusMessage.textContent = 'Your training plan has been saved and opened in a new tab!';
+statusMessage.style.color = 'green';
+}
+
+} catch (error) {
+console.error('Error during plan export:', error);
+alert('An error occurred while exporting your plan. Please try again or contact support. Error: ' + error.message);
+statusMessage.textContent = 'An unexpected error occurred. Check console for details.';
+statusMessage.style.color = 'red';
+} finally {
+exportPlanBtn.disabled = false;
+}
+});
+
+window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
+</script>
 </body>
 </html>
+
