@@ -1,120 +1,123 @@
 <script>
-  // --- DOM ELEMENTS ---
-  const exportPlanBtn = document.getElementById('exportPlanBtn');
-  const trainingPlanContentElement = document.getElementById('trainingPlanContent');
-  const trainingContainer = document.getElementById('training-container');
-  const outputBox = document.getElementById('outputBox');
-  const trackerForm = document.getElementById('trackerForm');
-  const statusMessage = document.getElementById('statusMessage');
-  const gymNameInput = document.getElementById('gymName');
+  // TENTO POSLUCHAČ ZAJIŠŤUJE, ŽE SE KÓD SPUSTÍ AŽ PO NAČTENÍ CELÉ STRÁNKY
+  document.addEventListener('DOMContentLoaded', () => {
 
-  // --- GENERATE TEXTAREA CONTENT ---
-  function populateTrainingPlanTextarea() {
-    let fullPlanText = "Your Training Plan:\n\n";
-    const dayBlocks = trainingContainer.querySelectorAll('.day');
+    // --- DOM ELEMENTS ---
+    const exportPlanBtn = document.getElementById('exportPlanBtn');
+    const trainingPlanContentElement = document.getElementById('trainingPlanContent');
+    const trainingContainer = document.getElementById('training-container');
+    const outputBox = document.getElementById('outputBox');
+    const trackerForm = document.getElementById('trackerForm');
+    const statusMessage = document.getElementById('statusMessage');
+    const gymNameInput = document.getElementById('gymName');
 
-    if (dayBlocks.length === 0) {
-      fullPlanText += "No training plan generated yet.";
-    } else {
-      dayBlocks.forEach(dayBlock => {
-        const dayTitle = dayBlock.querySelector('h3');
-        if (dayTitle) fullPlanText += dayTitle.innerText.trim() + "\n";
+    // --- GENERATE TEXTAREA CONTENT ---
+    function populateTrainingPlanTextarea() {
+      let fullPlanText = "Your Training Plan:\n\n";
+      const dayBlocks = trainingContainer.querySelectorAll('.day');
 
-        const exerciseListContainer = dayBlock.querySelector('.exercise-list');
-        if (exerciseListContainer) {
-          const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
-          exerciseBlocks.forEach(exerciseBlock => {
-            const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
-            if (mainExerciseDiv) {
-              const tempDiv = document.createElement('div');
-              tempDiv.innerHTML = mainExerciseDiv.innerHTML;
-              const altListSpan = tempDiv.querySelector('.alt-list');
-              if (altListSpan) altListSpan.remove();
-              fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
-            }
-          });
-        }
-
-        fullPlanText += "\n";
-      });
-    }
-
-    trainingPlanContentElement.value = fullPlanText;
-    outputBox.style.display = 'block';
-  }
-
-  // --- MAKE FUNCTION GLOBALLY ACCESSIBLE ---
-  window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
-
-  // --- FORM SUBMIT HANDLER ---
-  trackerForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    statusMessage.textContent = 'Generating your plan...';
-    statusMessage.style.color = 'yellow';
-    outputBox.style.display = 'block';
-
-    const formData = {
-      goal: document.getElementById('goal').value,
-      frequency: document.getElementById('frequency').value,
-      equipment: document.getElementById('equipment').value,
-      experience: document.getElementById('experience').value,
-      injuries: document.getElementById('injuries').value,
-      fixed: document.getElementById('fixed').value,
-      email: document.getElementById('email').value
-    };
-
-    await window.generateTrainingPlan(formData); // Napojené na planLogic.js
-
-    populateTrainingPlanTextarea();
-
-    statusMessage.textContent = '✅ Plan generated. You can now continue!';
-    statusMessage.style.color = 'green';
-  });
-
-  // --- EXPORT HANDLER (API call) ---
-  const apiUrl = 'https://api.webbyfe.com';
-
-  exportPlanBtn.addEventListener('click', async () => {
-    const planText = trainingPlanContentElement.value.trim();
-    const gymName = gymNameInput.value.trim();
-
-    if (!planText || planText === "No training plan generated yet.") {
-      alert('Please generate a plan first.');
-      return;
-    }
-    if (!gymName) {
-      alert('Please enter a gym name.');
-      return;
-    }
-
-    statusMessage.textContent = 'Creating your logbook... Please wait.';
-    statusMessage.style.color = 'yellow';
-    exportPlanBtn.disabled = true;
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planText, gymName: gymName })
-      });
-
-      if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-
-      const result = await response.json();
-
-      if (result.success) {
-        statusMessage.innerHTML = `✅ Success! <a href="${result.url}" target="_blank" style="color: lightgreen;">Open your logbook</a>`;
-        statusMessage.style.color = 'green';
+      if (dayBlocks.length === 0) {
+        fullPlanText += "No training plan generated yet.";
       } else {
-        throw new Error(result.error || 'An unknown backend error occurred.');
+        dayBlocks.forEach(dayBlock => {
+          const dayTitle = dayBlock.querySelector('h3');
+          if (dayTitle) fullPlanText += dayTitle.innerText.trim() + "\n";
+
+          const exerciseListContainer = dayBlock.querySelector('.exercise-list');
+          if (exerciseListContainer) {
+            const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
+            exerciseBlocks.forEach(exerciseBlock => {
+              const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
+              if (mainExerciseDiv) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = mainExerciseDiv.innerHTML;
+                const altListSpan = tempDiv.querySelector('.alt-list');
+                if (altListSpan) altListSpan.remove();
+                fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
+              }
+            });
+          }
+          fullPlanText += "\n";
+        });
       }
 
-    } catch (error) {
-      console.error('Error:', error);
-      statusMessage.textContent = '❌ Error creating logbook: ' + error.message;
-      statusMessage.style.color = 'red';
-    } finally {
-      exportPlanBtn.disabled = false;
+      trainingPlanContentElement.value = fullPlanText;
+      outputBox.style.display = 'block';
     }
-  });
+
+    // --- MAKE FUNCTION GLOBALLY ACCESSIBLE ---
+    window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
+
+    // --- FORM SUBMIT HANDLER ---
+    trackerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      statusMessage.textContent = 'Generating your plan...';
+      statusMessage.style.color = 'yellow';
+      outputBox.style.display = 'block';
+
+      const formData = {
+        goal: document.getElementById('goal').value,
+        frequency: document.getElementById('frequency').value,
+        equipment: document.getElementById('equipment').value,
+        experience: document.getElementById('experience').value,
+        injuries: document.getElementById('injuries').value,
+        fixed: document.getElementById('fixed').value,
+        email: document.getElementById('email').value
+      };
+
+      await window.generateTrainingPlan(formData); // Napojené na planLogic.js
+      populateTrainingPlanTextarea();
+
+      statusMessage.textContent = '✅ Plan generated. You can now continue!';
+      statusMessage.style.color = 'green';
+    });
+
+    // --- EXPORT HANDLER (API call) ---
+    const apiUrl = 'https://api.webbyfe.com';
+
+    exportPlanBtn.addEventListener('click', async () => {
+      const planText = trainingPlanContentElement.value.trim();
+      const gymName = gymNameInput.value.trim();
+
+      if (!planText || planText === "No training plan generated yet.") {
+        alert('Please generate a plan first.');
+        return;
+      }
+      if (!gymName) {
+        alert('Please enter a gym name.');
+        return;
+      }
+
+      statusMessage.textContent = 'Creating your logbook... Please wait.';
+      statusMessage.style.color = 'yellow';
+      exportPlanBtn.disabled = true;
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: planText, gymName: gymName })
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+
+        const result = await response.json();
+
+        if (result.success) {
+          statusMessage.innerHTML = `✅ Success! <a href="${result.url}" target="_blank" style="color: lightgreen;">Open your logbook</a>`;
+          statusMessage.style.color = 'green';
+        } else {
+          throw new Error(result.error || 'An unknown backend error occurred.');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        statusMessage.textContent = '❌ Error creating logbook: ' + error.message;
+        statusMessage.style.color = 'red';
+      } finally {
+        exportPlanBtn.disabled = false;
+      }
+    });
+
+  }); // KONEC POSLUCHAČE DOMContentLoaded
 </script>
