@@ -1,123 +1,131 @@
-<script>
-  // TENTO POSLUCHAČ ZAJIŠŤUJE, ŽE SE KÓD SPUSTÍ AŽ PO NAČTENÍ CELÉ STRÁNKY
-  document.addEventListener('DOMContentLoaded', () => {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Self-Coaching Plan Generator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 700px; }
+        h1 { color: #ff8c00; }
+        form { background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
+        label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: bold; }
+        select, input { width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
+        button { background: #ff8c00; color: #121212; font-weight: bold; padding: 1rem; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 2rem; font-size: 1rem; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .output { margin-top: 2rem; background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
+        #finalStatus { text-align: center; margin-top: 1rem; font-weight: bold; }
+        a { color: #ffae42; }
+    </style>
+</head>
+<body>
 
-    // --- DOM ELEMENTS ---
-    const exportPlanBtn = document.getElementById('exportPlanBtn');
-    const trainingPlanContentElement = document.getElementById('trainingPlanContent');
-    const trainingContainer = document.getElementById('training-container');
-    const outputBox = document.getElementById('outputBox');
-    const trackerForm = document.getElementById('trackerForm');
-    const statusMessage = document.getElementById('statusMessage');
-    const gymNameInput = document.getElementById('gymName');
+    <div class="container">
+        <h1>Self-Coaching Plan Generator</h1>
+        <form id="trackerForm">
+            <label for="goal">What's your main goal?</label>
+            <select id="goal">
+                <option value="Build muscle">Build muscle</option>
+                <option value="Lose fat">Lose fat</option>
+                <option value="Get stronger">Get stronger</option>
+            </select>
+            
+            <label for="frequency">How many days per week can you train?</label>
+            <select id="frequency">
+                <option value="3-4">3-4 days</option>
+                <option value="5">5 days</option>
+            </select>
 
-    // --- GENERATE TEXTAREA CONTENT ---
-    function populateTrainingPlanTextarea() {
-      let fullPlanText = "Your Training Plan:\n\n";
-      const dayBlocks = trainingContainer.querySelectorAll('.day');
+            <label for="gymName">What is the name of your gym?</label>
+            <input type="text" id="gymName" value="My Home Gym" required />
 
-      if (dayBlocks.length === 0) {
-        fullPlanText += "No training plan generated yet.";
-      } else {
-        dayBlocks.forEach(dayBlock => {
-          const dayTitle = dayBlock.querySelector('h3');
-          if (dayTitle) fullPlanText += dayTitle.innerText.trim() + "\n";
+            <button type="submit">Generate My Plan</button>
+        </form>
 
-          const exerciseListContainer = dayBlock.querySelector('.exercise-list');
-          if (exerciseListContainer) {
-            const exerciseBlocks = exerciseListContainer.querySelectorAll('.exercise');
-            exerciseBlocks.forEach(exerciseBlock => {
-              const mainExerciseDiv = exerciseBlock.querySelector('div:first-child');
-              if (mainExerciseDiv) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = mainExerciseDiv.innerHTML;
-                const altListSpan = tempDiv.querySelector('.alt-list');
-                if (altListSpan) altListSpan.remove();
-                fullPlanText += "- " + tempDiv.innerText.trim() + "\n";
-              }
+        <div class="output" id="outputBox" style="display:none;">
+            <h2>Your Generated Plan</h2>
+            <p>Review your plan below. You can click "Continue" to create your Google Sheet logbook.</p>
+            
+            <div id="training-container"></div>
+            
+            <button id="continueButton">Continue with this plan</button>
+            <div id="finalStatus"></div>
+        </div>
+    </div>
+
+    <script type="module" src="./planLogic.js"></script>
+
+    <script>
+        // TENTO POSLUCHAČ JE KLÍČOVÝ. Říká: "Počkej, až bude celá stránka načtená, pak spusť kód."
+        document.addEventListener('DOMContentLoaded', () => {
+            const trackerForm = document.getElementById('trackerForm');
+            const outputBox = document.getElementById('outputBox');
+            const continueButton = document.getElementById('continueButton');
+            const finalStatus = document.getElementById('finalStatus');
+            const trainingContainer = document.getElementById('training-container');
+            const gymNameInput = document.getElementById('gymName');
+            const apiUrl = 'https://api.webbyfe.com';
+
+            // Obsluha tlačítka "Generate My Plan"
+            trackerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = {
+                    goal: document.getElementById('goal').value,
+                    frequency: document.getElementById('frequency').value
+                };
+
+                if (window.generateAndDisplayPlan) {
+                    window.generateAndDisplayPlan(formData);
+                    outputBox.style.display = 'block';
+                } else {
+                    alert('Error: Plan logic script not loaded correctly.');
+                }
             });
-          }
-          fullPlanText += "\n";
+
+            // Obsluha tlačítka "Continue with this plan"
+            continueButton.addEventListener('click', async () => {
+                const planText = trainingContainer.innerText.trim();
+                const gymName = gymNameInput.value.trim();
+
+                if (!planText) {
+                    alert('Please generate a plan first.');
+                    return;
+                }
+
+                finalStatus.textContent = 'Creating your logbook...';
+                finalStatus.style.color = '#ffae42';
+                continueButton.disabled = true;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plan: planText, gymName: gymName })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server returned an error: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
+                        finalStatus.style.color = '#32cd32';
+                    } else {
+                        throw new Error(result.error || 'An unknown backend error occurred.');
+                    }
+
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    finalStatus.textContent = `❌ Error: ${error.message}`;
+                    finalStatus.style.color = '#ff4500';
+                } finally {
+                    continueButton.disabled = false;
+                }
+            });
         });
-      }
+    </script>
 
-      trainingPlanContentElement.value = fullPlanText;
-      outputBox.style.display = 'block';
-    }
-
-    // --- MAKE FUNCTION GLOBALLY ACCESSIBLE ---
-    window.populateTrainingPlanTextarea = populateTrainingPlanTextarea;
-
-    // --- FORM SUBMIT HANDLER ---
-    trackerForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      statusMessage.textContent = 'Generating your plan...';
-      statusMessage.style.color = 'yellow';
-      outputBox.style.display = 'block';
-
-      const formData = {
-        goal: document.getElementById('goal').value,
-        frequency: document.getElementById('frequency').value,
-        equipment: document.getElementById('equipment').value,
-        experience: document.getElementById('experience').value,
-        injuries: document.getElementById('injuries').value,
-        fixed: document.getElementById('fixed').value,
-        email: document.getElementById('email').value
-      };
-
-      await window.generateTrainingPlan(formData); // Napojené na planLogic.js
-      populateTrainingPlanTextarea();
-
-      statusMessage.textContent = '✅ Plan generated. You can now continue!';
-      statusMessage.style.color = 'green';
-    });
-
-    // --- EXPORT HANDLER (API call) ---
-    const apiUrl = 'https://api.webbyfe.com';
-
-    exportPlanBtn.addEventListener('click', async () => {
-      const planText = trainingPlanContentElement.value.trim();
-      const gymName = gymNameInput.value.trim();
-
-      if (!planText || planText === "No training plan generated yet.") {
-        alert('Please generate a plan first.');
-        return;
-      }
-      if (!gymName) {
-        alert('Please enter a gym name.');
-        return;
-      }
-
-      statusMessage.textContent = 'Creating your logbook... Please wait.';
-      statusMessage.style.color = 'yellow';
-      exportPlanBtn.disabled = true;
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: planText, gymName: gymName })
-        });
-
-        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-
-        const result = await response.json();
-
-        if (result.success) {
-          statusMessage.innerHTML = `✅ Success! <a href="${result.url}" target="_blank" style="color: lightgreen;">Open your logbook</a>`;
-          statusMessage.style.color = 'green';
-        } else {
-          throw new Error(result.error || 'An unknown backend error occurred.');
-        }
-
-      } catch (error) {
-        console.error('Error:', error);
-        statusMessage.textContent = '❌ Error creating logbook: ' + error.message;
-        statusMessage.style.color = 'red';
-      } finally {
-        exportPlanBtn.disabled = false;
-      }
-    });
-
-  }); // KONEC POSLUCHAČE DOMContentLoaded
-</script>
+</body>
+</html>
