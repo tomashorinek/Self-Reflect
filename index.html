@@ -3,131 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Self-Coaching Plan Generator</title>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <title>Self-Reflect</title>
   <style>
-    /* Zde patří VŠECHNY vaše CSS styly pro tmavý design, které jsme řešili. */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
-      color: white;
       margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
       padding: 2rem;
     }
-    h1, h2 { text-align: center; }
-    form { max-width: 600px; margin: auto; background: #1f1f1f; padding: 2rem; border-radius: 12px; }
-    label, select, input, textarea, button { display: block; width: 100%; margin-top: 1rem; }
-    select, input, textarea { padding: 0.5rem; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 6px; }
-    input::placeholder, textarea::placeholder { color: #888; }
-    button { background: #ff6600; color: white; font-weight: bold; padding: 1rem; border: none; border-radius: 6px; cursor: pointer; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .output { max-width: 800px; margin: 2rem auto; background: #1a1a1a; padding: 2rem; border-radius: 12px; }
-    #trainingPlanContent { width: 100%; box-sizing: border-box; margin-bottom: 1rem; min-height: 200px; white-space: pre-wrap; }
-    .day { background: #1e1e1e; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
-    .exercise { display: flex; justify-content: space-between; background: #2a2a2a; padding: 0.5rem 1rem; margin: 0.5rem 0; border-radius: 6px; }
-    .alt-list { color: #ccc; font-size: 0.9rem; }
-    .alt-button { color: #ff9900; cursor: pointer; }
-    #statusMessage { text-align: center; margin-top: 1rem; font-weight: bold; }
+    h1 { font-size: 2.8rem; margin-bottom: 1rem; }
+    p { font-size: 1.2rem; margin-bottom: 2rem; color: #ccc; }
+    a.button {
+      background-color: #ff6600;
+      color: white;
+      padding: 1rem 2rem;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    a.button:hover { background-color: #e65c00; }
   </style>
 </head>
 <body>
-  <h1>Self-Coaching Plan Generator</h1>
-  <form id="trackerForm">
-    <label for="goal">What's your main goal?</label>
-    <select id="goal">
-      <option value="Build muscle">Build muscle</option>
-      <option value="Lose fat">Lose fat</option>
-      <option value="Get stronger">Get stronger</option>
-      <option value="Improve conditioning">Improve conditioning</option>
-    </select>
-    <label for="frequency">How many days per week can you train?</label>
-    <select id="frequency" required>
-        <option value="">-- Select --</option><option value="1-2">1–2</option><option value="3-4">3–4</option><option value="5">5</option><option value="5plus">5+</option>
-    </select>
-    <label for="equipment">Select Equipment Access:</label>
-    <select id="equipment" name="equipment">
-        <option value="gym">Gym Access</option><option value="home">Home Training</option>
-    </select>
-    <label for="experience">Your training experience level?</label>
-    <select id="experience">
-        <option value="Beginner (0–3 months)">Beginner (0–3 months)</option><option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option><option value="Advanced (1–2 years)">Advanced (1–2 years)</option><option value="Advanced+ (2+ years)">Advanced+ (2+ years)</option>
-    </select>
-    <label for="injuries">Any injuries or health issues?</label>
-    <textarea id="injuries" placeholder="If yes, specify..."></textarea>
-    <label for="fixed">Do you want a fixed weekly routine?</label>
-    <select id="fixed"><option value="Yes">Yes</option><option value="No">No</option></select>
-    <label for="email">Where should we send your plan?</label>
-    <input type="email" id="email" placeholder="e.g. you@selftracker.com" required />
-    <label for="gymName">What gym do you primarily train at?</label>
-    <input type="text" id="gymName" placeholder="e.g. Fitness Center Relax" required />
-    <button type="submit">Generate My Plan</button>
-  </form>
-
-  <div class="output" id="outputBox" style="display:none">
-    <h2>Your Training Plan</h2>
-    <textarea id="trainingPlanContent" rows="20"></textarea>
-    <div id="training-container"></div>
-    <button id="exportPlanBtn">Continue with this plan</button>
-    <div id="statusMessage"></div>
-  </div>
-
-  <script>
-    // Zde bude veškerý váš stávající JavaScript pro generování plánu...
-    // Např. data pro `window.trainingDataGym`, `window.conditioningFrequencies`, atd.
-    // ...
-    // ... (vložte sem vaši logiku pro generování plánu)
-    
-    // --- NOVÁ ČÁST PRO ODESLÁNÍ DAT ---
-    
-    const exportPlanBtn = document.getElementById('exportPlanBtn');
-    const statusMessage = document.getElementById('statusMessage');
-
-    // Nastavte si API adresu, kterou jste si vytvořil v Cloudflare
-    const apiUrl = 'https://api.webbyfe.com/'; // Můžete si zvolit i např. /create-plan
-
-    exportPlanBtn.addEventListener('click', async () => {
-      const planText = document.getElementById('trainingPlanContent').value.trim();
-      const gymName = document.getElementById('gymName').value.trim();
-
-      if (!planText || !gymName) {
-        alert('Please generate a plan and enter a gym name.');
-        return;
-      }
-
-      statusMessage.textContent = 'Creating your logbook...';
-      statusMessage.style.color = 'yellow';
-      exportPlanBtn.disabled = true;
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            plan: planText,
-            gymName: gymName
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.status === 'success') {
-          statusMessage.textContent = 'Success! Opening your logbook in a new tab...';
-          statusMessage.style.color = 'green';
-          window.open(result.sheetUrl, '_blank');
-        } else {
-          throw new Error(result.message);
-        }
-
-      } catch (error) {
-        console.error('Error:', error);
-        statusMessage.textContent = 'Error creating logbook: ' + error.message;
-        statusMessage.style.color = 'red';
-      } finally {
-        exportPlanBtn.disabled = false;
-      }
-    });
-  </script>
+  <h1>Welcome to Self-Reflect</h1>
+  <p>Start building your own training program with our self-coaching system.</p>
+  <a class="button" href="training.html">Start Your Plan</a>
 </body>
 </html>
