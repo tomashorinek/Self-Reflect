@@ -10,7 +10,7 @@
         h1 { color: #ff8c00; }
         form { background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
         label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: bold; }
-        select, input { width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
+        select, input, textarea { width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
         button { background: #ff8c00; color: #121212; font-weight: bold; padding: 1rem; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 2rem; font-size: 1rem; }
         button:disabled { background: #555; cursor: not-allowed; }
         .output { margin-top: 2rem; background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
@@ -28,26 +28,50 @@
                 <option value="Build muscle">Build muscle</option>
                 <option value="Lose fat">Lose fat</option>
                 <option value="Get stronger">Get stronger</option>
-            </select>
-            
-            <label for="frequency">How many days per week can you train?</label>
-            <select id="frequency">
-                <option value="3-4">3-4 days</option>
-                <option value="5">5 days</option>
+                <option value="Improve conditioning">Improve conditioning</option>
             </select>
 
+            <label for="frequency">How many days per week can you train?</label>
+            <select id="frequency" required>
+                <option value="3-4">3–4</option>
+                <option value="5">5</option>
+                <option value="5plus">5+</option>
+            </select>
+
+            <label for="equipment">Select Equipment Access:</label>
+            <select id="equipment">
+                <option value="gym">Gym Access</option>
+                <option value="home">Home Training</option>
+            </select>
+
+            <label for="experience">Your training experience level?</label>
+            <select id="experience">
+                <option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
+                <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
+                <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
+            </select>
+
+            <label for="injuries">Any injuries or health issues?</label>
+            <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+
+            <label for="fixed">Do you want a fixed weekly routine?</label>
+            <select id="fixed">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+
+            <label for="email">Your email (optional):</label>
+            <input type="email" id="email" placeholder="you@example.com" />
+
             <label for="gymName">What is the name of your gym?</label>
-            <input type="text" id="gymName" value="My Home Gym" required />
+            <input type="text" id="gymName" placeholder="e.g., Fitness World" required />
 
             <button type="submit">Generate My Plan</button>
         </form>
 
         <div class="output" id="outputBox" style="display:none;">
             <h2>Your Generated Plan</h2>
-            <p>Review your plan below. You can click "Continue" to create your Google Sheet logbook.</p>
-            
             <div id="training-container"></div>
-            
             <button id="continueButton">Continue with this plan</button>
             <div id="finalStatus"></div>
         </div>
@@ -56,7 +80,6 @@
     <script type="module" src="./planLogic.js"></script>
 
     <script>
-        // TENTO POSLUCHAČ JE KLÍČOVÝ. Říká: "Počkej, až bude celá stránka načtená, pak spusť kód."
         document.addEventListener('DOMContentLoaded', () => {
             const trackerForm = document.getElementById('trackerForm');
             const outputBox = document.getElementById('outputBox');
@@ -66,60 +89,61 @@
             const gymNameInput = document.getElementById('gymName');
             const apiUrl = 'https://api.webbyfe.com';
 
-            // Obsluha tlačítka "Generate My Plan"
+            // --- Obsluha tlačítka "Generate My Plan" ---
             trackerForm.addEventListener('submit', (event) => {
                 event.preventDefault();
+                
+                // Sbíráme data ze VŠECH polí formuláře
                 const formData = {
                     goal: document.getElementById('goal').value,
-                    frequency: document.getElementById('frequency').value
+                    frequency: document.getElementById('frequency').value,
+                    equipment: document.getElementById('equipment').value,
+                    experience: document.getElementById('experience').value,
+                    injuries: document.getElementById('injuries').value,
+                    fixed: document.getElementById('fixed').value,
+                    email: document.getElementById('email').value,
+                    gymName: document.getElementById('gymName').value
                 };
 
                 if (window.generateAndDisplayPlan) {
                     window.generateAndDisplayPlan(formData);
                     outputBox.style.display = 'block';
                 } else {
-                    alert('Error: Plan logic script not loaded correctly.');
+                    alert('Error: Plan logic script (planLogic.js) not loaded correctly.');
                 }
             });
 
-            // Obsluha tlačítka "Continue with this plan"
+            // --- Obsluha tlačítka "Continue with this plan" ---
             continueButton.addEventListener('click', async () => {
                 const planText = trainingContainer.innerText.trim();
-                const gymName = gymNameInput.value.trim();
+                const gymName = gymNameInput.value.trim(); // Znovu načteme aktuální hodnotu
 
-                if (!planText) {
-                    alert('Please generate a plan first.');
+                if (!planText || !gymName) {
+                    alert('Please generate a plan and enter a gym name first.');
                     return;
                 }
 
                 finalStatus.textContent = 'Creating your logbook...';
-                finalStatus.style.color = '#ffae42';
                 continueButton.disabled = true;
 
                 try {
+                    // Posíláme plán i název posilovny
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ plan: planText, gymName: gymName })
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`Server returned an error: ${response.statusText}`);
-                    }
-
+                    if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
                     const result = await response.json();
 
                     if (result.success) {
-                        finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
-                        finalStatus.style.color = '#32cd32';
+                        finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Logbook</a>`;
                     } else {
-                        throw new Error(result.error || 'An unknown backend error occurred.');
+                        throw new Error(result.error || 'Unknown backend error.');
                     }
-
                 } catch (error) {
-                    console.error('Fetch error:', error);
                     finalStatus.textContent = `❌ Error: ${error.message}`;
-                    finalStatus.style.color = '#ff4500';
                 } finally {
                     continueButton.disabled = false;
                 }
