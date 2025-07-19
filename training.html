@@ -155,12 +155,17 @@
         const exercises = day.querySelectorAll('.exercise');
         console.log(`  🗓 ${dayTitle} – ${exercises.length} exercises`);
 
-        exercises.forEach((ex, exIndex) => {
-            const text = ex.childNodes[0].textContent.trim();
-            if (text.length > 0) {
-                output += `- ${text}\n`;
+        exercises.forEach((ex) => {
+            // Vyfiltrujeme tlačítka a získáme pouze hlavní text
+            const clone = ex.cloneNode(true);
+            clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
+            const cleanText = clone.textContent.trim();
+
+            if (cleanText.length > 0) {
+                output += `- ${cleanText}\n`;
             }
         });
+
         output += '\n';
     });
 
