@@ -14,7 +14,7 @@ const trainingData = {
       { name: "Chest Supported Wide Grip Row Machine", sets: "3x10-12", alt: ["T-bar", "Bench Support DB Row"] },
       { name: "Chest Press Machine", sets: "3x12", alt: ["Benchpress", "Dumbbell Press"] },
       { name: "Hamstring Leg Curl", sets: "3x12-3x10", alt: ["Seated", "Laying", "Cables"] },
-      { name: "Leg Press", sets: "-", alt: ["Hack Squat", "Smith Squat"] },
+      { name: "Leg Press", sets: "3x8-10", alt: ["Hack Squat", "Smith Squat"] },
       { name: "Cable Crunch", sets: "2x15", alt: ["Sit-ups", "Knee Raises"] }
     ]
   },
