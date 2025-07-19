@@ -121,6 +121,7 @@
             <h2>Your Generated Plan</h2>
             <div id="training-container"></div>
             <button id="continueButton">Continue with this plan</button>
+            <textarea id="trainingPlanContent" style="display:none;"></textarea>
             <div id="finalStatus"></div>
         </div>
     </div>
@@ -139,6 +140,27 @@
             const trainingContainer = document.getElementById('training-container');
             const gymNameInput = document.getElementById('gymName');
             const apiUrl = 'https://api.webbyfe.com';
+function populateTrainingPlanTextarea() {
+    const container = document.getElementById('training-container');
+    const days = container.querySelectorAll('.day');
+
+    let output = '';
+    days.forEach(day => {
+        const dayTitle = day.querySelector('h3')?.innerText.trim() || '';
+        output += dayTitle + '\n';
+
+        const exercises = day.querySelectorAll('.exercise');
+        exercises.forEach(ex => {
+            const text = ex.childNodes[0].textContent.trim();
+            if (text.length > 0) {
+                output += '- ' + text + '\n';
+            }
+        });
+        output += '\n';
+    });
+
+    document.getElementById('trainingPlanContent').value = output.trim();
+}
 
             // --- Obsluha tlačítka "Generate My Plan" ---
             trackerForm.addEventListener('submit', async (event) => { // Přidáno 'async'
@@ -167,7 +189,9 @@
 
             // --- Obsluha tlačítka "Continue with this plan" ---
             continueButton.addEventListener('click', async () => {
-                const planText = trainingContainer.innerText.trim();
+              populateTrainingPlanTextarea(); // vloží správný text do textarea
+                const planText = document.getElementById('trainingPlanContent').value.trim();
+
                 const gymName = gymNameInput.value.trim();
 
                 if (!planText || !gymName) {
