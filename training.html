@@ -173,6 +173,10 @@
     document.getElementById('trainingPlanContent').value = output.trim();
 }
 
+    console.log("✅ Final output to be sent:\n" + output.trim());
+    document.getElementById('trainingPlanContent').value = output.trim();
+}
+
             // --- Obsluha tlačítka "Generate My Plan" ---
             trackerForm.addEventListener('submit', async (event) => { // Přidáno 'async'
                 event.preventDefault();
