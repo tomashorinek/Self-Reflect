@@ -140,25 +140,31 @@
             const trainingContainer = document.getElementById('training-container');
             const gymNameInput = document.getElementById('gymName');
             const apiUrl = 'https://api.webbyfe.com';
-function populateTrainingPlanTextarea() {
+
+    function populateTrainingPlanTextarea() {
     const container = document.getElementById('training-container');
     const days = container.querySelectorAll('.day');
 
     let output = '';
-    days.forEach(day => {
-        const dayTitle = day.querySelector('h3')?.innerText.trim() || '';
+    console.log("▶️ Days found:", days.length);
+
+    days.forEach((day, dayIndex) => {
+        const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${dayIndex + 1}`;
         output += dayTitle + '\n';
 
         const exercises = day.querySelectorAll('.exercise');
-        exercises.forEach(ex => {
+        console.log(`  🗓 ${dayTitle} – ${exercises.length} exercises`);
+
+        exercises.forEach((ex, exIndex) => {
             const text = ex.childNodes[0].textContent.trim();
             if (text.length > 0) {
-                output += '- ' + text + '\n';
+                output += `- ${text}\n`;
             }
         });
         output += '\n';
     });
 
+    console.log("✅ Final output to be sent:\n" + output.trim());
     document.getElementById('trainingPlanContent').value = output.trim();
 }
 
@@ -189,15 +195,20 @@ function populateTrainingPlanTextarea() {
 
             // --- Obsluha tlačítka "Continue with this plan" ---
             continueButton.addEventListener('click', async () => {
-              populateTrainingPlanTextarea(); // vloží správný text do textarea
-                const planText = document.getElementById('trainingPlanContent').value.trim();
+    console.log("🚀 'Continue with this plan' clicked");
+    populateTrainingPlanTextarea();
 
-                const gymName = gymNameInput.value.trim();
+    const planText = document.getElementById('trainingPlanContent').value.trim();
+    const gymName = gymNameInput.value.trim();
 
-                if (!planText || !gymName) {
-                    alert('Please generate a plan and enter a gym name first.');
-                    return;
-                }
+    console.log("📤 Sending planText:", planText.slice(0, 200)); // zkrácený výpis
+    console.log("📍 Gym name:", gymName);
+
+    if (!planText || !gymName) {
+        alert('Please generate a plan and enter a gym name first.');
+        return;
+    }
+
 
                 finalStatus.textContent = 'Creating your logbook...';
                 finalStatus.style.color = '#ffae42'; // Orange color for pending
