@@ -190,8 +190,10 @@ function populateTrainingPlanTextarea() {
 
                 try {
                     // Voláme importovanou funkci
-                    await generateTrainingPlan(formData); // Voláme s await, protože funkce je asynchronní
-                    outputBox.style.display = 'block';
+                   await generateTrainingPlan(formData);
+                   populateTrainingPlanTextarea(); // <-- přidej tuto řádku
+                   outputBox.style.display = 'block';
+ 
                 } catch (error) {
                     alert(`Error generating plan: ${error.message || error}`);
                     console.error('Error generating plan:', error);
