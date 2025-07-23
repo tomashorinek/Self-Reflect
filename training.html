@@ -1,225 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Self-Coaching Plan Generator</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 700px; }
-        h1 { color: #ff8c00; }
-        form { background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
-        label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: bold; }
-        select, input, textarea { width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
-        button { background: #ff8c00; color: #121212; font-weight: bold; padding: 1rem; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 2rem; font-size: 1rem; }
-        button:disabled { background: #555; cursor: not-allowed; }
-        .output { margin-top: 2rem; background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
-        #finalStatus { text-align: center; margin-top: 1rem; font-weight: bold; }
-        a { color: #ffae42; }
-        .exercise { background: #2a2a2a; padding: 0.8rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; cursor: grab; }
-        .exercise:active { cursor: grabbing; }
-        .alt-button { background: #444; color: #e0e0e0; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer; font-size: 0.9rem; margin-left: 10px; }
-        .alt-button:hover { background: #555; }
-        .remove-gym-btn { background: #822; color: #fff; border: none; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; margin-left: 8px; }
-        .sortable-ghost { opacity: 0.4; background-color: #3a3a3a; }
-        .day { margin-bottom: 2rem; padding: 1rem; background: #2a2a2a; border-radius: 8px; border: 1px solid #333; }
-        .day h3 { color: #ffae42; margin-top: 0; }
-        .exercise .alt-list { font-size: 0.8em; color: #999; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Coaching Plan Generator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 700px;
+    }
+    h1 {
+      color: #ff8c00;
+    }
+    form {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #ff8c00;
+      color: #121212;
+      font-weight: bold;
+      padding: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 2rem;
+      font-size: 1rem;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .output {
+      margin-top: 2rem;
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    #finalStatus {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .gym-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .remove-btn {
+      background-color: #8b0000;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Self-Coaching Plan Generator</h1>
-        <form id="trackerForm">
-            <label for="goal">What's your main goal?</label>
-            <select id="goal">
-                <option value="Build muscle">Build muscle</option>
-                <option value="Lose fat">Lose fat</option>
-                <option value="Get stronger">Get stronger</option>
-                <option value="Improve conditioning">Improve conditioning</option>
-            </select>
+  <div class="container">
+    <h1>Self-Coaching Plan Generator</h1>
+    <form id="trackerForm">
+      <label for="goal">What's your main goal?</label>
+      <select id="goal">
+        <option value="Build muscle">Build muscle</option>
+        <option value="Lose fat">Lose fat</option>
+        <option value="Get stronger">Get stronger</option>
+        <option value="Improve conditioning">Improve conditioning</option>
+      </select>
 
-            <label for="frequency">How many days per week can you train?</label>
-            <select id="frequency" required>
-                <option value="1-2">1-2</option>
-                <option value="3-4">3–4</option>
-                <option value="5">5</option>
-                <option value="5plus">5+</option>
-            </select>
+      <label for="frequency">How many days per week can you train?</label>
+      <select id="frequency" required>
+        <option value="1-2">1-2</option>
+        <option value="3-4">3–4</option>
+        <option value="5">5</option>
+        <option value="5plus">5+</option>
+      </select>
 
-            <label for="equipment">Select Equipment Access:</label>
-            <select id="equipment">
-                <option value="gym">Gym Access</option>
-                <option value="home">Home Training</option>
-            </select>
+      <label for="equipment">Select Equipment Access:</label>
+      <select id="equipment">
+        <option value="gym">Gym Access</option>
+        <option value="home">Home Training</option>
+      </select>
 
-            <label for="experience">Your training experience level?</label>
-            <select id="experience">
-                <option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
-                <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
-                <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
-            </select>
+      <label for="experience">Your training experience level?</label>
+      <select id="experience">
+        <option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
+        <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
+        <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
+      </select>
 
-            <label for="injuries">Any injuries or health issues?</label>
-            <textarea id="injuries" placeholder="If yes, specify..."></textarea>
+      <label for="injuries">Any injuries or health issues?</label>
+      <textarea id="injuries" placeholder="If yes, specify..."></textarea>
 
-            <label for="fixed">Do you want a fixed weekly routine?</label>
-            <select id="fixed">
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-            </select>
+      <label for="fixed">Do you want a fixed weekly routine?</label>
+      <select id="fixed">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
 
-            <label for="email">Your email (optional):</label>
-            <input type="email" id="email" placeholder="you@example.com" />
+      <label for="email">Your email (optional):</label>
+      <input type="email" id="email" placeholder="you@example.com" />
 
-            <label for="gymNames">Gyms where you train:</label>
-            <div id="gymInputs">
-              <div class="gym-input-row">
-                <input type="text" name="gymNames" class="gym-input" placeholder="Enter gym name" required />
-              </div>
-            </div>
-            <button type="button" id="addGymBtn">➕ Add another gym</button>
-
-            <button type="submit">Generate My Plan</button>
-        </form>
-
-        <div class="output" id="outputBox" style="display:none;">
-            <h2>Your Generated Plan</h2>
-            <div id="training-container"></div>
-            <button id="continueButton">Continue with this plan</button>
-            <textarea id="trainingPlanContent" style="display:none;"></textarea>
-            <div id="finalStatus"></div>
+      <label>Gyms where you train:</label>
+      <div id="gymFields">
+        <div class="gym-input-wrapper">
+          <input type="text" class="gymName" placeholder="e.g., Fitness World" required />
         </div>
+      </div>
+      <button type="button" onclick="addGymField()">Add Another Gym</button>
+
+      <button type="submit">Generate My Plan</button>
+    </form>
+
+    <div class="output" id="outputBox" style="display:none;">
+      <h2>Your Generated Plan</h2>
+      <div id="training-container"></div>
+      <button id="continueButton">Continue with this plan</button>
+      <textarea id="trainingPlanContent" style="display:none;"></textarea>
+      <div id="finalStatus"></div>
     </div>
+  </div>
 
-    <script type="module">
-        import { generateTrainingPlan } from './planLogic.js';
+  <script type="module">
+    import { generateTrainingPlan } from './planLogic.js';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const gymInputsContainer = document.getElementById('gymInputs');
-            const addGymBtn = document.getElementById('addGymBtn');
+    const apiUrl = 'https://api.webbyfe.com';
 
-            addGymBtn.addEventListener('click', () => {
-                const row = document.createElement('div');
-                row.className = 'gym-input-row';
+    window.addGymField = function () {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'gym-input-wrapper';
 
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = 'gymNames';
-                input.className = 'gym-input';
-                input.placeholder = 'Enter another gym';
-                input.required = true;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'gymName';
+      input.placeholder = 'e.g., Gym X';
 
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'remove-gym-btn';
-                removeBtn.textContent = '✖';
-                removeBtn.onclick = () => row.remove();
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '✖';
+      removeBtn.onclick = () => wrapper.remove();
 
-                row.appendChild(input);
-                row.appendChild(removeBtn);
-                gymInputsContainer.appendChild(row);
-            });
+      wrapper.appendChild(input);
+      wrapper.appendChild(removeBtn);
 
-            const trackerForm = document.getElementById('trackerForm');
-            const outputBox = document.getElementById('outputBox');
-            const continueButton = document.getElementById('continueButton');
-            const finalStatus = document.getElementById('finalStatus');
-            const trainingContainer = document.getElementById('training-container');
-            const apiUrl = 'https://api.webbyfe.com';
+      document.getElementById('gymFields').appendChild(wrapper);
+    };
 
-            function populateTrainingPlanTextarea() {
-                const container = document.getElementById('training-container');
-                const days = container.querySelectorAll('.day');
-
-                let output = '';
-                days.forEach((day, dayIndex) => {
-                    const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${dayIndex + 1}`;
-                    output += dayTitle + '\n';
-
-                    const exercises = day.querySelectorAll('.exercise');
-                    exercises.forEach((ex) => {
-                        const clone = ex.cloneNode(true);
-                        clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
-                        const cleanText = clone.textContent.trim();
-                        if (cleanText.length > 0) output += `- ${cleanText}\n`;
-                    });
-
-                    output += '\n';
-                });
-
-                document.getElementById('trainingPlanContent').value = output.trim();
-            }
-
-            trackerForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                const gymInputs = document.querySelectorAll('input[name="gymNames"]');
-                const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter((name, i, arr) => name && arr.indexOf(name) === i);
-                if (gymNames.length === 0) {
-                    alert('Please enter at least one gym name.');
-                    return;
-                }
-                const formData = {
-                    goal: document.getElementById('goal').value,
-                    frequency: document.getElementById('frequency').value,
-                    equipment: document.getElementById('equipment').value,
-                    experience: document.getElementById('experience').value,
-                    injuries: document.getElementById('injuries').value,
-                    fixed: document.getElementById('fixed').value,
-                    email: document.getElementById('email').value,
-                    gymNames: gymNames
-                };
-                try {
-                    await generateTrainingPlan(formData);
-                    populateTrainingPlanTextarea();
-                    outputBox.style.display = 'block';
-                } catch (error) {
-                    alert(`Error generating plan: ${error.message || error}`);
-                    console.error('Error generating plan:', error);
-                }
-            });
-
-continueButton.addEventListener('click', async () => {
-    console.log("🚀 'Continue with this plan' clicked");
-
-    populateTrainingPlanTextarea(); // ← musí být na prvním místě
-
-    const planText = document.getElementById('trainingPlanContent').value.trim();
-    const gymInputs = document.querySelectorAll('input[name=\"gymNames\"]');
-    const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter(name => name !== '');
-
-    console.log('📤 Sending planText:', planText);
-    console.log('📍 Gym names:', gymNames);
-
-    if (!planText || gymNames.length === 0) {
-        alert('Please generate a plan and enter at least one gym name.');
-        return;
-    }
-                finalStatus.textContent = 'Creating your logbook...';
-                finalStatus.style.color = '#ffae42';
-                continueButton.disabled = true;
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ plan: planText, gymNames: gymNames })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
-                        finalStatus.style.color = '#32cd32';
-                    } else {
-                        throw new Error(result.error || 'An unknown backend error occurred.');
-                    }
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    finalStatus.textContent = `❌ Error: ${error.message}`;
-                    finalStatus.style.color = '#ff4500';
-                } finally {
-                    continueButton.disabled = false;
-                }
-            });
+    function populateTrainingPlanTextarea() {
+      const container = document.getElementById('training-container');
+      const days = container.querySelectorAll('.day');
+      let output = '';
+      days.forEach((day, i) => {
+        const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+        output += dayTitle + '\n';
+        const exercises = day.querySelectorAll('.exercise');
+        exercises.forEach(ex => {
+          const clone = ex.cloneNode(true);
+          clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
+          const cleanText = clone.textContent.trim();
+          if (cleanText.length > 0) output += `- ${cleanText}\n`;
         });
-    </script>
+        output += '\n';
+      });
+      document.getElementById('trainingPlanContent').value = output.trim();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('trackerForm');
+      const outputBox = document.getElementById('outputBox');
+      const continueBtn = document.getElementById('continueButton');
+      const finalStatus = document.getElementById('finalStatus');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const gymNames = Array.from(document.querySelectorAll('.gymName'))
+          .map(input => input.value.trim())
+          .filter(name => name !== '');
+
+        if (gymNames.length === 0) {
+          alert('Please enter at least one gym name.');
+          return;
+        }
+
+        const formData = {
+          goal: document.getElementById('goal').value,
+          frequency: document.getElementById('frequency').value,
+          equipment: document.getElementById('equipment').value,
+          experience: document.getElementById('experience').value,
+          injuries: document.getElementById('injuries').value,
+          fixed: document.getElementById('fixed').value,
+          email: document.getElementById('email').value,
+          gymNames
+        };
+
+        try {
+          await generateTrainingPlan(formData);
+          populateTrainingPlanTextarea();
+          outputBox.style.display = 'block';
+        } catch (error) {
+          alert('❌ Error: ' + (error.message || error));
+        }
+      });
+
+      continueBtn.addEventListener('click', async () => {
+        populateTrainingPlanTextarea();
+        const planText = document.getElementById('trainingPlanContent').value.trim();
+        const gymNames = Array.from(document.querySelectorAll('.gymName'))
+          .map(input => input.value.trim())
+          .filter(name => name !== '');
+
+        if (!planText || gymNames.length === 0) {
+          alert('Please generate a plan and enter at least one gym name.');
+          return;
+        }
+
+        finalStatus.textContent = 'Creating your logbook...';
+        finalStatus.style.color = '#ffae42';
+        continueBtn.disabled = true;
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: planText, gymNames })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
+            finalStatus.style.color = '#32cd32';
+          } else {
+            throw new Error(result.error || 'Unknown backend error.');
+          }
+        } catch (error) {
+          finalStatus.textContent = `❌ Error: ${error.message}`;
+          finalStatus.style.color = '#ff4500';
+        } finally {
+          continueBtn.disabled = false;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
