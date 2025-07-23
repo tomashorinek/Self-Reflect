@@ -110,9 +110,15 @@
 
             <label for="email">Your email (optional):</label>
             <input type="email" id="email" placeholder="you@example.com" />
+            <label for="gymName">Where do you usually train?</label>
+            <select id="gymName" multiple size="4">
+            <option value="Fitness World">Fitness World</option>
+            <option value="MyGym Ostrava">MyGym Ostrava</option>
+            <option value="Home Gym">Home Gym</option>
+            <option value="Other">Other (write below)</option>
+            </select>
+            <input type="text" id="customGymName" placeholder="Custom gym name (optional)" />
 
-            <label for="gymName">What is the name of your gym?</label>
-            <input type="text" id="gymName" placeholder="e.g., Fitness World" required />
 
             <button type="submit">Generate My Plan</button>
         </form>
