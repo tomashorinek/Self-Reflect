@@ -16,57 +16,18 @@
         .output { margin-top: 2rem; background: #1e1e1e; padding: 2rem; border-radius: 8px; border: 1px solid #333; }
         #finalStatus { text-align: center; margin-top: 1rem; font-weight: bold; }
         a { color: #ffae42; }
-        /* Přidáno pro Sortable.js */
-        .exercise {
-            background: #2a2a2a;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #444;
-            cursor: grab;
-        }
-        .exercise:active {
-            cursor: grabbing;
-        }
-        .alt-button {
-            background: #444;
-            color: #e0e0e0;
-            border: none;
-            border-radius: 4px;
-            padding: 0.5rem;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-left: 10px;
-        }
-        .alt-button:hover {
-            background: #555;
-        }
-        .sortable-ghost {
-            opacity: 0.4;
-            background-color: #3a3a3a;
-        }
-        .day {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: #2a2a2a;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        .day h3 {
-            color: #ffae42;
-            margin-top: 0;
-        }
-        .exercise .alt-list {
-            font-size: 0.8em;
-            color: #999;
-        }
+        .exercise { background: #2a2a2a; padding: 0.8rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; cursor: grab; }
+        .exercise:active { cursor: grabbing; }
+        .alt-button { background: #444; color: #e0e0e0; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer; font-size: 0.9rem; margin-left: 10px; }
+        .alt-button:hover { background: #555; }
+        .remove-gym-btn { background: #822; color: #fff; border: none; border-radius: 4px; padding: 0.3rem 0.6rem; cursor: pointer; margin-left: 8px; }
+        .sortable-ghost { opacity: 0.4; background-color: #3a3a3a; }
+        .day { margin-bottom: 2rem; padding: 1rem; background: #2a2a2a; border-radius: 8px; border: 1px solid #333; }
+        .day h3 { color: #ffae42; margin-top: 0; }
+        .exercise .alt-list { font-size: 0.8em; color: #999; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Self-Coaching Plan Generator</h1>
         <form id="trackerForm">
@@ -110,15 +71,14 @@
 
             <label for="email">Your email (optional):</label>
             <input type="email" id="email" placeholder="you@example.com" />
-            <label for="gymName">Where do you usually train?</label>
-            <select id="gymName" multiple size="4">
-            <option value="Fitness World">Fitness World</option>
-            <option value="MyGym Ostrava">MyGym Ostrava</option>
-            <option value="Home Gym">Home Gym</option>
-            <option value="Other">Other (write below)</option>
-            </select>
-            <input type="text" id="customGymName" placeholder="Custom gym name (optional)" />
 
+            <label for="gymNames">Gyms where you train:</label>
+            <div id="gymInputs">
+              <div class="gym-input-row">
+                <input type="text" name="gymNames" class="gym-input" placeholder="Enter gym name" required />
+              </div>
+            </div>
+            <button type="button" id="addGymBtn">➕ Add another gym</button>
 
             <button type="submit">Generate My Plan</button>
         </form>
@@ -132,57 +92,73 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
     <script type="module">
-        // Importujeme hlavní funkci z planLogic.js
         import { generateTrainingPlan } from './planLogic.js';
 
         document.addEventListener('DOMContentLoaded', () => {
+            const gymInputsContainer = document.getElementById('gymInputs');
+            const addGymBtn = document.getElementById('addGymBtn');
+
+            addGymBtn.addEventListener('click', () => {
+                const row = document.createElement('div');
+                row.className = 'gym-input-row';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'gymNames';
+                input.className = 'gym-input';
+                input.placeholder = 'Enter another gym';
+                input.required = true;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-gym-btn';
+                removeBtn.textContent = '✖';
+                removeBtn.onclick = () => row.remove();
+
+                row.appendChild(input);
+                row.appendChild(removeBtn);
+                gymInputsContainer.appendChild(row);
+            });
+
             const trackerForm = document.getElementById('trackerForm');
             const outputBox = document.getElementById('outputBox');
             const continueButton = document.getElementById('continueButton');
             const finalStatus = document.getElementById('finalStatus');
             const trainingContainer = document.getElementById('training-container');
-            const gymNameInput = document.getElementById('gymName');
             const apiUrl = 'https://api.webbyfe.com';
 
-function populateTrainingPlanTextarea() {
-    const container = document.getElementById('training-container');
-    const days = container.querySelectorAll('.day');
+            function populateTrainingPlanTextarea() {
+                const container = document.getElementById('training-container');
+                const days = container.querySelectorAll('.day');
 
-    let output = '';
-    console.log("▶️ Days found:", days.length);
+                let output = '';
+                days.forEach((day, dayIndex) => {
+                    const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${dayIndex + 1}`;
+                    output += dayTitle + '\n';
 
-    days.forEach((day, dayIndex) => {
-        const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${dayIndex + 1}`;
-        output += dayTitle + '\n';
+                    const exercises = day.querySelectorAll('.exercise');
+                    exercises.forEach((ex) => {
+                        const clone = ex.cloneNode(true);
+                        clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
+                        const cleanText = clone.textContent.trim();
+                        if (cleanText.length > 0) output += `- ${cleanText}\n`;
+                    });
 
-        const exercises = day.querySelectorAll('.exercise');
-        console.log(`  🗓 ${dayTitle} – ${exercises.length} exercises`);
+                    output += '\n';
+                });
 
-        exercises.forEach((ex) => {
-            const clone = ex.cloneNode(true);
-            clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
-            const cleanText = clone.textContent.trim();
-
-            if (cleanText.length > 0) {
-                output += `- ${cleanText}\n`;
+                document.getElementById('trainingPlanContent').value = output.trim();
             }
-        });
 
-        output += '\n';
-    });
-
-    console.log("✅ Final output to be sent:\n" + output.trim());
-    document.getElementById('trainingPlanContent').value = output.trim();
-}
-
-
-            // --- Obsluha tlačítka "Generate My Plan" ---
-            trackerForm.addEventListener('submit', async (event) => { // Přidáno 'async'
+            trackerForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                
+                const gymInputs = document.querySelectorAll('input[name="gymNames"]');
+                const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter((name, i, arr) => name && arr.indexOf(name) === i);
+                if (gymNames.length === 0) {
+                    alert('Please enter at least one gym name.');
+                    return;
+                }
                 const formData = {
                     goal: document.getElementById('goal').value,
                     frequency: document.getElementById('frequency').value,
@@ -191,72 +167,52 @@ function populateTrainingPlanTextarea() {
                     injuries: document.getElementById('injuries').value,
                     fixed: document.getElementById('fixed').value,
                     email: document.getElementById('email').value,
-                    gymName: document.getElementById('gymName').value
+                    gymNames: gymNames
                 };
-
                 try {
-                    // Voláme importovanou funkci
-                   await generateTrainingPlan(formData);
-                   populateTrainingPlanTextarea(); // <-- přidej tuto řádku
-                   outputBox.style.display = 'block';
- 
+                    await generateTrainingPlan(formData);
+                    populateTrainingPlanTextarea();
+                    outputBox.style.display = 'block';
                 } catch (error) {
                     alert(`Error generating plan: ${error.message || error}`);
                     console.error('Error generating plan:', error);
                 }
             });
 
-            // --- Obsluha tlačítka "Continue with this plan" ---
             continueButton.addEventListener('click', async () => {
-    console.log("🚀 'Continue with this plan' clicked");
-    populateTrainingPlanTextarea();
-
-    const planText = document.getElementById('trainingPlanContent').value.trim();
-    const gymName = gymNameInput.value.trim();
-
-    console.log("📤 Sending planText:", planText.slice(0, 200)); // zkrácený výpis
-    console.log("📍 Gym name:", gymName);
-
-    if (!planText || !gymName) {
-        alert('Please generate a plan and enter a gym name first.');
-        return;
-    }
-
-
+                populateTrainingPlanTextarea();
+                const planText = document.getElementById('trainingPlanContent').value.trim();
+                const gymInputs = document.querySelectorAll('input[name="gymNames"]');
+                const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter(name => name !== '');
+                if (!planText || gymNames.length === 0) {
+                    alert('Please generate a plan and enter at least one gym name.');
+                    return;
+                }
                 finalStatus.textContent = 'Creating your logbook...';
-                finalStatus.style.color = '#ffae42'; // Orange color for pending
+                finalStatus.style.color = '#ffae42';
                 continueButton.disabled = true;
-
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ plan: planText, gymName: gymName })
+                        body: JSON.stringify({ plan: planText, gymNames: gymNames })
                     });
-
-                    if (!response.ok) {
-                        throw new Error(`Server returned an error: ${response.statusText}`);
-                    }
-
                     const result = await response.json();
-
                     if (result.success) {
                         finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
-                        finalStatus.style.color = '#32cd32'; // Green color for success
+                        finalStatus.style.color = '#32cd32';
                     } else {
                         throw new Error(result.error || 'An unknown backend error occurred.');
                     }
-
                 } catch (error) {
                     console.error('Fetch error:', error);
                     finalStatus.textContent = `❌ Error: ${error.message}`;
-                    finalStatus.style.color = '#ff4500'; // Red color for error
+                    finalStatus.style.color = '#ff4500';
                 } finally {
                     continueButton.disabled = false;
                 }
             });
         });
     </script>
-
 </body>
 </html>
