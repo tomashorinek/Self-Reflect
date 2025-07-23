@@ -365,4 +365,37 @@ export async function generateTrainingPlan(formData) {
         enforceUniqueExercises(currentPlan);
         renderPlan(currentPlan, adjustedFreq, formData);
     }
+    
+    // --- Insert plan into DOM in simple format for populateTrainingPlanTextarea ---
+    if (currentPlan) {
+        const container = document.getElementById('training-container');
+        if (container) {
+            container.innerHTML = '';
+
+            const planArray = Array.isArray(currentPlan)
+                ? currentPlan
+                : Object.entries(currentPlan).map(([title, list]) => ({
+                    title,
+                    exercises: list.map(ex => typeof ex === 'string' ? ex : ex.name || ex)
+                }));
+
+            planArray.forEach(day => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+
+                const header = document.createElement('h3');
+                header.textContent = day.title;
+                dayDiv.appendChild(header);
+
+                day.exercises.forEach(ex => {
+                    const exDiv = document.createElement('div');
+                    exDiv.className = 'exercise';
+                    exDiv.textContent = `- ${ex}`;
+                    dayDiv.appendChild(exDiv);
+                });
+
+                container.appendChild(dayDiv);
+            });
+        }
+    }
 }
