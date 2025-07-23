@@ -179,15 +179,22 @@
                 }
             });
 
-            continueButton.addEventListener('click', async () => {
-                populateTrainingPlanTextarea();
-                const planText = document.getElementById('trainingPlanContent').value.trim();
-                const gymInputs = document.querySelectorAll('input[name="gymNames"]');
-                const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter(name => name !== '');
-                if (!planText || gymNames.length === 0) {
-                    alert('Please generate a plan and enter at least one gym name.');
-                    return;
-                }
+continueButton.addEventListener('click', async () => {
+    console.log("🚀 'Continue with this plan' clicked");
+
+    populateTrainingPlanTextarea(); // ← musí být na prvním místě
+
+    const planText = document.getElementById('trainingPlanContent').value.trim();
+    const gymInputs = document.querySelectorAll('input[name=\"gymNames\"]');
+    const gymNames = Array.from(gymInputs).map(input => input.value.trim()).filter(name => name !== '');
+
+    console.log('📤 Sending planText:', planText);
+    console.log('📍 Gym names:', gymNames);
+
+    if (!planText || gymNames.length === 0) {
+        alert('Please generate a plan and enter at least one gym name.');
+        return;
+    }
                 finalStatus.textContent = 'Creating your logbook...';
                 finalStatus.style.color = '#ffae42';
                 continueButton.disabled = true;
