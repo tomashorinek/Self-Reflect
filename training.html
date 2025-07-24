@@ -6,7 +6,7 @@
   <title>Self-Coaching Plan Generator</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: #121212;
       color: #e0e0e0;
       margin: 0;
@@ -97,6 +97,7 @@
       padding: 1rem;
       border-radius: 6px;
       margin-top: 1rem;
+      display: none;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -112,36 +113,36 @@
         <option value="Get stronger">Get stronger</option>
         <option value="Improve conditioning">Improve conditioning</option>
       </select>
+
       <label for="frequency">Training days per week:</label>
       <select id="frequency">
-        <option value="1-2">1-2</option>
+        <option value="1-2">1–2</option>
         <option value="3-4">3–4</option>
         <option value="5">5</option>
         <option value="5plus">5+</option>
       </select>
+
       <label for="equipment">Equipment Access:</label>
       <select id="equipment">
         <option value="gym">Gym</option>
         <option value="home">Home</option>
       </select>
+
       <label for="experience">Training experience:</label>
       <select id="experience">
         <option value="Beginner">Beginner</option>
         <option value="Intermediate">Intermediate</option>
         <option value="Advanced">Advanced</option>
       </select>
+
       <label for="fixed">Fixed schedule?</label>
       <select id="fixed">
         <option value="Yes">Yes</option>
         <option value="No">No</option>
       </select>
-      <label for="gymNames">Your Gyms:</label>
-      <div id="gymFields">
-        <div class="gym-input-wrapper">
-          <input type="text" class="gymName" placeholder="e.g., Gym A" required />
-        </div>
-      </div>
-      <button type="button" onclick="addGymField()">Add Gym</button>
+
+      <label>Your Gyms:</label>
+      <div id="gymFields"></div>
 
       <label for="email">Your email (optional):</label>
       <input type="email" id="email" placeholder="you@example.com" />
@@ -152,7 +153,7 @@
     <div class="output" id="outputBox" style="display:none">
       <h2>Your Training Plan</h2>
       <div id="training-container"></div>
-      <textarea id="trainingPlanContent"></textarea>
+      <textarea id="trainingPlanContent" readonly></textarea>
       <button id="continueButton">Export Plan</button>
       <div id="finalStatus"></div>
     </div>
@@ -163,21 +164,53 @@
 
     const apiUrl = 'https://api.webbyfe.com';
 
-    window.addGymField = function () {
+    function createGymInput(value = '', allowDelete = true) {
       const wrapper = document.createElement('div');
       wrapper.className = 'gym-input-wrapper';
+
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'gymName';
-      input.placeholder = 'e.g., Gym B';
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-btn';
-      removeBtn.textContent = '✖';
-      removeBtn.onclick = () => wrapper.remove();
-      wrapper.appendChild(input);
-      wrapper.appendChild(removeBtn);
-      document.getElementById('gymFields').appendChild(wrapper);
-    };
+      input.placeholder = 'Your gym...';
+      input.value = value;
+
+      if (allowDelete) {
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '✖';
+        removeBtn.onclick = () => {
+          wrapper.remove();
+          updateGhostGym();
+        };
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+      } else {
+        input.addEventListener('input', () => {
+          if (input.value.trim() !== '') {
+            input.removeEventListener('input', arguments.callee);
+            input.placeholder = 'e.g., Other gym';
+            input.required = true;
+            wrapper.replaceWith(createGymInput(input.value, true));
+            addGhostGym();
+          }
+        });
+        wrapper.appendChild(input);
+      }
+
+      return wrapper;
+    }
+
+    function addGhostGym() {
+      const ghost = createGymInput('', false);
+      document.getElementById('gymFields').appendChild(ghost);
+    }
+
+    function updateGhostGym() {
+      const gymFields = document.getElementById('gymFields');
+      const allInputs = gymFields.querySelectorAll('.gym-input-wrapper');
+      const last = allInputs[allInputs.length - 1];
+      if (!last || last.querySelector('.remove-btn')) addGhostGym();
+    }
 
     function activateDragAndDrop() {
       document.querySelectorAll('.day').forEach(day => {
@@ -207,7 +240,8 @@
 
     document.getElementById('trackerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(x => x);
+      const gymNames = Array.from(document.querySelectorAll('.gymName'))
+        .map(x => x.value.trim()).filter(x => x);
       if (!gymNames.length) return alert('Add at least one gym.');
       const data = {
         goal: goal.value,
@@ -231,7 +265,8 @@
     document.getElementById('continueButton').addEventListener('click', async () => {
       populateTrainingPlanTextarea();
       const plan = trainingPlanContent.value.trim();
-      const gyms = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(x => x);
+      const gyms = Array.from(document.querySelectorAll('.gymName'))
+        .map(x => x.value.trim()).filter(x => x);
       const emailValue = email.value.trim();
       if (!plan || !gyms.length) return alert('Fill in all data.');
       finalStatus.textContent = 'Creating logbook...';
@@ -251,6 +286,11 @@
         finalStatus.textContent = '❌ ' + err.message;
         finalStatus.style.color = '#ff5555';
       }
+    });
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+      addGhostGym(); // always start with one "Other gym" input
     });
   </script>
 </body>
