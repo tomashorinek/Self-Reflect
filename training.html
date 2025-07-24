@@ -1,3 +1,4 @@
+<!-- training.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,6 +144,7 @@
 
       <label>Your Gyms:</label>
       <div id="gymFields"></div>
+      <button type="button" onclick="addGymField()">➕ Add another gym</button>
 
       <label for="email">Your email (optional):</label>
       <input type="email" id="email" placeholder="you@example.com" />
@@ -164,7 +166,7 @@
 
     const apiUrl = 'https://api.webbyfe.com';
 
-    function createGymInput(value = '', allowDelete = true) {
+    function addGymField(value = '') {
       const wrapper = document.createElement('div');
       wrapper.className = 'gym-input-wrapper';
 
@@ -174,42 +176,14 @@
       input.placeholder = 'Your gym...';
       input.value = value;
 
-      if (allowDelete) {
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-btn';
-        removeBtn.textContent = '✖';
-        removeBtn.onclick = () => {
-          wrapper.remove();
-          updateGhostGym();
-        };
-        wrapper.appendChild(input);
-        wrapper.appendChild(removeBtn);
-      } else {
-        input.addEventListener('input', () => {
-          if (input.value.trim() !== '') {
-            input.removeEventListener('input', arguments.callee);
-            input.placeholder = 'e.g., Other gym';
-            input.required = true;
-            wrapper.replaceWith(createGymInput(input.value, true));
-            addGhostGym();
-          }
-        });
-        wrapper.appendChild(input);
-      }
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '✖';
+      removeBtn.onclick = () => wrapper.remove();
 
-      return wrapper;
-    }
-
-    function addGhostGym() {
-      const ghost = createGymInput('', false);
-      document.getElementById('gymFields').appendChild(ghost);
-    }
-
-    function updateGhostGym() {
-      const gymFields = document.getElementById('gymFields');
-      const allInputs = gymFields.querySelectorAll('.gym-input-wrapper');
-      const last = allInputs[allInputs.length - 1];
-      if (!last || last.querySelector('.remove-btn')) addGhostGym();
+      wrapper.appendChild(input);
+      wrapper.appendChild(removeBtn);
+      document.getElementById('gymFields').appendChild(wrapper);
     }
 
     function activateDragAndDrop() {
@@ -258,7 +232,7 @@
         populateTrainingPlanTextarea();
         document.getElementById('outputBox').style.display = 'block';
       } catch (err) {
-        alert('Error: ' + err.message);
+        alert('❌ Error: ' + err.message);
       }
     });
 
@@ -281,16 +255,15 @@
         if (json.success) {
           finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
           finalStatus.style.color = '#00ff88';
-        } else throw new Error(json.error);
+        } else throw new Error(json.error || 'Unexpected response');
       } catch (err) {
         finalStatus.textContent = '❌ ' + err.message;
         finalStatus.style.color = '#ff5555';
       }
     });
 
-    // INIT
     document.addEventListener('DOMContentLoaded', () => {
-      addGhostGym(); // always start with one "Other gym" input
+      addGymField(); // start with one gym field
     });
   </script>
 </body>
