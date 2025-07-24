@@ -19,14 +19,14 @@
       width: 100%;
       max-width: 700px;
     }
-    h1 {
-      color: #ff8c00;
-    }
-    form {
+    h1 { color: #ff8c00; }
+    form, .output {
       background: #1e1e1e;
       padding: 2rem;
       border-radius: 8px;
       border: 1px solid #333;
+      width: 100%;
+      box-sizing: border-box;
     }
     label {
       display: block;
@@ -34,9 +34,7 @@
       margin-bottom: 0.5rem;
       font-weight: bold;
     }
-    select,
-    input,
-    textarea {
+    select, input, textarea {
       width: 100%;
       padding: 0.75rem;
       background: #2a2a2a;
@@ -57,22 +55,6 @@
       margin-top: 2rem;
       font-size: 1rem;
     }
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-    .output {
-      margin-top: 2rem;
-      background: #1e1e1e;
-      padding: 2rem;
-      border-radius: 8px;
-      border: 1px solid #333;
-    }
-    #finalStatus {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
     .gym-input-wrapper {
       display: flex;
       gap: 0.5rem;
@@ -86,7 +68,37 @@
       color: white;
       cursor: pointer;
     }
+    .day {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #222;
+      border-radius: 6px;
+    }
+    .exercise {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: #333;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alt-button {
+      cursor: pointer;
+      margin-left: 1rem;
+    }
+    #trainingPlanContent {
+      width: 100%;
+      height: 300px;
+      background: #1c1c1c;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -99,56 +111,44 @@
         <option value="Get stronger">Get stronger</option>
         <option value="Improve conditioning">Improve conditioning</option>
       </select>
-
-      <label for="frequency">How many days per week can you train?</label>
-      <select id="frequency" required>
+      <label for="frequency">Training days per week:</label>
+      <select id="frequency">
         <option value="1-2">1-2</option>
         <option value="3-4">3–4</option>
         <option value="5">5</option>
         <option value="5plus">5+</option>
       </select>
-
-      <label for="equipment">Select Equipment Access:</label>
+      <label for="equipment">Equipment Access:</label>
       <select id="equipment">
-        <option value="gym">Gym Access</option>
-        <option value="home">Home Training</option>
+        <option value="gym">Gym</option>
+        <option value="home">Home</option>
       </select>
-
-      <label for="experience">Your training experience level?</label>
+      <label for="experience">Training experience:</label>
       <select id="experience">
-        <option value="Beginner (0–3 months)">Beginner (0–3 months)</option>
-        <option value="Intermediate (3 months – 1 year)">Intermediate (3 months – 1 year)</option>
-        <option value="Advanced (1–2 years)">Advanced (1–2 years)</option>
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
       </select>
-
-      <label for="injuries">Any injuries or health issues?</label>
-      <textarea id="injuries" placeholder="If yes, specify..."></textarea>
-
-      <label for="fixed">Do you want a fixed weekly routine?</label>
+      <label for="fixed">Fixed schedule?</label>
       <select id="fixed">
         <option value="Yes">Yes</option>
         <option value="No">No</option>
       </select>
-
-      <label for="email">Your email (optional):</label>
-      <input type="email" id="email" placeholder="you@example.com" />
-
-      <label>Gyms where you train:</label>
+      <label for="gymNames">Your Gyms:</label>
       <div id="gymFields">
         <div class="gym-input-wrapper">
-          <input type="text" class="gymName" placeholder="e.g., Fitness World" required />
+          <input type="text" class="gymName" placeholder="e.g., Gym A" required />
         </div>
       </div>
-      <button type="button" onclick="addGymField()">Add Another Gym</button>
-
+      <button type="button" onclick="addGymField()">Add Gym</button>
       <button type="submit">Generate My Plan</button>
     </form>
 
-    <div class="output" id="outputBox" style="display:none;">
-      <h2>Your Generated Plan</h2>
+    <div class="output" id="outputBox" style="display:none">
+      <h2>Your Training Plan</h2>
       <div id="training-container"></div>
-      <button id="continueButton">Continue with this plan</button>
-      <textarea id="trainingPlanContent" style="display:none;"></textarea>
+      <textarea id="trainingPlanContent"></textarea>
+      <button id="continueButton">Export Plan</button>
       <div id="finalStatus"></div>
     </div>
   </div>
@@ -161,21 +161,16 @@
     window.addGymField = function () {
       const wrapper = document.createElement('div');
       wrapper.className = 'gym-input-wrapper';
-
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'gymName';
-      input.placeholder = 'e.g., Gym X';
-
+      input.placeholder = 'e.g., Gym B';
       const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
       removeBtn.className = 'remove-btn';
       removeBtn.textContent = '✖';
       removeBtn.onclick = () => wrapper.remove();
-
       wrapper.appendChild(input);
       wrapper.appendChild(removeBtn);
-
       document.getElementById('gymFields').appendChild(wrapper);
     };
 
@@ -184,94 +179,60 @@
       const days = container.querySelectorAll('.day');
       let output = '';
       days.forEach((day, i) => {
-        const dayTitle = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-        output += dayTitle + '\n';
-        const exercises = day.querySelectorAll('.exercise');
-        exercises.forEach(ex => {
-          const clone = ex.cloneNode(true);
-          clone.querySelectorAll('button, .alt-list').forEach(el => el.remove());
-          const cleanText = clone.textContent.trim();
-          if (cleanText.length > 0) output += `- ${cleanText}\n`;
+        const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+        output += title + '\n';
+        day.querySelectorAll('.exercise').forEach(ex => {
+          const exText = ex.querySelector('strong')?.textContent || ex.textContent;
+          output += `- ${exText.trim()}\n`;
         });
         output += '\n';
       });
       document.getElementById('trainingPlanContent').value = output.trim();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('trackerForm');
-      const outputBox = document.getElementById('outputBox');
-      const continueBtn = document.getElementById('continueButton');
-      const finalStatus = document.getElementById('finalStatus');
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const gymNames = Array.from(document.querySelectorAll('.gymName'))
-          .map(input => input.value.trim())
-          .filter(name => name !== '');
-
-        if (gymNames.length === 0) {
-          alert('Please enter at least one gym name.');
-          return;
-        }
-
-        const formData = {
-          goal: document.getElementById('goal').value,
-          frequency: document.getElementById('frequency').value,
-          equipment: document.getElementById('equipment').value,
-          experience: document.getElementById('experience').value,
-          injuries: document.getElementById('injuries').value,
-          fixed: document.getElementById('fixed').value,
-          email: document.getElementById('email').value,
-          gymNames
-        };
-
-        try {
-          await generateTrainingPlan(formData);
-          populateTrainingPlanTextarea();
-          outputBox.style.display = 'block';
-        } catch (error) {
-          alert('❌ Error: ' + (error.message || error));
-        }
-      });
-
-      continueBtn.addEventListener('click', async () => {
+    document.getElementById('trackerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(x => x);
+      if (!gymNames.length) return alert('Add at least one gym.');
+      const data = {
+        goal: goal.value,
+        frequency: frequency.value,
+        equipment: equipment.value,
+        experience: experience.value,
+        fixed: fixed.value,
+        gymNames
+      };
+      try {
+        await generateTrainingPlan(data);
         populateTrainingPlanTextarea();
-        const planText = document.getElementById('trainingPlanContent').value.trim();
-        const gymNames = Array.from(document.querySelectorAll('.gymName'))
-          .map(input => input.value.trim())
-          .filter(name => name !== '');
+        document.getElementById('outputBox').style.display = 'block';
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
 
-        if (!planText || gymNames.length === 0) {
-          alert('Please generate a plan and enter at least one gym name.');
-          return;
-        }
-
-        finalStatus.textContent = 'Creating your logbook...';
-        finalStatus.style.color = '#ffae42';
-        continueBtn.disabled = true;
-
-        try {
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan: planText, gymNames })
-          });
-
-          const result = await response.json();
-          if (result.success) {
-            finalStatus.innerHTML = `✅ Success! <a href="${result.url}" target="_blank">Open Your Google Sheet Logbook</a>`;
-            finalStatus.style.color = '#32cd32';
-          } else {
-            throw new Error(result.error || 'Unknown backend error.');
-          }
-        } catch (error) {
-          finalStatus.textContent = `❌ Error: ${error.message}`;
-          finalStatus.style.color = '#ff4500';
-        } finally {
-          continueBtn.disabled = false;
-        }
-      });
+    document.getElementById('continueButton').addEventListener('click', async () => {
+      populateTrainingPlanTextarea();
+      const plan = trainingPlanContent.value.trim();
+      const gyms = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(x => x);
+      if (!plan || !gyms.length) return alert('Fill in all data.');
+      finalStatus.textContent = 'Creating logbook...';
+      finalStatus.style.color = '#ffa500';
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, gymNames: gyms })
+        });
+        const json = await res.json();
+        if (json.success) {
+          finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
+          finalStatus.style.color = '#00ff88';
+        } else throw new Error(json.error);
+      } catch (err) {
+        finalStatus.textContent = '❌ ' + err.message;
+        finalStatus.style.color = '#ff5555';
+      }
     });
   </script>
 </body>
