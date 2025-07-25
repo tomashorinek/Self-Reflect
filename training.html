@@ -272,14 +272,6 @@ function updateTrainingPlanContentInTextarea() {
   console.log("📋 Textarea updated with current plan:\n", textarea.value);
 }
 
-// Funkce pro aktualizaci obsahu textarea
-  function updateTrainingPlanContentInTextarea() {
-    const textarea = document.getElementById('trainingPlanContent');
-    const content = getTrainingPlanContentFromDOM();
-    textarea.value = content;
-    console.log("📦 Textarea updated with current plan:\n", content);
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
     addGymField();
 
