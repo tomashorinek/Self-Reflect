@@ -269,28 +269,31 @@ function populateTrainingPlanTextarea() {
     }
   });
 });
-// ✅ export button funkce
 document.getElementById('continueButton').addEventListener('click', async () => {
-  // ⚠️ Teď teprve vytvoř tréninkový plán do textarey
+  // ✅ Ujisti se, že se plán znovu vygeneruje
   populateTrainingPlanTextarea();
 
-const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
-const gymNames = Array.from(document.querySelectorAll('.gymName'))
-  .map(x => x.value.trim()).filter(x => x);
-const userName = document.getElementById('email').value.trim() || "Anonymous";
-const finalStatus = document.getElementById('finalStatus');
+  // ✅ Zobraz textarea, pokud ještě není
+  const textarea = document.getElementById('trainingPlanContent');
+  textarea.style.display = 'block';
 
-if (!trainingPlan) {
-  finalStatus.textContent = '❌ Training plan is empty. Please generate your plan first.';
-  finalStatus.style.color = '#ff5555';
-  return;
-}
+  const trainingPlan = textarea.value.trim();
+  const gymNames = Array.from(document.querySelectorAll('.gymName'))
+    .map(x => x.value.trim()).filter(x => x);
+  const userName = document.getElementById('email').value.trim() || "Anonymous";
+  const finalStatus = document.getElementById('finalStatus');
 
-if (!gymNames.length || !userName) {
-  finalStatus.textContent = '❌ Missing required fields. Please make sure you filled in everything.';
-  finalStatus.style.color = '#ff5555';
-  return;
-}
+  if (!trainingPlan) {
+    finalStatus.textContent = '❌ Training plan is empty. Please generate your plan first.';
+    finalStatus.style.color = '#ff5555';
+    return;
+  }
+
+  if (!gymNames.length || !userName) {
+    finalStatus.textContent = '❌ Missing required fields. Please make sure you filled in everything.';
+    finalStatus.style.color = '#ff5555';
+    return;
+  }
 
   finalStatus.textContent = 'Creating logbook...';
   finalStatus.style.color = '#ffa500';
