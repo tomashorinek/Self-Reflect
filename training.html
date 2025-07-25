@@ -253,21 +253,24 @@
       }
     });
 
-// ✅ tlačítko Export Plan
 document.getElementById('continueButton').addEventListener('click', async () => {
-  populateTrainingPlanTextarea();
+  populateTrainingPlanTextarea(); // pokus o zápis z DOMu
 
   const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
   const gymNames = Array.from(document.querySelectorAll('.gymName'))
     .map(x => x.value.trim()).filter(x => x);
   const userName = document.getElementById('email').value.trim() || "Anonymous";
-  const finalStatus = document.getElementById('finalStatus');
+
+  console.log("📦 DEBUG | trainingPlan content:", trainingPlan);
+  console.log("📦 DEBUG | gymNames:", gymNames);
+  console.log("📦 DEBUG | userName:", userName);
 
   if (!trainingPlan || !gymNames.length || !userName) {
     alert('❌ Missing required fields. Please make sure you filled in everything.');
     return;
   }
 
+  const finalStatus = document.getElementById('finalStatus');
   finalStatus.textContent = 'Creating logbook...';
   finalStatus.style.color = '#ffa500';
 
@@ -275,11 +278,7 @@ document.getElementById('continueButton').addEventListener('click', async () => 
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userName,
-        trainingPlan,
-        gymNames
-      })
+      body: JSON.stringify({ userName, trainingPlan, gymNames })
     });
 
     const json = await res.json();
