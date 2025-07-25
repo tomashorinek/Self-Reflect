@@ -245,25 +245,33 @@
   }
 
 
-  function populateTrainingPlanTextarea() {
-    const container = document.getElementById('training-container');
-    const textarea = document.getElementById('trainingPlanContent');
-    if (!container || !textarea) return;
+function updateTrainingPlanContentInTextarea() {
+  const container = document.getElementById('training-container');
+  const textarea = document.getElementById('trainingPlanContent');
+  if (!container || !textarea) return;
 
-    let text = '';
-    container.querySelectorAll('.day').forEach(dayDiv => {
-        const dayTitle = dayDiv.querySelector('h3')?.textContent;
-        if (dayTitle) text += `${dayTitle}\n`;
-        dayDiv.querySelectorAll('.exercise').forEach(ex => {
-            const name = ex.querySelector('strong')?.textContent || '';
-            const setsText = ex.innerText.split('–')[1]?.trim().split('\n')[0] || '';
-            text += `- ${name} – ${setsText}\n`;
-        });
-        text += '\n';
+  let output = '';
+  const days = container.querySelectorAll('.day');
+
+  days.forEach((day, i) => {
+    const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+    output += `${title}\n`;
+
+    day.querySelectorAll('.exercise').forEach(ex => {
+      const main = ex.querySelector('strong');
+      const sets = ex.innerHTML.match(/–\s?(.+?)<br>/)?.[1]?.trim() || '';
+      if (main) {
+        output += `- ${main.textContent.trim()} – ${sets}\n`;
+      }
     });
 
-    textarea.value = text.trim();
+    output += '\n';
+  });
+
+  textarea.value = output.trim();
+  console.log("📋 Textarea updated with current plan:\n", textarea.value);
 }
+
 // Funkce pro aktualizaci obsahu textarea
   function updateTrainingPlanContentInTextarea() {
     const textarea = document.getElementById('trainingPlanContent');
