@@ -275,6 +275,10 @@ function renderPlan(plan, freq, formData) {
             }
         });
     });
+    // 🆕 Update textarea after render
+    if (typeof updateTrainingPlanContentInTextarea === 'function') {
+        updateTrainingPlanContentInTextarea();
+    }
 
     // populateTrainingPlanTextarea(); // Tato funkce není definována, nebo není potřeba, pokud se text načítá přímo z training-container
 }
