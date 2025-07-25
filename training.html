@@ -200,6 +200,7 @@ function populateTrainingPlanTextarea() {
   const container = document.getElementById('training-container');
   const days = container.querySelectorAll('.day');
   console.log("📝 Found days:", days.length);
+
   let output = '';
   days.forEach((day, i) => {
     const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
@@ -210,18 +211,19 @@ function populateTrainingPlanTextarea() {
     });
     output += '\n';
   });
-  document.getElementById('trainingPlanContent').value = output.trim();
-  console.log("📦 Generated training plan content:\n", output.trim());
+
+  const textarea = document.getElementById('trainingPlanContent');
+  textarea.value = output.trim();
+
+  console.log("📦 Generated training plan content:\n", textarea.value);
 }
- document.addEventListener('DOMContentLoaded', () => {
-  // ✅ přidej první gym input
+document.addEventListener('DOMContentLoaded', () => {
   addGymField();
 
-  // ✅ tlačítko na přidání dalšího gymu
   document.getElementById('addGymButton').addEventListener('click', () => {
     addGymField();
   });
-
+});
   // ✅ blok Enter v inputu
   document.getElementById('trackerForm').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
