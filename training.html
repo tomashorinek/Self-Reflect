@@ -245,7 +245,26 @@
   }
 
 
-  // Funkce pro aktualizaci obsahu textarea
+  function populateTrainingPlanTextarea() {
+    const container = document.getElementById('training-container');
+    const textarea = document.getElementById('trainingPlanContent');
+    if (!container || !textarea) return;
+
+    let text = '';
+    container.querySelectorAll('.day').forEach(dayDiv => {
+        const dayTitle = dayDiv.querySelector('h3')?.textContent;
+        if (dayTitle) text += `${dayTitle}\n`;
+        dayDiv.querySelectorAll('.exercise').forEach(ex => {
+            const name = ex.querySelector('strong')?.textContent || '';
+            const setsText = ex.innerText.split('–')[1]?.trim().split('\n')[0] || '';
+            text += `- ${name} – ${setsText}\n`;
+        });
+        text += '\n';
+    });
+
+    textarea.value = text.trim();
+}
+// Funkce pro aktualizaci obsahu textarea
   function updateTrainingPlanContentInTextarea() {
     const textarea = document.getElementById('trainingPlanContent');
     const content = getTrainingPlanContentFromDOM();
