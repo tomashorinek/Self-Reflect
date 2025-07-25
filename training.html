@@ -97,7 +97,7 @@
       padding: 1rem;
       border-radius: 6px;
       margin-top: 1rem;
-      display: none; /* Skryté, dokud není plán vygenerován */
+      /* Ponecháme viditelné, ale read-only pro drag & drop */
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -154,7 +154,7 @@
     <div class="output" id="outputBox" style="display:none">
       <h2>Your Training Plan</h2>
       <div id="training-container"></div>
-      <textarea id="trainingPlanContent" readonly></textarea>
+      <textarea id="trainingPlanContent" readonly></textarea> 
       <button id="continueButton">Export Plan</button>
       <div id="finalStatus"></div>
     </div>
@@ -163,7 +163,8 @@
 <script type="module">
   import { generateTrainingPlan } from './planLogic.js';
 
-  const apiUrl = 'https://api.webbyfe.com'; // Předpokládám, že toto je URL pro tvůj Apps Script Web App
+  // Předpokládám, že toto je URL pro tvůj Apps Script Web App
+  const apiUrl = 'https://api.webbyfe.com'; 
 
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
@@ -189,14 +190,18 @@
     document.querySelectorAll('.day').forEach(day => {
       Sortable.create(day, {
         group: 'exercises',
-        handle: '.exercise',
-        animation: 150
+        handle: '.exercise', // Použijeme celý element .exercise jako handle
+        animation: 150,
+        // Při každé změně pořadí v drag & drop aktualizujeme textarea
+        onEnd: function (evt) {
+          updateTrainingPlanContentInTextarea();
+        }
       });
     });
   }
 
-  // Nová funkce pro získání aktuálního obsahu plánu
-  function getTrainingPlanContent() {
+  // Funkce pro získání aktuálního obsahu plánu z DOMu
+  function getTrainingPlanContentFromDOM() {
     const container = document.getElementById('training-container');
     if (!container) {
       console.warn("❌ Missing training container.");
@@ -205,7 +210,7 @@
 
     const days = container.querySelectorAll('.day');
     if (!days || days.length === 0) {
-      console.warn("❌ No training days found.");
+      console.warn("❌ No training days found in DOM.");
       return '';
     }
 
@@ -224,6 +229,14 @@
     return output.trim();
   }
 
+  // Funkce pro aktualizaci obsahu textarea
+  function updateTrainingPlanContentInTextarea() {
+    const textarea = document.getElementById('trainingPlanContent');
+    const content = getTrainingPlanContentFromDOM();
+    textarea.value = content;
+    console.log("📦 Textarea updated with current plan:\n", content);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     addGymField();
 
@@ -239,7 +252,7 @@
     }
   });
 
-  // ✅ formulář submit
+  // ✅ formulář submit - generování plánu
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -258,40 +271,47 @@
     };
 
     try {
-      await generateTrainingPlan(data);
-      activateDragAndDrop();
-
-      // Po vygenerování a aktivaci Drag & Drop, naplníme textarea
-      // Použijeme setTimeout s nulovým zpožděním, aby se kód spustil po dokončení vykreslování DOMu
+      // Skryjeme outputBox před generováním nového plánu
+      document.getElementById('outputBox').style.display = 'none';
+      
+      await generateTrainingPlan(data); // Toto by mělo naplnit #training-container
+      
+      // Počkejme na vykreslení DOMu a pak aktivujeme D&D a naplníme textarea
       setTimeout(() => {
-        const trainingPlanContent = getTrainingPlanContent();
-        document.getElementById('trainingPlanContent').value = trainingPlanContent;
-        console.log("📦 Plan populated into textarea:\n", trainingPlanContent);
+        activateDragAndDrop();
+        updateTrainingPlanContentInTextarea(); // Naplní textarea po vygenerování
         document.getElementById('outputBox').style.display = 'block';
-        document.getElementById('trainingPlanContent').style.display = 'block'; // Zviditelníme textarea
-      }, 0); 
+      }, 50); // Mírné zpoždění pro zajištění renderování DOMu
     } catch (err) {
-      alert('❌ Error: ' + err.message);
+      alert('❌ Error generating plan: ' + err.message);
     }
   });
 
+  // ✅ Tlačítko Export Plan
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
     finalStatus.style.color = '#ffa500';
 
-    // Pokaždé, když klikneme na Export, aktualizujeme obsah textarea
-    const trainingPlan = getTrainingPlanContent();
-    document.getElementById('trainingPlanContent').value = trainingPlan;
-    console.log("📦 Plan read for export:\n", trainingPlan);
+    // 1. Aktualizujeme obsah textarea z DOMu, aby reflektoval D&D změny
+    updateTrainingPlanContentInTextarea();
 
+    // 2. Teď, když je textarea aktualizována, můžeme z ní číst
+    const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim()).filter(x => x);
     const userName = document.getElementById('email').value.trim() || "Anonymous";
 
+    console.log("Attempting to export plan:");
+    console.log("  Training Plan Content Length:", trainingPlan.length);
+    console.log("  Training Plan (first 200 chars):", trainingPlan.substring(0, 200) + (trainingPlan.length > 200 ? '...' : ''));
+    console.log("  Gym Names:", gymNames);
+    console.log("  User Name:", userName);
+
     if (!trainingPlan) {
-      finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first.';
+      finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
       finalStatus.style.color = '#ff3333';
+      console.error("🚫 Export failed: Training plan is empty.");
       return;
     }
 
@@ -308,12 +328,16 @@
       if (json.success) {
         finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
         finalStatus.style.color = '#00ff88';
+        // Zde bys mohl přidat logiku pro znefunkčnění drag & drop, pokud je potřeba
+        // Například odebrat třídu 'cursor: grab' nebo úplně zrušit Sortable instanci
+        console.log("✅ Plan successfully exported!");
       } else {
         throw new Error(json.error || "Unexpected server error.");
       }
     } catch (err) {
-      finalStatus.textContent = `❌ ${err.message}`;
+      finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
       finalStatus.style.color = '#ff3333';
+      console.error("🚫 Export error:", err);
     }
   });
 </script>
