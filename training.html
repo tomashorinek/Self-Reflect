@@ -144,7 +144,7 @@
 
       <label>Your Gyms:</label>
       <div id="gymFields"></div>
-      <button type="button" onclick="addGymField()">➕ Add another gym</button>
+      <button type="button" id="addGymButton">➕ Add another gym</button>
 
       <label for="email">Your email (optional):</label>
       <input type="email" id="email" placeholder="you@example.com" />
@@ -161,57 +161,74 @@
     </div>
   </div>
 
-  <script type="module">
-    import { generateTrainingPlan } from './planLogic.js';
+<script type="module">
+  import { generateTrainingPlan } from './planLogic.js';
 
-    const apiUrl = 'https://api.webbyfe.com';
+  const apiUrl = 'https://api.webbyfe.com';
 
-    function addGymField(value = '') {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'gym-input-wrapper';
+  function addGymField(value = '') {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'gym-input-wrapper';
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'gymName';
-      input.placeholder = 'Your gym...';
-      input.value = value;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'gymName';
+    input.placeholder = 'Your gym...';
+    input.value = value;
 
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-btn';
-      removeBtn.textContent = '✖';
-      removeBtn.onclick = () => wrapper.remove();
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '✖';
+    removeBtn.onclick = () => wrapper.remove();
 
-      wrapper.appendChild(input);
-      wrapper.appendChild(removeBtn);
-      document.getElementById('gymFields').appendChild(wrapper);
-    }
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    document.getElementById('gymFields').appendChild(wrapper);
+  }
 
-    function activateDragAndDrop() {
-      document.querySelectorAll('.day').forEach(day => {
-        Sortable.create(day, {
-          group: 'exercises',
-          handle: '.exercise',
-          animation: 150
-        });
+  function activateDragAndDrop() {
+    document.querySelectorAll('.day').forEach(day => {
+      Sortable.create(day, {
+        group: 'exercises',
+        handle: '.exercise',
+        animation: 150
       });
-    }
+    });
+  }
 
-    function populateTrainingPlanTextarea() {
-      const container = document.getElementById('training-container');
-      const days = container.querySelectorAll('.day');
-      let output = '';
-      days.forEach((day, i) => {
-        const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-        output += title + '\n';
-        day.querySelectorAll('.exercise').forEach(ex => {
-          const exText = ex.querySelector('strong')?.textContent || ex.textContent;
-          output += `- ${exText.trim()}\n`;
-        });
-        output += '\n';
+  function populateTrainingPlanTextarea() {
+    const container = document.getElementById('training-container');
+    const days = container.querySelectorAll('.day');
+    let output = '';
+    days.forEach((day, i) => {
+      const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+      output += title + '\n';
+      day.querySelectorAll('.exercise').forEach(ex => {
+        const exText = ex.querySelector('strong')?.textContent || ex.textContent;
+        output += `- ${exText.trim()}\n`;
       });
-      document.getElementById('trainingPlanContent').value = output.trim();
-    }
+      output += '\n';
+    });
+    document.getElementById('trainingPlanContent').value = output.trim();
+  }
 
+  document.addEventListener('DOMContentLoaded', () => {
+    // ✅ přidej první gym input
+    addGymField();
+
+    // ✅ tlačítko na přidání dalšího gymu
+    document.getElementById('addGymButton').addEventListener('click', () => {
+      addGymField();
+    });
+
+    // ✅ blok Enter v inputu
+    document.getElementById('trackerForm').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
+        e.preventDefault();
+      }
+    });
+
+    // ✅ formulář
     document.getElementById('trackerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const gymNames = Array.from(document.querySelectorAll('.gymName'))
@@ -236,57 +253,33 @@
       }
     });
 
-document.getElementById('continueButton').addEventListener('click', async () => {
-  populateTrainingPlanTextarea();
-  const plan = trainingPlanContent.value.trim();
-  const gyms = Array.from(document.querySelectorAll('.gymName'))
-    .map(x => x.value.trim()).filter(x => x);
-  const emailValue = email.value.trim();
-
-  if (!plan || !gyms.length) {
-    alert('Fill in all data.');
-    return;
-  }
-
-  console.log('📤 Exporting Plan:', plan);
-  console.log('📦 Gyms:', gyms);
-  console.log('📧 Email:', emailValue);
-
-  finalStatus.textContent = 'Creating logbook...';
-  finalStatus.style.color = '#ffa500';
-
-  try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, gymNames: gyms, email: emailValue })
+    // ✅ export button
+    document.getElementById('continueButton').addEventListener('click', async () => {
+      populateTrainingPlanTextarea();
+      const plan = trainingPlanContent.value.trim();
+      const gyms = Array.from(document.querySelectorAll('.gymName'))
+        .map(x => x.value.trim()).filter(x => x);
+      const emailValue = email.value.trim();
+      if (!plan || !gyms.length) return alert('Fill in all data.');
+      finalStatus.textContent = 'Creating logbook...';
+      finalStatus.style.color = '#ffa500';
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, gymNames: gyms, email: emailValue })
+        });
+        const json = await res.json();
+        if (json.success) {
+          finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
+          finalStatus.style.color = '#00ff88';
+        } else throw new Error(json.error || 'Unexpected response');
+      } catch (err) {
+        finalStatus.textContent = '❌ ' + err.message;
+        finalStatus.style.color = '#ff5555';
+      }
     });
-
-    const text = await res.text(); // načti surový text odpovědi
-    console.log('🔍 RAW Response:', text);
-
-    let json;
-    try {
-      json = JSON.parse(text); // pokus se převést na JSON
-    } catch (parseErr) {
-      throw new Error('Response is not valid JSON. Check proxy or API.');
-    }
-
-    if (json.success) {
-      finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
-      finalStatus.style.color = '#00ff88';
-    } else {
-      throw new Error(json.error || 'Unknown error from server');
-    }
-  } catch (err) {
-    console.error('❌ Export failed:', err);
-    finalStatus.textContent = '❌ ' + err.message;
-    finalStatus.style.color = '#ff5555';
-  }
-});
-    document.addEventListener('DOMContentLoaded', () => {
-      addGymField(); // start with one gym field
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
