@@ -254,7 +254,7 @@
     });
 
     // ✅ export button
- document.getElementById('continueButton').addEventListener('click', async () => {
+const trainingPlan = document.getElementById('trainingPlanContent')?.value.trim() || "Day 1: Squats\nDay 2: Bench Press";
   populateTrainingPlanTextarea();
 
   const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
