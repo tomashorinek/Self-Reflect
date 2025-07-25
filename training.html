@@ -198,8 +198,13 @@
 
 function populateTrainingPlanTextarea() {
   const container = document.getElementById('training-container');
-  const days = container.querySelectorAll('.day');
-  console.log("📝 Found days:", days.length);
+  const days = container?.querySelectorAll('.day');
+  console.log("📝 Found days:", days?.length);
+
+  if (!container || !days || days.length === 0) {
+    console.warn("⚠️ Cannot populate plan — training-container is missing or empty.");
+    return false;
+  }
 
   let output = '';
   days.forEach((day, i) => {
@@ -213,9 +218,16 @@ function populateTrainingPlanTextarea() {
   });
 
   const textarea = document.getElementById('trainingPlanContent');
-  textarea.value = output.trim();
+  if (!textarea) {
+    console.error("❌ trainingPlanContent textarea not found.");
+    return false;
+  }
 
-  console.log("📦 Generated training plan content:\n", textarea.value);
+  textarea.value = output.trim();
+  textarea.style.display = 'block';
+
+  console.log("📦 Generated training plan:\n", textarea.value);
+  return true;
 }
 document.addEventListener('DOMContentLoaded', () => {
   addGymField();
@@ -271,18 +283,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 document.getElementById('continueButton').addEventListener('click', async () => {
-  // ✅ Ujisti se, že se plán znovu vygeneruje
-  populateTrainingPlanTextarea();
+  const finalStatus = document.getElementById('finalStatus');
+  finalStatus.textContent = '';
+  finalStatus.style.color = '#ffa500';
 
-  // ✅ Zobraz textarea, pokud ještě není
-  const textarea = document.getElementById('trainingPlanContent');
-  textarea.style.display = 'block';
+  const populated = populateTrainingPlanTextarea(); // vrací true/false
+  if (!populated) {
+    finalStatus.textContent = '❌ Could not generate training plan. Please try again.';
+    finalStatus.style.color = '#ff5555';
+    return;
+  }
 
-  const trainingPlan = textarea.value.trim();
+  const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
   const gymNames = Array.from(document.querySelectorAll('.gymName'))
     .map(x => x.value.trim()).filter(x => x);
   const userName = document.getElementById('email').value.trim() || "Anonymous";
-  const finalStatus = document.getElementById('finalStatus');
+
+  console.log("📤 Sending training plan:\n", trainingPlan);
+  console.log("📍 Gym names:", gymNames);
+  console.log("👤 User:", userName);
 
   if (!trainingPlan) {
     finalStatus.textContent = '❌ Training plan is empty. Please generate your plan first.';
@@ -296,10 +315,8 @@ document.getElementById('continueButton').addEventListener('click', async () => 
     return;
   }
 
-  finalStatus.textContent = 'Creating logbook...';
-  finalStatus.style.color = '#ffa500';
-
   try {
+    finalStatus.textContent = 'Creating logbook...';
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
