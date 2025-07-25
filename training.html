@@ -196,22 +196,23 @@
     });
   }
 
-  function populateTrainingPlanTextarea() {
-    const container = document.getElementById('training-container');
-    const days = container.querySelectorAll('.day');
-    let output = '';
-    days.forEach((day, i) => {
-      const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-      output += title + '\n';
-      day.querySelectorAll('.exercise').forEach(ex => {
-        const exText = ex.querySelector('strong')?.textContent || ex.textContent;
-        output += `- ${exText.trim()}\n`;
-      });
-      output += '\n';
+function populateTrainingPlanTextarea() {
+  const container = document.getElementById('training-container');
+  const days = container.querySelectorAll('.day');
+  console.log("📝 Found days:", days.length);
+  let output = '';
+  days.forEach((day, i) => {
+    const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+    output += title + '\n';
+    day.querySelectorAll('.exercise').forEach(ex => {
+      const exText = ex.querySelector('strong')?.textContent || ex.textContent;
+      output += `- ${exText.trim()}\n`;
     });
-    document.getElementById('trainingPlanContent').value = output.trim();
-  }
-
+    output += '\n';
+  });
+  document.getElementById('trainingPlanContent').value = output.trim();
+  console.log("📦 Generated training plan content:\n", output.trim());
+}
   document.addEventListener('DOMContentLoaded', () => {
     // ✅ přidej první gym input
     addGymField();
@@ -258,17 +259,23 @@ document.getElementById('continueButton').addEventListener('click', async () => 
   // ⚠️ Teď teprve vytvoř tréninkový plán do textarey
   populateTrainingPlanTextarea();
 
-  const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
-  const gymNames = Array.from(document.querySelectorAll('.gymName'))
-    .map(x => x.value.trim()).filter(x => x);
-  const userName = document.getElementById('email').value.trim() || "Anonymous";
-  const finalStatus = document.getElementById('finalStatus');
+const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+const gymNames = Array.from(document.querySelectorAll('.gymName'))
+  .map(x => x.value.trim()).filter(x => x);
+const userName = document.getElementById('email').value.trim() || "Anonymous";
+const finalStatus = document.getElementById('finalStatus');
 
-  if (!trainingPlan || !gymNames.length || !userName) {
-    finalStatus.textContent = '❌ Missing required fields. Please make sure you filled in everything.';
-    finalStatus.style.color = '#ff5555';
-    return;
-  }
+if (!trainingPlan) {
+  finalStatus.textContent = '❌ Training plan is empty. Please generate your plan first.';
+  finalStatus.style.color = '#ff5555';
+  return;
+}
+
+if (!gymNames.length || !userName) {
+  finalStatus.textContent = '❌ Missing required fields. Please make sure you filled in everything.';
+  finalStatus.style.color = '#ff5555';
+  return;
+}
 
   finalStatus.textContent = 'Creating logbook...';
   finalStatus.style.color = '#ffa500';
@@ -297,7 +304,6 @@ document.getElementById('continueButton').addEventListener('click', async () => 
     finalStatus.style.color = '#ff5555';
   }
 });
-  });
 </script>
 </body>
 </html>
