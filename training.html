@@ -254,31 +254,47 @@
     });
 
     // ✅ export button
-    document.getElementById('continueButton').addEventListener('click', async () => {
-      populateTrainingPlanTextarea();
-      const plan = trainingPlanContent.value.trim();
-      const gyms = Array.from(document.querySelectorAll('.gymName'))
-        .map(x => x.value.trim()).filter(x => x);
-      const emailValue = email.value.trim();
-      if (!plan || !gyms.length) return alert('Fill in all data.');
-      finalStatus.textContent = 'Creating logbook...';
-      finalStatus.style.color = '#ffa500';
-      try {
-        const res = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan, gymNames: gyms, email: emailValue })
-        });
-        const json = await res.json();
-        if (json.success) {
-          finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
-          finalStatus.style.color = '#00ff88';
-        } else throw new Error(json.error || 'Unexpected response');
-      } catch (err) {
-        finalStatus.textContent = '❌ ' + err.message;
-        finalStatus.style.color = '#ff5555';
-      }
+ document.getElementById('continueButton').addEventListener('click', async () => {
+  populateTrainingPlanTextarea();
+
+  const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+  const gymNames = Array.from(document.querySelectorAll('.gymName'))
+    .map(x => x.value.trim()).filter(x => x);
+  const userName = document.getElementById('email').value.trim() || "Anonymous";
+
+  if (!trainingPlan || !gymNames.length || !userName) {
+    alert('❌ Missing required fields. Please make sure you filled in everything.');
+    return;
+  }
+
+  finalStatus.textContent = 'Creating logbook...';
+  finalStatus.style.color = '#ffa500';
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userName,
+        trainingPlan,
+        gymNames
+      })
     });
+
+    const json = await res.json();
+
+    if (json.success) {
+      finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
+      finalStatus.style.color = '#00ff88';
+    } else {
+      throw new Error(json.error || 'Unexpected response from server.');
+    }
+  } catch (err) {
+    finalStatus.textContent = '❌ ' + err.message;
+    finalStatus.style.color = '#ff5555';
+  }
+});
+
   });
 </script>
 </body>
