@@ -97,7 +97,7 @@
       padding: 1rem;
       border-radius: 6px;
       margin-top: 1rem;
-      /* Ponecháme viditelné, ale read-only pro drag & drop */
+      /* Ponecháme viditelné a read-only */
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -163,8 +163,7 @@
 <script type="module">
   import { generateTrainingPlan } from './planLogic.js';
 
-  // Předpokládám, že toto je URL pro tvůj Apps Script Web App
-  const apiUrl = 'https://api.webbyfe.com'; 
+  const apiUrl = 'https://script.google.com/macros/s/AKfyc.../exec'; // ZDE MUSÍ BÝT TVOJE SKUTEČNÁ APPS SCRIPT URL!
 
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
@@ -190,9 +189,11 @@
     document.querySelectorAll('.day').forEach(day => {
       Sortable.create(day, {
         group: 'exercises',
-        handle: '.exercise', // Použijeme celý element .exercise jako handle
+        handle: '.exercise', 
         animation: 150,
-        // Při každé změně pořadí v drag & drop aktualizujeme textarea
+        // *** TOTO JE KLÍČOVÁ ZMĚNA ***
+        // Po každé Drag & Drop operaci (když se item přestane táhnout)
+        // se aktualizuje obsah textarea.
         onEnd: function (evt) {
           updateTrainingPlanContentInTextarea();
         }
@@ -216,18 +217,33 @@
 
     let output = '';
     days.forEach((day, i) => {
+      // Zde získáme název dne z <h3> tagu, pokud existuje, jinak použijeme generický název
       const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
       output += `${title}\n`;
 
       day.querySelectorAll('.exercise').forEach(ex => {
-        const strong = ex.querySelector('strong');
-        const text = strong ? strong.textContent.trim() : ex.textContent.trim();
-        output += `- ${text}\n`;
+        // Získáme text cvičení, včetně toho, co je uvnitř <strong> (název cviku)
+        // a případně i další text (opakování, série, atd.)
+        let exerciseText = '';
+        ex.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            exerciseText += node.textContent.trim();
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'STRONG') {
+              exerciseText += node.textContent.trim();
+            }
+            // Zde bys mohl přidat logiku pro zpracování "Alt" textu nebo tlačítek,
+            // pokud chceš, aby se objevily v textarea.
+            // Pro teď vezmeme jen hlavní text cvičení.
+          }
+        });
+        output += `- ${exerciseText.replace(/\s+/g, ' ').trim()}\n`; // Normalizujeme mezery
       });
-      output += '\n'; // Přidá prázdný řádek mezi dny
+      output += '\n'; // Přidá prázdný řádek mezi dny pro lepší čitelnost
     });
     return output.trim();
   }
+
 
   // Funkce pro aktualizaci obsahu textarea
   function updateTrainingPlanContentInTextarea() {
@@ -281,6 +297,8 @@
         activateDragAndDrop();
         updateTrainingPlanContentInTextarea(); // Naplní textarea po vygenerování
         document.getElementById('outputBox').style.display = 'block';
+        // Nastavíme textarea jako readonly po vygenerování, ale uživatel může přetahovat
+        document.getElementById('trainingPlanContent').setAttribute('readonly', true);
       }, 50); // Mírné zpoždění pro zajištění renderování DOMu
     } catch (err) {
       alert('❌ Error generating plan: ' + err.message);
@@ -293,7 +311,7 @@
     finalStatus.textContent = '';
     finalStatus.style.color = '#ffa500';
 
-    // 1. Aktualizujeme obsah textarea z DOMu, aby reflektoval D&D změny
+    // 1. Před exportem aktualizujeme obsah textarea z DOMu, aby reflektoval D&D změny
     updateTrainingPlanContentInTextarea();
 
     // 2. Teď, když je textarea aktualizována, můžeme z ní číst
@@ -328,8 +346,6 @@
       if (json.success) {
         finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
         finalStatus.style.color = '#00ff88';
-        // Zde bys mohl přidat logiku pro znefunkčnění drag & drop, pokud je potřeba
-        // Například odebrat třídu 'cursor: grab' nebo úplně zrušit Sortable instanci
         console.log("✅ Plan successfully exported!");
       } else {
         throw new Error(json.error || "Unexpected server error.");
@@ -340,6 +356,22 @@
       console.error("🚫 Export error:", err);
     }
   });
+
+  // Příklad pro změnu alternativy - toto musíš implementovat ve svém planLogic.js nebo přímo zde
+  // pro tlačítka "Alt". Tato funkce by měla:
+  // 1. Změnit HTML obsah cvičení v #training-container.
+  // 2. Následně volat updateTrainingPlanContentInTextarea();
+  // Příklad (předpokládá, že tlačítko má nějaké data-alt-index atribut):
+  /*
+  document.getElementById('training-container').addEventListener('click', (event) => {
+    if (event.target.classList.contains('alt-button')) {
+      const exerciseElement = event.target.closest('.exercise');
+      // Zde logika pro výměnu cviku za alternativu
+      // ...
+      updateTrainingPlanContentInTextarea(); // Důležité: po změně obsahu DOMu aktualizovat textarea
+    }
+  });
+  */
 </script>
 </body>
 </html>
