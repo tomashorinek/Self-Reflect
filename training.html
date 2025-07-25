@@ -253,14 +253,15 @@
       }
     });
 
-    // ✅ export button
-const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+// ✅ tlačítko Export Plan
+document.getElementById('continueButton').addEventListener('click', async () => {
   populateTrainingPlanTextarea();
 
   const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
   const gymNames = Array.from(document.querySelectorAll('.gymName'))
     .map(x => x.value.trim()).filter(x => x);
   const userName = document.getElementById('email').value.trim() || "Anonymous";
+  const finalStatus = document.getElementById('finalStatus');
 
   if (!trainingPlan || !gymNames.length || !userName) {
     alert('❌ Missing required fields. Please make sure you filled in everything.');
@@ -294,7 +295,6 @@ const trainingPlan = document.getElementById('trainingPlanContent').value.trim()
     finalStatus.style.color = '#ff5555';
   }
 });
-
   });
 </script>
 </body>
