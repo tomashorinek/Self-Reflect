@@ -24,8 +24,7 @@
       background: #1e1e1e;
       padding: 2rem;
       border-radius: 8px;
-      border: 1px solid #333;
-      width: 100%;
+      border: 1px solid #333;<br>      width: 100%;
       box-sizing: border-box;
     }
     label {
@@ -97,7 +96,6 @@
       padding: 1rem;
       border-radius: 6px;
       margin-top: 1rem;
-      /* Ponecháme viditelné a read-only */
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -163,7 +161,8 @@
 <script type="module">
   import { generateTrainingPlan } from './planLogic.js';
 
-  const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/'; // ZDE MUSÍ BÝT TVOJE SKUTEČNÁ APPS SCRIPT URL!
+  // !!! ZDE MUSÍ BÝT URL TVÉHO NASAZENÉHO CLOUDFLARE WORKERU !!!
+  const apiUrl = 'https://webbyte-proxy.quiet-king-42b1.workers.dev/'; 
 
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
@@ -191,86 +190,54 @@
         group: 'exercises',
         handle: '.exercise', 
         animation: 150,
-        // *** TOTO JE KLÍČOVÁ ZMĚNA ***
-        // Po každé Drag & Drop operaci (když se item přestane táhnout)
-        // se aktualizuje obsah textarea.
         onEnd: function (evt) {
-          updateTrainingPlanContentInTextarea();
+          updateTrainingPlanContentInTextarea(); // Voláme po D&D
         }
       });
     });
   }
 
-  // Funkce pro získání aktuálního obsahu plánu z DOMu
-  function getTrainingPlanContentFromDOM() {
+  // !!! POUZE JEDNA FUNKCE PRO AKTUALIZACI TEXTAREA, S OPRAVENOU LOGIKOU !!!
+  function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
-    if (!container) {
-      console.warn("❌ Missing training container.");
-      return '';
-    }
-
-    const days = container.querySelectorAll('.day');
-    if (!days || days.length === 0) {
-      console.warn("❌ No training days found in DOM.");
-      return '';
+    const textarea = document.getElementById('trainingPlanContent');
+    if (!container || !textarea) {
+      console.warn("❌ Missing training container or textarea.");
+      return;
     }
 
     let output = '';
+    const days = container.querySelectorAll('.day');
+
+    if (!days || days.length === 0) {
+      console.warn("❌ No training days found in DOM for textarea update.");
+      textarea.value = ''; // Vyčistí textarea pokud nejsou dny
+      return;
+    }
+
     days.forEach((day, i) => {
-      // Zde získáme název dne z <h3> tagu, pokud existuje, jinak použijeme generický název
       const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
       output += `${title}\n`;
 
       day.querySelectorAll('.exercise').forEach(ex => {
-        // Získáme text cvičení, včetně toho, co je uvnitř <strong> (název cviku)
-        // a případně i další text (opakování, série, atd.)
-        let exerciseText = '';
-        ex.childNodes.forEach(node => {
-          if (node.nodeType === Node.TEXT_NODE) {
-            exerciseText += node.textContent.trim();
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.tagName === 'STRONG') {
-              exerciseText += node.textContent.trim();
-            }
-            // Zde bys mohl přidat logiku pro zpracování "Alt" textu nebo tlačítek,
-            // pokud chceš, aby se objevily v textarea.
-            // Pro teď vezmeme jen hlavní text cvičení.
-          }
-        });
-        output += `- ${exerciseText.replace(/\s+/g, ' ').trim()}\n`; // Normalizujeme mezery
+        // Nový, robustnější přístup pro získání textu cvičení
+        // Vytvoříme klon elementu, odstraníme nežádoucí části a získáme text
+        const tempEx = ex.cloneNode(true);
+        tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
+        
+        // Nyní získáme text, který by měl obsahovat jen název cviku a série/opakování
+        // Normalizujeme mezery, aby se odstranily nadbytečné whitespace
+        let cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
+
+        output += `- ${cleanedText}\n`;
       });
-      output += '\n'; // Přidá prázdný řádek mezi dny pro lepší čitelnost
+      output += '\n'; 
     });
-    return output.trim();
+
+    textarea.value = output.trim();
+    console.log("📋 Textarea updated with current plan:\n", textarea.value);
   }
 
-
-function updateTrainingPlanContentInTextarea() {
-  const container = document.getElementById('training-container');
-  const textarea = document.getElementById('trainingPlanContent');
-  if (!container || !textarea) return;
-
-  let output = '';
-  const days = container.querySelectorAll('.day');
-
-  days.forEach((day, i) => {
-    const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-    output += `${title}\n`;
-
-    day.querySelectorAll('.exercise').forEach(ex => {
-      const main = ex.querySelector('strong');
-      const sets = ex.innerHTML.match(/–\s?(.+?)<br>/)?.[1]?.trim() || '';
-      if (main) {
-        output += `- ${main.textContent.trim()} – ${sets}\n`;
-      }
-    });
-
-    output += '\n';
-  });
-
-  textarea.value = output.trim();
-  console.log("📋 Textarea updated with current plan:\n", textarea.value);
-}
 
   document.addEventListener('DOMContentLoaded', () => {
     addGymField();
@@ -306,19 +273,16 @@ function updateTrainingPlanContentInTextarea() {
     };
 
     try {
-      // Skryjeme outputBox před generováním nového plánu
       document.getElementById('outputBox').style.display = 'none';
       
       await generateTrainingPlan(data); // Toto by mělo naplnit #training-container
       
-      // Počkejme na vykreslení DOMu a pak aktivujeme D&D a naplníme textarea
       setTimeout(() => {
         activateDragAndDrop();
         updateTrainingPlanContentInTextarea(); // Naplní textarea po vygenerování
         document.getElementById('outputBox').style.display = 'block';
-        // Nastavíme textarea jako readonly po vygenerování, ale uživatel může přetahovat
         document.getElementById('trainingPlanContent').setAttribute('readonly', true);
-      }, 50); // Mírné zpoždění pro zajištění renderování DOMu
+      }, 50); 
     } catch (err) {
       alert('❌ Error generating plan: ' + err.message);
     }
@@ -330,10 +294,8 @@ function updateTrainingPlanContentInTextarea() {
     finalStatus.textContent = '';
     finalStatus.style.color = '#ffa500';
 
-    // 1. Před exportem aktualizujeme obsah textarea z DOMu, aby reflektoval D&D změny
-    updateTrainingPlanContentInTextarea();
+    updateTrainingPlanContentInTextarea(); // Před exportem zajistíme nejaktuálnější stav
 
-    // 2. Teď, když je textarea aktualizována, můžeme z ní číst
     const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim()).filter(x => x);
@@ -376,21 +338,39 @@ function updateTrainingPlanContentInTextarea() {
     }
   });
 
-  // Příklad pro změnu alternativy - toto musíš implementovat ve svém planLogic.js nebo přímo zde
-  // pro tlačítka "Alt". Tato funkce by měla:
-  // 1. Změnit HTML obsah cvičení v #training-container.
-  // 2. Následně volat updateTrainingPlanContentInTextarea();
-  // Příklad (předpokládá, že tlačítko má nějaké data-alt-index atribut):
-  /*
-  document.getElementById('training-container').addEventListener('click', (event) => {
+  // !!! DŮLEŽITÉ: ZDE MUSÍŠ IMPLEMENTOVAT LOGIKU PRO ZMĚNU ALTERNATIVY !!!
+  // Tato část kódu POUZE PŘÍKLADEM, je potřeba ji dopracovat, aby skutečně měnila HTML.
+  document.getElementById('training-container').addEventListener('click', async (event) => {
     if (event.target.classList.contains('alt-button')) {
-      const exerciseElement = event.target.closest('.exercise');
-      // Zde logika pro výměnu cviku za alternativu
-      // ...
-      updateTrainingPlanContentInTextarea(); // Důležité: po změně obsahu DOMu aktualizovat textarea
+      const altButton = event.target;
+      const exerciseElement = altButton.closest('.exercise');
+      if (!exerciseElement) return;
+
+      const dayElement = altButton.closest('.day');
+      const dayIndex = Array.from(dayElement.parentNode.children).indexOf(dayElement); // Získej index dne
+      const exerciseIndex = Array.from(dayElement.querySelectorAll('.exercise')).indexOf(exerciseElement); // Získej index cvičení v rámci dne
+
+      console.log(`Clicked alt button for Day ${dayIndex}, Exercise ${exerciseIndex}`);
+
+      // Zde budeš potřebovat přístup k datům tréninkového plánu, který generuje planLogic.js.
+      // Ideálně by planLogic.js měl mít funkci, která ti vrátí data pro další alternativu
+      // a umožní ti aktualizovat DOM.
+      // PŘÍKLAD (předpokládá, že generateTrainingPlan vrací nebo má přístup k datům plánu):
+      // const newExerciseData = await getNextAlternativeFor(dayIndex, exerciseIndex);
+      // if (newExerciseData) {
+      //   // Vytvoř nový HTML pro cvičení z newExerciseData
+      //   const newExerciseHtml = `<strong>${newExerciseData.name}</strong> - ${newExerciseData.setsReps} ...`;
+      //   exerciseElement.innerHTML = newExerciseHtml; // Aktualizuj HTML cvičení
+      //   updateTrainingPlanContentInTextarea(); // Až PO aktualizaci DOMu zavolej aktualizaci textarea
+      // }
+      
+      // Pro účely testování a aby se nic nerozbilo, zatím jen zaloguj
+      alert('Logika pro změnu alternativy není zatím implementována! Musíte ji dopsat do planLogic.js a zde volat.');
+      
+      // Po jakékoli změně v DOMu, volej:
+      // updateTrainingPlanContentInTextarea(); 
     }
   });
-  */
 </script>
 </body>
 </html>
