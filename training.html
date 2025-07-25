@@ -213,47 +213,62 @@ function populateTrainingPlanTextarea() {
   document.getElementById('trainingPlanContent').value = output.trim();
   console.log("📦 Generated training plan content:\n", output.trim());
 }
-  document.addEventListener('DOMContentLoaded', () => {
-    // ✅ přidej první gym input
+ document.addEventListener('DOMContentLoaded', () => {
+  // ✅ přidej první gym input
+  addGymField();
+
+  // ✅ tlačítko na přidání dalšího gymu
+  document.getElementById('addGymButton').addEventListener('click', () => {
     addGymField();
+  });
 
-    // ✅ tlačítko na přidání dalšího gymu
-    document.getElementById('addGymButton').addEventListener('click', () => {
-      addGymField();
-    });
-
-    // ✅ blok Enter v inputu
-    document.getElementById('trackerForm').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
-        e.preventDefault();
-      }
-    });
-
-    // ✅ formulář
-    document.getElementById('trackerForm').addEventListener('submit', async (e) => {
+  // ✅ blok Enter v inputu
+  document.getElementById('trackerForm').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
       e.preventDefault();
-      const gymNames = Array.from(document.querySelectorAll('.gymName'))
-        .map(x => x.value.trim()).filter(x => x);
-      if (!gymNames.length) return alert('Add at least one gym.');
-      const data = {
-        goal: goal.value,
-        frequency: frequency.value,
-        equipment: equipment.value,
-        experience: experience.value,
-        fixed: fixed.value,
-        gymNames,
-        email: email.value.trim()
-      };
-      try {
-        await generateTrainingPlan(data);
-        activateDragAndDrop();
+    }
+  });
+
+  // ✅ formulář submit
+  document.getElementById('trackerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const gymNames = Array.from(document.querySelectorAll('.gymName'))
+      .map(x => x.value.trim()).filter(x => x);
+    if (!gymNames.length) return alert('Add at least one gym.');
+
+    const data = {
+      goal: goal.value,
+      frequency: frequency.value,
+      equipment: equipment.value,
+      experience: experience.value,
+      fixed: fixed.value,
+      gymNames,
+      email: email.value.trim()
+    };
+
+    try {
+      await generateTrainingPlan(data);
+      activateDragAndDrop();
+
+      // ✅ počkej, až se DOM s tréninkem aktualizuje, pak teprve vytvoř textarea obsah
+      setTimeout(() => {
+        const days = document.querySelectorAll('.day');
+        console.log("✅ DOM ready, found days:", days.length);
+
+        days.forEach((day, i) => {
+          const exercises = day.querySelectorAll('.exercise');
+          console.log(`🔍 Day ${i + 1} has ${exercises.length} exercises.`);
+        });
+
         populateTrainingPlanTextarea();
         document.getElementById('outputBox').style.display = 'block';
-      } catch (err) {
-        alert('❌ Error: ' + err.message);
-      }
-    });
-
+      }, 100); // ⏳ mírné zpoždění, můžeš zvětšit pokud bude nutné
+    } catch (err) {
+      alert('❌ Error: ' + err.message);
+    }
+  });
+});
 // ✅ export button funkce
 document.getElementById('continueButton').addEventListener('click', async () => {
   // ⚠️ Teď teprve vytvoř tréninkový plán do textarey
