@@ -24,7 +24,8 @@
       background: #1e1e1e;
       padding: 2rem;
       border-radius: 8px;
-      border: 1px solid #333;<br>      width: 100%;
+      border: 1px solid #333;
+      width: 100%;
       box-sizing: border-box;
     }
     label {
@@ -97,6 +98,14 @@
       border-radius: 6px;
       margin-top: 1rem;
     }
+    /* Styl pro kontejner Other Gym, aby label a input byly pod sebou */
+    #specificGymNameContainer {
+      margin-top: 1rem;
+      display: block; /* Umožní labelu a inputu být na vlastních řádcích */
+    }
+    #specificGymNameContainer label {
+      margin-bottom: 0.25rem;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
@@ -124,7 +133,12 @@
       <select id="equipment">
         <option value="gym">Gym</option>
         <option value="home">Home</option>
-      </select>
+        <option value="other">Other Gym (specify below)</option> </select>
+
+      <div id="specificGymNameContainer" style="display:none;">
+        <label for="specificGymName">Specify Other Gym Name:</label>
+        <input type="text" id="specificGymName" placeholder="E.g., Local Fitness, My Garage" />
+      </div>
 
       <label for="experience">Training experience:</label>
       <select id="experience">
@@ -245,11 +259,31 @@
     document.getElementById('addGymButton').addEventListener('click', () => {
       addGymField();
     });
+
+    // PŘIDÁNO: Logika pro zobrazení/skrytí pole "Specific Gym Name"
+    const equipmentSelect = document.getElementById('equipment');
+    const specificGymNameContainer = document.getElementById('specificGymNameContainer');
+    const specificGymNameInput = document.getElementById('specificGymName');
+
+    equipmentSelect.addEventListener('change', () => {
+      if (equipmentSelect.value === 'other') {
+        specificGymNameContainer.style.display = 'block';
+      } else {
+        specificGymNameContainer.style.display = 'none';
+        specificGymNameInput.value = ''; // Vyčisti pole, když není potřeba
+      }
+    });
+    // Zavolej to jednou při načtení stránky, pokud je již vybrána "other"
+    equipmentSelect.dispatchEvent(new Event('change'));
   });
 
   // ✅ blok Enter v inputu
   document.getElementById('trackerForm').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
+      e.preventDefault();
+    }
+    // PŘIDÁNO: Zablokování Enteru i pro specificGymName
+    if (e.key === 'Enter' && e.target.id === 'specificGymName') {
       e.preventDefault();
     }
   });
@@ -260,15 +294,29 @@
 
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim()).filter(x => x);
-    if (!gymNames.length) return alert('Add at least one gym.');
+    
+    // PŘIDÁNO: Získání specifického názvu gymu
+    const equipmentValue = document.getElementById('equipment').value;
+    const specificGymName = document.getElementById('specificGymName').value.trim();
+
+    if (equipmentValue === 'other') {
+        if (!specificGymName) {
+            return alert('Please specify the name of your other gym.');
+        }
+        // Přidá zadaný název na začátek pole gymNames
+        // Apps Script použije dataObject.gymNames[0]
+        gymNames.unshift(specificGymName); 
+    }
+
+    if (!gymNames.length) return alert('Add at least one gym.'); // Toto by se nemělo stát s "other"
 
     const data = {
       goal: goal.value,
       frequency: frequency.value,
-      equipment: equipment.value,
+      equipment: equipmentValue, // Použijeme aktuální hodnotu equipment
       experience: experience.value,
       fixed: fixed.value,
-      gymNames,
+      gymNames, // Nyní může obsahovat i specificGymName
       email: email.value.trim()
     };
 
@@ -297,14 +345,26 @@
     updateTrainingPlanContentInTextarea(); // Před exportem zajistíme nejaktuálnější stav
 
     const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+    // Zde už není potřeba znovu získávat gymNames a userName, jsou již v data proměnné
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim()).filter(x => x);
     const userName = document.getElementById('email').value.trim() || "Anonymous";
 
+    // PŘIDÁNO: Znovu získáme specifický název gymu, aby se ujistil, že je nejaktuálnější pro odeslání
+    const equipmentValue = document.getElementById('equipment').value;
+    const specificGymName = document.getElementById('specificGymName').value.trim();
+
+    if (equipmentValue === 'other' && specificGymName) {
+        // Pokud je vybráno "other" a uživatel zadal název, použij ho
+        // Důležité: Tímto zajistíš, že pole gymNames je správné i po případných změnách
+        gymNames.unshift(specificGymName);
+    }
+
+
     console.log("Attempting to export plan:");
     console.log("  Training Plan Content Length:", trainingPlan.length);
     console.log("  Training Plan (first 200 chars):", trainingPlan.substring(0, 200) + (trainingPlan.length > 200 ? '...' : ''));
-    console.log("  Gym Names:", gymNames);
+    console.log("  Gym Names:", gymNames); // Zkontroluj v konzoli, že zde je i specificGymName
     console.log("  User Name:", userName);
 
     if (!trainingPlan) {
