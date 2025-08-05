@@ -75,12 +75,23 @@ window.generateTrainingPlan = async function (formData) {
   }
 
   try {
-    await loadConditioningData();
-    const frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
-    const equipment = formData.equipment.toLowerCase().includes("gym") ? "gym" : "bodyweight";
-    const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+await loadConditioningData();
 
-    if (!plan) throw new Error("❌ Conditioning plan not found.");
+// 📌 Oprava mapování vybavení
+const equipment = formData.equipment.toLowerCase().includes("home") ? "bodyweight" : "gym";
+
+// 📌 Oprava mapování frekvence
+let frequency = formData.frequency;
+if (["3", "4"].includes(frequency)) frequency = "3-4";
+else if (frequency === "5plus") frequency = "5+";
+
+console.log("Equipment:", equipment);
+console.log("Frequency:", frequency);
+console.log("Available:", Object.keys(window.conditioningFrequencies?.[equipment] || {}));
+
+const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+if (!plan) throw new Error("❌ Conditioning plan not found.");
+
 
     extendConditioningAlternatives(plan);
 
