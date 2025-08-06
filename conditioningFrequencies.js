@@ -8,7 +8,7 @@ function ensureConditioningData() {
     }
 
     window.conditioningFrequencies = {
-      gym: {
+      Gym: {
         "1-2": [
           { name: "Full Body Circuit", sets: "3 rounds", alt: ["Full Body Machines", "Barbell Complex"] },
           { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] },
@@ -80,7 +80,7 @@ function ensureConditioningData() {
         }
       },
 
-      bodyweight: {
+      Home: {
         "1-2": [
           { name: "Bodyweight Conditioning Circuit", sets: "3 rounds", alt: ["AMRAP 10 min", "Full Body Tabata"] },
           { name: "Jumping Jacks", sets: "3x20", alt: ["High Knees", "Seal Jacks"] },
