@@ -1,6 +1,6 @@
 // === conditioningFrequencies.js loader ===
 let currentPlan = null;
-function loadConditioningData() {
+function ensureConditioningData() {
     return new Promise((resolve, reject) => {
         if (window.conditioningFrequencies) {
             resolve();
@@ -8,7 +8,7 @@ function loadConditioningData() {
         }
 
         const script = document.createElement('script');
-        script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
+        script.src = 'conditioningFrequencies.js';
         script.onload = async () => {
             try {
                 if (window.conditioningFrequencies) {
@@ -198,7 +198,7 @@ function loadTrainingData(goal, equipment) {
 /*
 window.addEventListener("DOMContentLoaded", async () => {
     try {
-        await loadConditioningData();
+     await ensureConditioningData();
         console.log("✅ Conditioning data preloaded");
     } catch (err) {
         console.error("❌ Preloading error:", err);
@@ -288,7 +288,7 @@ export async function generateTrainingPlan(formData) {
     const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
     if (formData.goal === "Improve conditioning") {
-        await loadConditioningData();
+        await ensureConditioningData();
         const equipmentMap = {
             gym: "gym",
             home: "bodyweight"
