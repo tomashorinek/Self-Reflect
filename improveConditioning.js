@@ -96,16 +96,22 @@ console.log("Equipment:", equipment);
 console.log("Frequency:", frequency);
 console.log("Available:", Object.keys(window.conditioningFrequencies?.[equipment] || {}));
 
-const plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+let plan = window.conditioningFrequencies?.[equipment]?.[frequency];
 if (!plan) throw new Error("❌ Conditioning plan not found.");
 
+// 🔹 Pokud je to pole (např. 1-2 dny), zabalíme do objektu s jediným dnem
+if (Array.isArray(plan)) {
+  plan = { "Day 1": plan };
+}
 
-    extendConditioningAlternatives(plan);
+extendConditioningAlternatives(plan);
 
-    if (typeof renderPlan === 'function') {
-      renderPlan(plan, frequency, formData);
-      document.getElementById('outputBox').style.display = 'block';
-    }
+// 🔹 Bezpečné volání renderPlan
+if (typeof renderPlan === 'function') {
+  renderPlan(plan, frequency, formData);
+  document.getElementById('outputBox').style.display = 'block';
+}
+
   } catch (err) {
     console.error(err);
     alert('Something went wrong loading your conditioning plan.');
