@@ -1,19 +1,28 @@
 // === improveConditioning.js ===
 
 // Load conditioning data script if needed
-function loadConditioningData() {
+function ensureConditioningData() {
   return new Promise((resolve, reject) => {
     if (window.conditioningFrequencies) {
       resolve();
       return;
     }
     const script = document.createElement('script');
-    script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-    script.onload = () => {
-      if (window.conditioningFrequencies) {
-        resolve();
-      } else {
-        reject("❌ Conditioning data not available after script load");
+    script.src = 'conditioningFrequencies.js';
+    script.onload = async () => {
+      try {
+        if (window.conditioningFrequencies) {
+          resolve();
+          return;
+        }
+        if (window.loadConditioningData) {
+          await window.loadConditioningData();
+          resolve();
+        } else {
+          reject("❌ Conditioning data not available after script load");
+        }
+      } catch (err) {
+        reject(err);
       }
     };
     script.onerror = () => reject("❌ Failed to load conditioning data script");
