@@ -1,6 +1,6 @@
 // === improveConditioning.js ===
 
-// Load conditioning data script if needed
+// ✅ Zajištění načtení conditioningFrequencies
 function ensureConditioningData() {
   return new Promise((resolve, reject) => {
     if (window.conditioningFrequencies) {
@@ -30,12 +30,12 @@ function ensureConditioningData() {
   });
 }
 
-// Extend alt exercises
+// ✅ Rozšíření alternativních cviků
 function extendConditioningAlternatives(plan) {
   Object.entries(plan).forEach(([day, exercises]) => {
     const dayLower = day.toLowerCase();
 
-    // Add fallback if too few exercises
+    // 🔹 Pokud má den méně než 3 cviky, přidáme finisher
     if (exercises.length < 3) {
       const extra = {
         mon: { name: "Core Circuit Finisher", sets: "3x40s plank + 10 crunches", alt: ["Plank to Push-up", "Mountain Climbers"] },
@@ -54,7 +54,7 @@ function extendConditioningAlternatives(plan) {
       }
     }
 
-    // Enrich with known alternative mappings
+    // 🔹 Doplnění alternativních cviků podle známé mapy
     exercises.forEach(ex => {
       if (!ex.alt) ex.alt = [];
       const altMap = {
@@ -76,7 +76,7 @@ function extendConditioningAlternatives(plan) {
   });
 }
 
-// Override generator only for conditioning
+// ✅ Přepis generátoru pro Improve Conditioning
 window.originalGenerateTrainingPlan = window.generateTrainingPlan;
 window.generateTrainingPlan = async function (formData) {
   if (formData.goal !== "Improve conditioning") {
@@ -84,36 +84,39 @@ window.generateTrainingPlan = async function (formData) {
   }
 
   try {
-await ensureConditioningData();
+    await ensureConditioningData();
 
-// 📌 Oprava mapování vybavení
-const equipment = formData.equipment.toLowerCase().includes("home") ? "bodyweight" : "gym";
+    // 🔹 Určení typu vybavení
+    const equipment = formData.equipment.toLowerCase().includes("home") ? "bodyweight" : "gym";
 
-// 📌 Oprava mapování frekvence
-let frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
+    // 🔹 Úprava frekvence (mapování "5plus" → "5+")
+    let frequency = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
-console.log("Equipment:", equipment);
-console.log("Frequency:", frequency);
-console.log("Available:", Object.keys(window.conditioningFrequencies?.[equipment] || {}));
+    console.log("Equipment:", equipment);
+    console.log("Frequency:", frequency);
+    console.log("Available Frequencies:", Object.keys(window.conditioningFrequencies?.[equipment] || {}));
 
-let plan = window.conditioningFrequencies?.[equipment]?.[frequency];
-if (!plan) throw new Error("❌ Conditioning plan not found.");
+    // 🔹 Načtení plánu
+    let plan = window.conditioningFrequencies?.[equipment]?.[frequency];
+    if (!plan) throw new Error("❌ Conditioning plan not found.");
 
-// 🔹 Pokud je to pole (např. 1-2 dny), zabalíme do objektu s jediným dnem
-if (Array.isArray(plan)) {
-  plan = { "Day 1": plan };
-}
+    // 🔹 Pokud je to pole (1–2 dny), zabalíme do objektu
+    if (Array.isArray(plan)) {
+      console.warn("ℹ️ Wrapping single-day plan into object for consistency");
+      plan = { "Day 1": plan };
+    }
 
-extendConditioningAlternatives(plan);
+    // 🔹 Rozšíření alternativ
+    extendConditioningAlternatives(plan);
 
-// 🔹 Bezpečné volání renderPlan
-if (typeof renderPlan === 'function') {
-  renderPlan(plan, frequency, formData);
-  document.getElementById('outputBox').style.display = 'block';
-}
+    // 🔹 Bezpečné renderování plánu
+    if (typeof renderPlan === 'function') {
+      renderPlan(plan, frequency, formData);
+      document.getElementById('outputBox').style.display = 'block';
+    }
 
   } catch (err) {
-    console.error(err);
-    alert('Something went wrong loading your conditioning plan.');
+    console.error("⚠️ Conditioning Plan Generation Error:", err);
+    alert(err.message || 'Something went wrong loading your conditioning plan.');
   }
 };
