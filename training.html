@@ -111,7 +111,7 @@
 </head>
 <body>
   <script>
-  // Přidání nového gym inputu
+  // === Přidá jeden gym input ===
   function addGymField() {
     const gymFieldsContainer = document.getElementById("gymFields");
     const input = document.createElement("input");
@@ -121,40 +121,45 @@
     gymFieldsContainer.appendChild(input);
   }
 
-  // Automaticky přidá 1. pole po načtení stránky
+  // === Spustí se po načtení stránky ===
   window.addEventListener("DOMContentLoaded", () => {
+    // přidej první pole automaticky
     addGymField();
+
+    // naváže event listener na tlačítko Add another gym
+    const addGymBtn = document.getElementById("addGymButton");
+    if (addGymBtn) {
+      addGymBtn.addEventListener("click", addGymField);
+    }
+
+    // naváže event listener na formulář
+    const form = document.getElementById("training-form");
+    if (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault(); // ⛔️ zabrání reloadu
+
+        const goal = document.getElementById("goal").value;
+        const frequency = document.getElementById("frequency").value;
+        const equipment = document.getElementById("equipment").value;
+
+        const gymInputs = document.querySelectorAll(".gym-input");
+        const gyms = Array.from(gymInputs)
+          .map((input) => input.value.trim())
+          .filter((val) => val.length > 0);
+
+        const plan = {
+          goal,
+          frequency,
+          equipment,
+          gyms,
+        };
+
+        generateTrainingPlan(plan); // zavolá plán z planLogic.js
+      });
+    }
   });
+</script>
 
-  // Přidávání dalších gymů kliknutím
-  document.getElementById("addGymButton").addEventListener("click", () => {
-    addGymField();
-  });
-
-  // Zachytí odeslání formuláře a zavolá generateTrainingPlan
-  const form = document.getElementById("training-form");
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const goal = document.getElementById("goal").value;
-    const frequency = document.getElementById("frequency").value;
-    const equipment = document.getElementById("equipment").value;
-
-    const gymInputs = document.querySelectorAll(".gym-input");
-    const gyms = Array.from(gymInputs)
-      .map((input) => input.value.trim())
-      .filter((val) => val.length > 0);
-
-    const plan = {
-      goal,
-      frequency,
-      equipment,
-      gyms,
-    };
-
-    generateTrainingPlan(plan); // volá logiku z planLogic.js
-  });
 </script>
   <div class="container">
     <h1>Self-Coaching Plan Generator</h1>
