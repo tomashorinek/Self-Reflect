@@ -126,6 +126,9 @@
       resolve();
     });
   }
-
   window.loadConditioningData = loadConditioningData;
+
+  if (!window.conditioningFrequencies) {
+    loadConditioningData();
+  }
 })();
