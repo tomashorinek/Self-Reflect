@@ -1,6 +1,4 @@
-function loadConditioningData() {
-  return new Promise((resolve, reject) => {
-    window.conditioningFrequencies = {
+export const conditioningFrequencies = {
       // Definice plánů s vlastní vahou (BODYWEIGHT) s novou, detailní strukturou
       bodyweight: {
         "1-2": {
@@ -122,18 +120,24 @@ function loadConditioningData() {
       }
     };
     
-    // Zbytek kódu, který se týká zobrazení tooltipu
-    const observer = new MutationObserver(() => {
-      const container = document.querySelector(".training-day-header");
-      if (container && !document.querySelector(".alt-tip")) {
-        const tip = document.createElement("div");
-        tip.className = "alt-tip";
-        tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
-        tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
-        container.parentNode.insertBefore(tip, container.nextSibling);
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+   export function loadConditioningData() {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined") {
+      window.conditioningFrequencies = conditioningFrequencies;
+
+      // Zbytek kódu, který se týká zobrazení tooltipu
+      const observer = new MutationObserver(() => {
+        const container = document.querySelector(".training-day-header");
+        if (container && !document.querySelector(".alt-tip")) {
+          const tip = document.createElement("div");
+          tip.className = "alt-tip";
+          tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
+          tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
+          container.parentNode.insertBefore(tip, container.nextSibling);
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
 
     resolve();
   });
@@ -146,3 +150,5 @@ if (typeof window !== "undefined") {
     loadConditioningData();
   }
 }
+
+export default conditioningFrequencies;
