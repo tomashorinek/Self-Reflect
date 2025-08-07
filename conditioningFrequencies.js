@@ -1,776 +1,330 @@
 function loadConditioningData() {
-return new Promise((resolve, reject) => {
-window.conditioningFrequencies = {
-gym, bodyweight: {
-  "1-2": {
-    "Day 1": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Arm Circles (each direction)",
-        "10x Air Squats",
-        "30s Plank Hold"
-      ],
-      workout: {
-        type: "EMOM",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Knee Push-ups", "Incline Push-ups"]
-          },
-          {
-            name: "Lunges",
-            reps: "20x",
-            description: "Stepping forward with one leg to work quads, hamstrings, and glutes.",
-            alternatives: ["Step-ups", "Split Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "Lying flat, lifting legs to work lower abs.",
-            alternatives: ["Reverse Crunches", "V-Ups"]
-          },
-          {
-            name: "Bear Crawl (forward + back)",
-            reps: "10x",
-            description: "A core and coordination-focused move using all four limbs to crawl.",
-            alternatives: ["Crab Walk", "Mountain Climbers"]
-          },
-          {
-            name: "Plank Shoulder Taps",
-            reps: "30s",
-            description: "From plank position, alternate tapping shoulders to work core stability.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      running: {
-        type: "Easy Run",
-        duration: "20–25 min",
-        description: "Light run focused on technique, posture, and relaxed breathing.",
-        alternative: "2 min run / 1 min walk"
-      }
-    }
-  },
-  "3-4": {
-    "Day 1": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Arm Circles (each direction)",
-        "10x Air Squats",
-        "30s Plank Hold"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Knee Push-ups", "Incline Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "V-ups / Leg Raises",
-            reps: "10x",
-            description: "Core-focused movement, lifting legs or combining with crunch for full-body engagement.",
-            alternatives: ["Toe Touches", "Crunches"]
-          },
-          {
-            name: "Bear Crawl (forward + back)",
-            reps: "10x",
-            description: "A core and coordination-focused move using all four limbs to crawl.",
-            alternatives: ["Crab Walk", "Mountain Climbers"]
-          },
-          {
-            name: "Plank Shoulder Taps",
-            reps: "30s",
-            description: "From plank position, alternate tapping shoulders to work core stability.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      running: {
-        type: "Easy Run",
-        duration: "25–30 min",
-        description: "Light run focused on breathing, posture, and a relaxed rhythm.",
-        alternative: "3 min run / 1 min walk"
-      }
-    },
-    "Day 2": {
-      warmup: [
-        "20x High Knees",
-        "10x Arm Swings",
-        "10x Reverse Lunges",
-        "20s Plank + 10x Shoulder Taps"
-      ],
-      workout: {
-        type: "EMOM",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting the quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "An abdominal movement that targets the lower core.",
-            alternatives: ["Flutter Kicks", "Reverse Crunch"]
-          },
-          {
-            name: "Shoulder Taps",
-            reps: "20x",
-            description: "Alternating shoulder taps in a plank position to build stability and shoulder strength.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      finisher: {
-        type: "Core Finisher",
-        rounds: 2,
-        exercises: [
-          "40s Plank Hold",
-          "10x Push-ups",
-          "20x Russian Twists",
-          "10x Superman Hold (3s each)"
-        ]
-      }
-    },
-    "Day 3": {
-      warmup: [
-        "10x Arm Circles",
-        "10x Inchworm to Plank",
-        "20x Jumping Jacks",
-        "10x Mountain Climbers"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "10x",
-            description: "A classic upper body movement targeting chest, triceps, and shoulders.",
-            alternatives: ["Knee Push-ups", "Incline Push-ups"]
-          },
-          {
-            name: "Pike Push-ups",
-            reps: "10x",
-            description: "Targets the shoulders and upper chest by simulating an overhead press.",
-            alternatives: ["Incline Pike Push-ups", "Wall Handstand Hold"]
-          },
-          {
-            name: "Split Squats",
-            reps: "15x each leg",
-            description: "A unilateral leg movement focusing on quads and glutes.",
-            alternatives: ["Step-ups", "Bulgarian Split Squats"]
-          },
-          {
-            name: "Bicycle Crunches",
-            reps: "20x",
-            description: "A core movement emphasizing obliques and hip flexors.",
-            alternatives: ["Toe Touches", "Russian Twists"]
-          }
-        ]
-      },
-      running: {
-        type: "Interval Run",
-        description: "6 rounds of fast intervals with full recovery in between.",
-        structure: [
-          "200–300 m fast run",
-          "60s walk / full recovery"
-        ]
-      }
-    },
-    "Day 4": {
-      warmup: [
-        "Arm and Hip Circles",
-        "World's Greatest Stretch",
-        "Downward Dog to Cobra"
-      ],
-      workout: {
-        type: "Core & Stability Circuit",
-        rounds: "2–3",
-        exercises: [
-          {
-            name: "Side Plank",
-            reps: "30s each side",
-            description: "Strengthens the obliques and improves lateral stability.",
-            alternatives: ["Side Plank with Reach", "Knee Side Plank"]
-          },
-          {
-            name: "Push-up to Plank",
-            reps: "10x",
-            description: "Transitions between push-up and elbow plank to challenge the core and shoulders.",
-            alternatives: ["Plank Up-Downs", "Modified Push-up to Plank"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "20x",
-            description: "Engages lower abs through controlled leg lifts.",
-            alternatives: ["Flutter Kicks", "Reverse Crunches"]
-          },
-          {
-            name: "Superman Reaches",
-            reps: "15x",
-            description: "Strengthens the lower back, glutes, and posterior chain.",
-            alternatives: ["Bird Dog", "Cobra Raises"]
-          }
-        ]
-      },
-      running: {
-        type: "Recovery Run or Walk",
-        duration: "20–25 min",
-        description: "Use this day for active recovery. Maintain a relaxed pace.",
-        alternative: "2 min jog / 1 min walk"
-      }
-    }
-const conditioningFrequencies = {
-  "1-2": { ... },
-  "3-4": { ... },
-  "5": {
-    "Day 1": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Arm Circles (each direction)",
-        "10x Air Squats",
-        "30s Plank Hold"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Knee Push-ups", "Incline Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "V-ups or Leg Raises",
-            reps: "10x",
-            description: "Core-focused movement for strengthening the lower and upper abdominal area.",
-            alternatives: ["Crunches", "Toe Touches"]
-          },
-          {
-            name: "Bear Crawl (forward + back)",
-            reps: "10x",
-            description: "A core and coordination-focused move using all four limbs to crawl.",
-            alternatives: ["Crab Walk", "Mountain Climbers"]
-          },
-          {
-            name: "Plank Shoulder Taps",
-            reps: "30s",
-            description: "From plank position, alternate tapping shoulders to work core stability.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      running: {
-        type: "Easy Run",
-        duration: "25–30 min",
-        description: "Light run focused on posture, breathing, and a relaxed rhythm.",
-        alternative: "3 min run / 1 min walk"
-      }
-    },
-    "Day 2": {
-      warmup: [
-        "20x High Knees",
-        "10x Arm Swings",
-        "10x Reverse Lunges",
-        "20s Plank + 10x Shoulder Taps"
-      ],
-      workout: {
-        type: "EMOM",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "An abdominal movement that targets the lower core.",
-            alternatives: ["Flutter Kicks", "Reverse Crunch"]
-          },
-          {
-            name: "Shoulder Taps",
-            reps: "20x",
-            description: "Alternating shoulder taps in a plank position to build stability and shoulder strength.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      finisher: {
-        type: "Core Finisher",
-        rounds: 2,
-        exercises: [
-          "40s Plank Hold",
-          "10x Push-ups",
-          "20x Russian Twists",
-          "10x Superman Hold (3s each)"
-        ]
-      }
-    },
-    "Day 3": {
-      warmup: [
-        "10x Arm Circles",
-        "10x Inchworm to Plank",
-        "20x Jumping Jacks",
-        "10x Mountain Climbers"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "10x",
-            description: "Classic upper body movement working chest, shoulders, and triceps.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Pike Push-ups (or Incline Push-ups)",
-            reps: "10x",
-            description: "Targets shoulders and upper chest with bodyweight resistance.",
-            alternatives: ["Shoulder Tap Push-ups", "Wall Pike Push-ups"]
-          },
-          {
-            name: "Step-back Lunges",
-            reps: "15x",
-            description: "Lunge variation focusing on glutes, quads, and stability.",
-            alternatives: ["Forward Lunges", "Walking Lunges"]
-          },
-          {
-            name: "Bicycle Crunches",
-            reps: "20x",
-            description: "Dynamic core exercise hitting obliques and rectus abdominis.",
-            alternatives: ["Dead Bug", "Toe Touches"]
-          }
-        ]
-      },
-      running: {
-        type: "Speed Intervals",
-        duration: "6 rounds",
-        description: "200–300 m fast run followed by 60s walk or jog. Focus on clean form and speed.",
-        alternative: "Short sprints with walk back recovery"
-      }
-    },
-    "Day 4": {
-      warmup: [
-        "Arm and Hip Circles",
-        "Deep Lunge Stretch",
-        "Downward Dog to Cobra"
-      ],
-      workout: {
-        type: "Core & Control",
-        rounds: 2,
-        exercises: [
-          {
-            name: "Side Plank",
-            reps: "30s each side",
-            description: "Static core hold for oblique activation and trunk stability.",
-            alternatives: ["Knee Side Plank", "Forearm Side Plank"]
-          },
-          {
-            name: "Push-up to Plank",
-            reps: "10x",
-            description: "Upper body and core coordination exercise moving between plank and push-up.",
-            alternatives: ["Up-Down Plank", "Kneeling Push-up to Plank"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "20x",
-            description: "Lower abdominal isolation movement.",
-            alternatives: ["Flutter Kicks", "Lying Toe Touches"]
-          },
-          {
-            name: "Superman Reach",
-            reps: "15x",
-            description: "Posterior chain activation movement for lower back and glutes.",
-            alternatives: ["Bird Dog", "Bridge Hold"]
-          }
-        ]
-      },
-      running: {
-        type: "Light Jog / Walk",
-        duration: "20–25 min",
-        description: "Recovery-focused light jog or 2 min jog / 1 min walk split.",
-        alternative: "Brisk walk with mobility drills"
-      }
-    },
-    "Day 5": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Reverse Lunges",
-        "5x Inchworms to Plank",
-        "30s Plank + 10x Shoulder Taps"
-      ],
-      workout: {
-        type: "Full Body Circuit",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "10x",
-            description: "Classic upper body movement working chest, shoulders, and triceps.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "20x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "An abdominal movement that targets the lower core.",
-            alternatives: ["Flutter Kicks", "Toe Touches"]
-          },
-          {
-            name: "Jump Lunges",
-            reps: "10x",
-            description: "Plyometric leg exercise that improves power and coordination.",
-            alternatives: ["Step-back Lunges", "Split Squats"]
-          },
-          {
-            name: "Plank Hold",
-            reps: "30s",
-            description: "Static core isometric to improve trunk endurance and control.",
-            alternatives: ["Knee Plank", "Elbow Plank"]
-          }
-        ]
-      },
-      running: {
-        type: "Tempo Run",
-        duration: "20 min total",
-        description: "5 min easy pace, 10–12 min steady tempo, 5 min cooldown jog or walk.",
-        alternative: "2 min brisk / 2 min jog x5"
-      }
-    }
-const conditioningFrequencies = {
-  "1-2": { ... },
-  "3-4": { ... },
-  "5": { ... },
-  "5+": {
-    "Day 1": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Arm Circles",
-        "10x Air Squats",
-        "30s Plank Hold"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Knee Push-ups", "Incline Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "V-ups",
-            reps: "10x",
-            description: "Core-focused movement for strengthening the lower and upper abdominal area.",
-            alternatives: ["Crunches", "Leg Raises"]
-          },
-          {
-            name: "Bear Crawl (forward + back)",
-            reps: "10x",
-            description: "A core and coordination-focused move using all four limbs to crawl.",
-            alternatives: ["Crab Walk", "Mountain Climbers"]
-          },
-          {
-            name: "Plank Shoulder Taps",
-            reps: "30s",
-            description: "From plank position, alternate tapping shoulders to work core stability.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      running: {
-        type: "Easy Run",
-        duration: "25–30 min",
-        description: "Light run focused on posture, breathing, and a relaxed rhythm.",
-        alternative: "3 min run / 1 min walk"
-      }
-    },
-    "Day 2": {
-      warmup: [
-        "20x High Knees",
-        "10x Arm Swings",
-        "10x Reverse Lunges",
-        "30s Plank + 10x Shoulder Taps"
-      ],
-      workout: {
-        type: "EMOM",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "A bodyweight chest press that also targets the triceps and shoulders.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "15x",
-            description: "A lower body exercise targeting quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "An abdominal movement that targets the lower core.",
-            alternatives: ["Flutter Kicks", "Reverse Crunch"]
-          },
-          {
-            name: "Shoulder Taps",
-            reps: "20x",
-            description: "Alternating shoulder taps in a plank position to build stability and shoulder strength.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      finisher: {
-        type: "Core Finisher",
-        rounds: 2,
-        exercises: [
-          "40s Plank Hold",
-          "10x Push-ups",
-          "20x Russian Twists",
-          "10x Superman Hold (3s each)"
-        ]
-      }
-    },
-    "Day 3": {
-      warmup: [
-        "10x Inchworms",
-        "20x Jumping Jacks",
-        "10x Arm Swings",
-        "10x Mountain Climbers"
-      ],
-      workout: {
-        type: "Strength Block",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "10x",
-            description: "Classic upper body movement working chest, shoulders, and triceps.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Pike Push-ups",
-            reps: "10x",
-            description: "Targets shoulders and upper chest with bodyweight resistance.",
-            alternatives: ["Wall Pike Push-ups", "Shoulder Tap Push-ups"]
-          },
-          {
-            name: "Step-back Lunges",
-            reps: "15x",
-            description: "Lunge variation focusing on glutes, quads, and stability.",
-            alternatives: ["Forward Lunges", "Walking Lunges"]
-          },
-          {
-            name: "Bicycle Crunches",
-            reps: "20x",
-            description: "Dynamic core exercise hitting obliques and rectus abdominis.",
-            alternatives: ["Dead Bug", "Toe Touches"]
-          }
-        ]
-      },
-      running: {
-        type: "Speed Intervals",
-        duration: "6 rounds",
-        description: "200–300 m fast run with 60–90s walk. Focus on strong form and recovery.",
-        alternative: "Sprint Intervals with walk back recovery"
-      }
-    },
-    "Day 4": {
-      warmup: [
-        "Dynamic Leg Swings",
-        "Arm Circles",
-        "World's Greatest Stretch",
-        "Downward Dog to Cobra"
-      ],
-      workout: {
-        type: "Core Stability",
-        rounds: 2,
-        exercises: [
-          {
-            name: "Side Plank",
-            reps: "30s each side",
-            description: "Static core hold for oblique activation and trunk stability.",
-            alternatives: ["Knee Side Plank", "Forearm Side Plank"]
-          },
-          {
-            name: "Push-up to Plank",
-            reps: "10x",
-            description: "Upper body and core coordination exercise moving between plank and push-up.",
-            alternatives: ["Up-Down Plank", "Kneeling Push-up to Plank"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "20x",
-            description: "Lower abdominal isolation movement.",
-            alternatives: ["Flutter Kicks", "Lying Toe Touches"]
-          },
-          {
-            name: "Superman Reaches",
-            reps: "15x",
-            description: "Posterior chain activation movement for lower back and glutes.",
-            alternatives: ["Bird Dog", "Bridge Hold"]
-          }
-        ]
-      },
-      running: {
-        type: "Light Jog or Walk",
-        duration: "20–30 min",
-        description: "Recovery-based jog or alternating walk/jog at zone 1–2 heart rate.",
-        alternative: "2 min jog / 1 min walk"
-      }
-    },
-    "Day 5": {
-      warmup: [
-        "20x Jumping Jacks",
-        "10x Reverse Lunges",
-        "5x Inchworm to Plank",
-        "30s Plank Hold"
-      ],
-      workout: {
-        type: "Full Body Push Circuit",
-        rounds: 3,
-        exercises: [
-          {
-            name: "Push-ups",
-            reps: "12x",
-            description: "Classic upper body movement working chest, shoulders, and triceps.",
-            alternatives: ["Incline Push-ups", "Knee Push-ups"]
-          },
-          {
-            name: "Air Squats",
-            reps: "20x",
-            description: "Bodyweight lower body movement focusing on quads, hamstrings, and glutes.",
-            alternatives: ["Wall Sit", "Chair Squats"]
-          },
-          {
-            name: "Leg Raises",
-            reps: "10x",
-            description: "An abdominal movement that targets the lower core.",
-            alternatives: ["Flutter Kicks", "Toe Touches"]
-          },
-          {
-            name: "Jump Lunges",
-            reps: "10x",
-            description: "Plyometric leg exercise that improves power and coordination.",
-            alternatives: ["Split Squats", "Step-back Lunges"]
-          },
-          {
-            name: "Plank with Shoulder Taps",
-            reps: "30s",
-            description: "Static core isometric with added shoulder activation.",
-            alternatives: ["Plank Hold", "Bird Dog"]
-          }
-        ]
-      },
-      running: {
-        type: "Tempo Run",
-        duration: "22–25 min",
-        description: "5 min easy pace, 12–15 min tempo pace (moderate), 5 min cooldown jog/walk.",
-        alternative: "2 min brisk jog / 2 min recovery jog x5"
-      }
-    },
-    "Day 6": {
-      warmup: [
-        "Light dynamic mobility",
-        "Wrist warm-up",
-        "Shoulder rotations"
-      ],
-      workout: {
-        type: "Push-up Challenge + Core",
-        rounds: 1,
-        exercises: [
-          {
-            name: "Push-up Ladder",
-            reps: "1–2–3–4–5... to failure",
-            description: "Progressive push-up challenge with short rest to build endurance.",
-            alternatives: ["Knee Push-ups", "Incline Ladder"]
-          }
-        ]
-      },
-      core: {
-        type: "Core Burn",
-        rounds: 2,
-        exercises: [
-          "20x Russian Twists",
-          "10x Leg Raises",
-          "10x V-ups",
-          "1 min Plank"
-        ]
-      },
-      cooldown: {
-        type: "Stretch",
-        duration: "5–10 min",
-        focus: ["Chest", "Shoulders", "Hips", "Hamstrings"]
-      }
-    }
-  }
-};
-// Add tooltip to alert users about alternate swap feature
-const observer = new MutationObserver(() => {
-const container = document.querySelector(".training-day-header");
-if (container && !document.querySelector(".alt-tip")) {
-const tip = document.createElement("div");
-tip.className = "alt-tip";
-tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
-tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
-container.parentNode.insertBefore(tip, container.nextSibling);
-}
-});
-observer.observe(document.body, { childList: true, subtree: true });
+return new Promise(resolve => {
+    const day1 = {
+      name: "Day 1",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "20x Jumping Jacks, 10x Arm Circles (each direction), 10x Air Squats, 30s Plank Hold.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Push-ups",
+          description: "Bodyweight press for chest, shoulders, and triceps.",
+          alternatives: [
+            { name: "Incline Push-ups", description: "Hands elevated to reduce load." },
+            { name: "Knee Push-ups", description: "Knees on the ground to decrease intensity." }
+          ],
+          alt: ["Incline Push-ups", "Knee Push-ups"]
+        },
+        {
+          name: "Lunges",
+          description: "Forward step to work quads, hamstrings, and glutes.",
+          alternatives: [
+            { name: "Step-ups", description: "Use a box or bench to step up and down." },
+            { name: "Split Squats", description: "Static lunge focusing on balance and unilateral strength." }
+          ],
+          alt: ["Step-ups", "Split Squats"]
+        },
+        {
+          name: "Plank Shoulder Taps",
+          description: "From plank, alternate tapping shoulders to build core stability.",
+          alternatives: [
+            { name: "Plank Hold", description: "Maintain a straight-arm plank without movement." },
+            { name: "Bird Dog", description: "Opposite arm and leg extensions from tabletop position." }
+          ],
+          alt: ["Plank Hold", "Bird Dog"]
+        },
+        {
+          name: "Running Block",
+          description: "Easy run 20–25 min focusing on technique and relaxed breathing.",
+          alternatives: [
+            { name: "2 min run / 1 min walk", description: "Interval option for controlled effort." },
+            { name: "Cycling", description: "Steady ride for the same duration." }
+          ],
+          alt: ["2 min run / 1 min walk", "Cycling"]
+        }
+      ]
+    };
 
-resolve();
-});
+    const day2 = {
+      name: "Day 2",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "20x High Knees, 10x Arm Swings, 10x Reverse Lunges, 30s Plank + 10 Shoulder Taps.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Squat Jumps",
+          description: "Explosive squats to develop power and conditioning.",
+          alternatives: [
+            { name: "Air Squats", description: "Bodyweight squats focusing on depth and control." },
+            { name: "Box Jumps", description: "Jump onto a sturdy platform." }
+          ],
+          alt: ["Air Squats", "Box Jumps"]
+        },
+        {
+          name: "Mountain Climbers",
+          description: "Alternating knees drive from plank position to elevate heart rate.",
+          alternatives: [
+            { name: "High Knees", description: "Running in place lifting knees high." },
+            { name: "Plank Jacks", description: "Jump legs in and out from plank stance." }
+          ],
+          alt: ["High Knees", "Plank Jacks"]
+        },
+        {
+          name: "Leg Raises",
+          description: "Lying leg lifts targeting lower abdominal muscles.",
+          alternatives: [
+            { name: "Reverse Crunches", description: "Curl hips toward chest to engage lower abs." },
+            { name: "Flutter Kicks", description: "Quick alternating leg lifts while lying down." }
+          ],
+          alt: ["Reverse Crunches", "Flutter Kicks"]
+        },
+        {
+          name: "Running Block",
+          description: "Easy run 20–25 min focusing on posture and relaxed breathing.",
+          alternatives: [
+            { name: "2 min run / 1 min walk", description: "Interval option for controlled effort." },
+            { name: "Cycling", description: "Steady ride for the same duration." }
+          ],
+          alt: ["2 min run / 1 min walk", "Cycling"]
+        }
+      ]
+    };
+
+    const day3 = {
+      name: "Day 3",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "10x Arm Circles, 10x Inchworm to Plank, 20x Jumping Jacks, 10x Mountain Climbers.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Push-ups",
+          description: "Bodyweight press for chest, shoulders, and triceps.",
+          alternatives: [
+            { name: "Incline Push-ups", description: "Hands elevated to reduce load." },
+            { name: "Knee Push-ups", description: "Knees on the ground to decrease intensity." }
+          ],
+          alt: ["Incline Push-ups", "Knee Push-ups"]
+        },
+        {
+          name: "Pike Push-ups",
+          description: "Shoulder-focused push-up variation mimicking an overhead press.",
+          alternatives: [
+            { name: "Incline Pike Push-ups", description: "Feet elevated to adjust difficulty." },
+            { name: "Wall Handstand Hold", description: "Static hold to build overhead strength." }
+          ],
+          alt: ["Incline Pike Push-ups", "Wall Handstand Hold"]
+        },
+        {
+          name: "Split Squats",
+          description: "Unilateral leg exercise focusing on quads and glutes.",
+          alternatives: [
+            { name: "Step-ups", description: "Step onto a raised platform one leg at a time." },
+            { name: "Bulgarian Split Squats", description: "Rear foot elevated for increased range." }
+          ],
+          alt: ["Step-ups", "Bulgarian Split Squats"]
+        },
+        {
+          name: "Running Block",
+          description: "Interval run: 6 rounds of 200–300 m fast run with 60s walk recovery.",
+          alternatives: [
+            { name: "Hill Sprints", description: "Short uphill runs with walk down recovery." },
+            { name: "Rowing Intervals", description: "200 m efforts on rower with 60s rest." }
+          ],
+          alt: ["Hill Sprints", "Rowing Intervals"]
+        }
+      ]
+    };
+
+    const day4 = {
+      name: "Day 4",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "Arm and Hip Circles, World's Greatest Stretch, Downward Dog to Cobra flow.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Side Plank",
+          description: "Static hold strengthening obliques and lateral core.",
+          alternatives: [
+            { name: "Knee Side Plank", description: "Support with knees for less intensity." },
+            { name: "Forearm Side Plank", description: "Perform on forearm for shoulder comfort." }
+          ],
+          alt: ["Knee Side Plank", "Forearm Side Plank"]
+        },
+        {
+          name: "Push-up to Plank",
+          description: "Transition between push-up and elbow plank to challenge core and shoulders.",
+          alternatives: [
+            { name: "Plank Up-Downs", description: "Move from forearms to hands repeatedly." },
+            { name: "Modified Push-up to Plank", description: "Perform on knees for reduced load." }
+          ],
+          alt: ["Plank Up-Downs", "Modified Push-up to Plank"]
+        },
+        {
+          name: "Superman Reaches",
+          description: "Prone arm and leg lifts to strengthen lower back and glutes.",
+          alternatives: [
+            { name: "Bird Dog", description: "Opposite arm/leg extensions from tabletop." },
+            { name: "Bridge Hold", description: "Supine hip lift focusing on posterior chain." }
+          ],
+          alt: ["Bird Dog", "Bridge Hold"]
+        },
+        {
+          name: "Running Block",
+          description: "Recovery run or walk for 20–25 min at relaxed pace.",
+          alternatives: [
+            { name: "2 min jog / 1 min walk", description: "Gentle intervals for active recovery." },
+            { name: "Cycling", description: "Easy ride keeping heart rate low." }
+          ],
+          alt: ["2 min jog / 1 min walk", "Cycling"]
+        }
+      ]
+    };
+
+    const day5 = {
+      name: "Day 5",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "20x Jumping Jacks, 10x Reverse Lunges, 5x Inchworms to Plank, 30s Plank + 10 Shoulder Taps.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Push-ups",
+          description: "Bodyweight press for chest, shoulders, and triceps.",
+          alternatives: [
+            { name: "Incline Push-ups", description: "Hands elevated to reduce load." },
+            { name: "Knee Push-ups", description: "Knees on the ground to decrease intensity." }
+          ],
+          alt: ["Incline Push-ups", "Knee Push-ups"]
+        },
+        {
+          name: "Air Squats",
+          description: "Bodyweight squats targeting the entire lower body.",
+          alternatives: [
+            { name: "Wall Sit", description: "Static seated hold against a wall." },
+            { name: "Chair Squats", description: "Use a chair for assistance." }
+          ],
+          alt: ["Wall Sit", "Chair Squats"]
+        },
+        {
+          name: "Jump Lunges",
+          description: "Explosive lunge variation building power and coordination.",
+          alternatives: [
+            { name: "Step-back Lunges", description: "Controlled backward lunges for stability." },
+            { name: "Split Squats", description: "Static lunge focusing on balance." }
+          ],
+          alt: ["Step-back Lunges", "Split Squats"]
+        },
+        {
+          name: "Running Block",
+          description: "Tempo run: 5 min easy, 10–12 min steady tempo, 5 min cooldown.",
+          alternatives: [
+            { name: "2 min brisk / 2 min jog", description: "Alternating pace intervals for 20 min." },
+            { name: "Elliptical Trainer", description: "Steady moderate effort for same duration." }
+          ],
+          alt: ["2 min brisk / 2 min jog", "Elliptical Trainer"]
+        }
+      ]
+    };
+
+    const day6 = {
+      name: "Day 6",
+      exercises: [
+        {
+          name: "Warm-up",
+          description: "Light dynamic mobility, wrist warm-ups, and shoulder rotations.",
+          alternatives: [
+            { name: "Jump Rope", description: "Light skipping to raise heart rate." },
+            { name: "Dynamic Stretching", description: "Full-body mobility routine." }
+          ],
+          alt: ["Jump Rope", "Dynamic Stretching"]
+        },
+        {
+          name: "Push-up Ladder",
+          description: "Perform 1-2-3-4-5... push-ups ladder with short rests to failure.",
+          alternatives: [
+            { name: "Knee Push-up Ladder", description: "Use knees to reduce difficulty." },
+            { name: "Incline Push-up Ladder", description: "Hands elevated to lessen load." }
+          ],
+          alt: ["Knee Push-up Ladder", "Incline Push-up Ladder"]
+        },
+        {
+          name: "Russian Twists",
+          description: "Seated rotational core exercise.",
+          alternatives: [
+            { name: "Seated Knee Tucks", description: "Pull knees to chest while balancing." },
+            { name: "Standing Oblique Crunch", description: "Side crunch while standing for core work." }
+          ],
+          alt: ["Seated Knee Tucks", "Standing Oblique Crunch"]
+        },
+        {
+          name: "Leg Raises",
+          description: "Lying leg lifts targeting lower abdominal muscles.",
+          alternatives: [
+            { name: "Reverse Crunches", description: "Curl hips toward chest to engage lower abs." },
+            { name: "Flutter Kicks", description: "Quick alternating leg lifts while lying down." }
+          ],
+          alt: ["Reverse Crunches", "Flutter Kicks"]
+        },
+        {
+          name: "Running Block",
+          description: "Light jog or walk 20–30 min for recovery.",
+          alternatives: [
+            { name: "2 min jog / 1 min walk", description: "Gentle intervals for active recovery." },
+            { name: "Cycling", description: "Easy ride keeping heart rate low." }
+          ],
+          alt: ["2 min jog / 1 min walk", "Cycling"]
+        }
+      ]
+    };
+
+    const bodyweight = {
+      "1-2": { "Day 1": day1, "Day 2": day2 },
+      "3-4": { "Day 1": day1, "Day 2": day2, "Day 3": day3, "Day 4": day4 },
+      "5": { "Day 1": day1, "Day 2": day2, "Day 3": day3, "Day 4": day4, "Day 5": day5 },
+      "5+": { "Day 1": day1, "Day 2": day2, "Day 3": day3, "Day 4": day4, "Day 5": day5, "Day 6": day6 }
+    };
+
+    const gym = JSON.parse(JSON.stringify(bodyweight));
+
+    window.conditioningFrequencies = { bodyweight, gym };
+    resolve();
+  });
+  }
+
+if (typeof window !== "undefined") {
+  window.loadConditioningData = loadConditioningData;
+  if (!window.conditioningFrequencies) {
+    loadConditioningData();
+  }
 }
+
+export { loadConditioningData };
