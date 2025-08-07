@@ -176,41 +176,64 @@ margin-bottom: 0.25rem;
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
-// !!! ZDE MUSÍ BÝT URL TVÉHO NASAZENÉHO CLOUDFLARE WORKERU !!!
-const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/'; 
+document.addEventListener('DOMContentLoaded', () => {
+  const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/';
 
-function addGymField(value = '') {
-const wrapper = document.createElement('div');
-wrapper.className = 'gym-input-wrapper';
+  function addGymField(value = '') {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'gym-input-wrapper';
 
-const input = document.createElement('input');
-input.type = 'text';
-input.className = 'gymName';
-input.placeholder = 'Your gym...';
-input.value = value;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'gymName';
+    input.placeholder = 'Your gym...';
+    input.value = value;
 
-const removeBtn = document.createElement('button');
-removeBtn.className = 'remove-btn';
-removeBtn.textContent = '✖';
-removeBtn.onclick = () => wrapper.remove();
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '✖';
+    removeBtn.onclick = () => wrapper.remove();
 
-wrapper.appendChild(input);
-wrapper.appendChild(removeBtn);
-document.getElementById('gymFields').appendChild(wrapper);
-}
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    document.getElementById('gymFields').appendChild(wrapper);
+  }
 
-function activateDragAndDrop() {
-document.querySelectorAll('.day').forEach(day => {
-Sortable.create(day, {
-group: 'exercises',
-handle: '.exercise', 
-animation: 150,
-onEnd: function (evt) {
-updateTrainingPlanContentInTextarea(); // Voláme po D&D
-}
+  function updateTrainingPlanContentInTextarea() {
+    const container = document.getElementById('training-container');
+    const textarea = document.getElementById('trainingPlanContent');
+    if (!container || !textarea) return;
+
+    let output = '';
+    const days = container.querySelectorAll('.day');
+    if (!days || days.length === 0) {
+      textarea.value = '';
+      return;
+    }
+
+    const gymNames = window.formData?.gymNames?.join(', ') || 'None';
+    output += `Gyms: ${gymNames}\n\n`;
+
+    days.forEach((day, i) => {
+      const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+      output += `${title}\n`;
+      day.querySelectorAll('.exercise').forEach(ex => {
+        const tempEx = ex.cloneNode(true);
+        tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
+        const cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
+        output += `- ${cleanedText}\n`;
+      });
+      output += '\n';
+    });
+
+    textarea.value = output.trim();
+  }
+
+  // ... a sem vlož celý tvůj původní `addEventListener` pro `submit`, `alt-button`, atd.
+  // (nemusíš přepisovat znovu – jen to všechno uzavři do tohohle DOMContentLoaded bloku)
 });
-});
-}
+</script>
+
 
 // !!! POUZE JEDNA FUNKCE PRO AKTUALIZACI TEXTAREA, S OPRAVENOU LOGIKOU !!!
 function updateTrainingPlanContentInTextarea() {
