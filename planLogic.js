@@ -13,7 +13,6 @@ function validateExercises(exercises, context = '') {
   console.log(`✓ Valid exercises array found in ${context} with ${exercises.length} items`);
   return true;
 }
-
 let currentPlan = null;
 
 function loadConditioningData() {
@@ -224,59 +223,52 @@ export async function generateTrainingPlan(formData) {
       await loadConditioningData();
       const equipmentMap = {
         gym: "gym",
-        home: "bodyweight",
-        other: "gym" // Default for "other" equipment
+        home: "bodyweight"
       };
       const eq = equipmentMap[formData.equipment] || formData.equipment;
       
-      console.log('Loading conditioning plan for:', { 
-        equipment: eq, 
-        frequency: frequencyKey,
-        originalEquipment: formData.equipment
-      });
+      console.log('Loading conditioning plan for:', { eq, frequencyKey });
       
       let basePlan = window.conditioningFrequencies?.[eq]?.[frequencyKey];
 
-      // Handle different plan formats
+      // If the plan is just an array of exercises, convert it to proper format
       if (Array.isArray(basePlan)) {
-        basePlan = { "Full Body": basePlan };
-      } else if (typeof basePlan === 'object' && basePlan !== null) {
-        // Ensure each day has the proper structure
-        Object.entries(basePlan).forEach(([dayName, dayData]) => {
-          if (Array.isArray(dayData)) {
-            basePlan[dayName] = { workout: { exercises: dayData } };
-          }
-        });
+        basePlan = { "Day 1": { workout: { exercises: basePlan } } };
       }
 
       if (!basePlan) {
         throw new Error(`No conditioning plan found for ${eq}/${frequencyKey}`);
       }
 
-      console.log('Raw conditioning plan structure:', basePlan);
-      const adaptedPlan = adaptConditioningPlan(basePlan);
-      console.log('Adapted conditioning plan structure:', adaptedPlan);
+      // Validate and adapt the plan structure
+      const validatedPlan = {};
+      for (const [dayName, dayData] of Object.entries(basePlan)) {
+        validatedPlan[dayName] = { ...dayData };
+        
+        // Ensure workout exists and has exercises array
+        if (!validatedPlan[dayName].workout) {
+          validatedPlan[dayName].workout = { exercises: [] };
+        }
+        
+        try {
+          validateExercises(validatedPlan[dayName].workout.exercises, dayName);
+        } catch (e) {
+          console.error(`Invalid exercises in ${dayName}, using empty array`);
+          validatedPlan[dayName].workout.exercises = [];
+        }
+      }
 
-      currentPlan = JSON.parse(JSON.stringify(adaptedPlan));
-      
-      // Apply your existing enhancements
+      currentPlan = JSON.parse(JSON.stringify(validatedPlan));
       extendConditioningAlternatives(currentPlan);
       enforceUniqueExercises(currentPlan);
-      
-      // Handle special case for "other" equipment
-      if (formData.equipment === "other" && formData.specificGymName) {
-        currentPlan.gymName = formData.specificGymName;
-      }
-      
       renderPlan(currentPlan, frequencyKey, formData);
+      
       return currentPlan;
     } catch (error) {
       console.error('❌ Conditioning plan generation failed:', error);
       alert(`Failed to generate conditioning plan: ${error.message}`);
       return null;
     }
-  } else {
-    // [Keep ALL your existing non-conditioning logic exactly the same]
-    // ... rest of your original generateTrainingPlan code ...
   }
+  // ... rest of your existing code for other goals ...
 }
