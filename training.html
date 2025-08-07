@@ -214,44 +214,37 @@ updateTrainingPlanContentInTextarea(); // Voláme po D&D
 
 // !!! POUZE JEDNA FUNKCE PRO AKTUALIZACI TEXTAREA, S OPRAVENOU LOGIKOU !!!
 function updateTrainingPlanContentInTextarea() {
-const container = document.getElementById('training-container');
-const textarea = document.getElementById('trainingPlanContent');
-if (!container || !textarea) {
-console.warn("❌ Missing training container or textarea.");
-return;
+  const container = document.getElementById('training-container');
+  const textarea = document.getElementById('trainingPlanContent');
+  if (!container || !textarea) return;
+
+  let output = '';
+  const days = container.querySelectorAll('.day');
+  if (!days || days.length === 0) {
+    textarea.value = '';
+    return;
+  }
+
+  // 🟧 Přidej Gym Names na začátek
+  const gymNames = window.formData?.gymNames?.join(', ') || 'None';
+  output += `Gyms: ${gymNames}\n\n`;
+
+  days.forEach((day, i) => {
+    const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+    output += `${title}\n`;
+
+    day.querySelectorAll('.exercise').forEach(ex => {
+      const tempEx = ex.cloneNode(true);
+      tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
+      const cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
+      output += `- ${cleanedText}\n`;
+    });
+    output += '\n';
+  });
+
+  textarea.value = output.trim();
 }
 
-let output = '';
-const days = container.querySelectorAll('.day');
-
-if (!days || days.length === 0) {
-console.warn("❌ No training days found in DOM for textarea update.");
-textarea.value = ''; // Vyčistí textarea pokud nejsou dny
-return;
-}
-
-days.forEach((day, i) => {
-const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-output += `${title}\n`;
-
-day.querySelectorAll('.exercise').forEach(ex => {
-// Nový, robustnější přístup pro získání textu cvičení
-// Vytvoříme klon elementu, odstraníme nežádoucí části a získáme text
-const tempEx = ex.cloneNode(true);
-tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
-
-// Nyní získáme text, který by měl obsahovat jen název cviku a série/opakování
-// Normalizujeme mezery, aby se odstranily nadbytečné whitespace
-let cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
-
-output += `- ${cleanedText}\n`;
-});
-output += '\n'; 
-});
-
-textarea.value = output.trim();
-console.log("📋 Textarea updated with current plan:\n", textarea.value);
-}
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -324,8 +317,8 @@ email: email.value.trim()
 try {
 document.getElementById('outputBox').style.display = 'none';
 
-await generateTrainingPlan(data); // Toto by mělo naplnit #training-container
-
+window.formData = data; // 🌐 zpřístupníme formData globálně
+await generateTrainingPlan(data);
 setTimeout(() => {
 activateDragAndDrop();
 updateTrainingPlanContentInTextarea(); // Naplní textarea po vygenerování
