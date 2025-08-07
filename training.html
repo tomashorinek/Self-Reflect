@@ -1,166 +1,438 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Self-Coaching Plan Generator</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 1000px;
-    }
-    h1, h2 {
-      color: #ff8c00;
-    }
-    form {
-      background: #1e1e1e;
-      padding: 2rem;
-      border-radius: 8px;
-      border: 1px solid #333;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.25rem;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 4px;
-      color: #fff;
-    }
-    button {
-      margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: bold;
-      background-color: #ff8c00;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #121212;
-    }
-    button:hover {
-      background-color: #ffa733;
-    }
-    #gymInputsContainer {
-      margin-top: 1rem;
-    }
-    #trainingPlanContent {
-      width: 100%;
-      height: 200px;
-      margin-top: 1rem;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Self-Coaching Plan Generator</title>
+<style>
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+background-color: #121212;
+color: #e0e0e0;
+margin: 0;
+padding: 2rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.container {
+width: 100%;
+max-width: 700px;
+}
+h1 { color: #ff8c00; }
+form, .output {
+background: #1e1e1e;
+padding: 2rem;
+border-radius: 8px;
+border: 1px solid #333;
+width: 100%;
+box-sizing: border-box;
+}
+label {
+display: block;
+margin-top: 1rem;
+margin-bottom: 0.5rem;
+font-weight: bold;
+}
+select, input, textarea {
+width: 100%;
+padding: 0.75rem;
+background: #2a2a2a;
+color: #e0e0e0;
+border: 1px solid #444;
+border-radius: 4px;
+box-sizing: border-box;
+}
+button {
+background: #ff8c00;
+color: #121212;
+font-weight: bold;
+padding: 1rem;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+width: 100%;
+margin-top: 2rem;
+font-size: 1rem;
+}
+.gym-input-wrapper {
+display: flex;
+gap: 0.5rem;
+margin-top: 0.5rem;
+}
+.remove-btn {
+background-color: #8b0000;
+padding: 0.5rem;
+border: none;
+border-radius: 4px;
+color: white;
+cursor: pointer;
+}
+.day {
+margin-bottom: 1.5rem;
+padding: 1rem;
+background: #222;
+border-radius: 6px;
+}
+.exercise {
+padding: 0.5rem;
+margin-bottom: 0.5rem;
+background: #333;
+border-radius: 4px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+cursor: grab;
+}
+.alt-button {
+cursor: pointer;
+margin-left: 1rem;
+}
+#trainingPlanContent {
+width: 100%;
+height: 300px;
+background: #1c1c1c;
+color: #fff;
+border: 1px solid #444;
+padding: 1rem;
+border-radius: 6px;
+margin-top: 1rem;
+}
+/* Styl pro kontejner Other Gym, aby label a input byly pod sebou */
+#specificGymNameContainer {
+margin-top: 1rem;
+display: block; /* Umožní labelu a inputu být na vlastních řádcích */
+}
+#specificGymNameContainer label {
+margin-bottom: 0.25rem;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Training Plan Generator</h1>
-    <form id="trainingForm">
-      <label for="goal">Goal</label>
-      <select id="goal" name="goal" required>
-        <option value="Build muscle">Build muscle</option>
-        <option value="Lose fat">Lose fat</option>
-        <option value="Get stronger">Get stronger</option>
-        <option value="Improve conditioning">Improve conditioning</option>
-      </select>
+<div class="container">
+<h1>Self-Coaching Plan Generator</h1>
+<form id="trackerForm">
+<label for="goal">What's your main goal?</label>
+<select id="goal">
+<option value="Build muscle">Build muscle</option>
+<option value="Lose fat">Lose fat</option>
+<option value="Get stronger">Get stronger</option>
+<option value="Improve conditioning">Improve conditioning</option>
+</select>
 
-      <label for="frequency">Training Frequency</label>
-      <select id="frequency" name="frequency" required>
-        <option value="1-2">1–2x / week</option>
-        <option value="3-4">3–4x / week</option>
-        <option value="5">5x / week</option>
-        <option value="5plus">5+ / week</option>
-      </select>
+<label for="frequency">Training days per week:</label>
+<select id="frequency">
+<option value="1-2">1–2</option>
+<option value="3-4">3–4</option>
+<option value="5">5</option>
+<option value="5plus">5+</option>
+</select>
 
-      <label for="equipment">Equipment</label>
-      <select id="equipment" name="equipment" required>
-        <option value="gym">Gym Access</option>
-        <option value="home">Home Only</option>
-        <option value="bodyweight">Bodyweight</option>
-      </select>
+<label for="equipment">Equipment Access:</label>
+<select id="equipment">
+<option value="gym">Gym</option>
+<option value="home">Home</option>
+<option value="other">Other Gym (specify below)</option> </select>
 
-      <label>Gym(s)</label>
-      <div id="gymInputsContainer"></div>
-      <button type="button" id="addGymButton">Add another gym</button>
+<div id="specificGymNameContainer" style="display:none;">
+<label for="specificGymName">Specify Other Gym Name:</label>
+<input type="text" id="specificGymName" placeholder="E.g., Local Fitness, My Garage" />
+</div>
 
-      <button type="submit" id="generateButton">Generate My Plan</button>
-    </form>
+<label for="experience">Training experience:</label>
+<select id="experience">
+<option value="Beginner">Beginner</option>
+<option value="Intermediate">Intermediate</option>
+<option value="Advanced">Advanced</option>
+</select>
 
-    <div id="outputBox" style="display:none; margin-top:2rem;">
-      <h2>Your Plan:</h2>
-      <div id="training-container"></div>
-      <textarea id="trainingPlanContent"></textarea>
-      <button id="exportButton">Export Plan</button>
-    </div>
-  </div>
+<label for="fixed">Fixed schedule?</label>
+<select id="fixed">
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
 
-  <script type="module">
-    import { generateTrainingPlan, populateTrainingPlanTextarea, exportToGoogleSheets } from './planLogic.js';
-    import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/modular/sortable.esm.js';
+<label>Your Gyms:</label>
+<div id="gymFields"></div>
+<button type="button" id="addGymButton">➕ Add another gym</button>
 
-    const gymInputsContainer = document.getElementById('gymInputsContainer');
+<label for="email">Your email (optional):</label>
+<input type="email" id="email" placeholder="you@example.com" />
 
-    function addGymField(value = '') {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.name = 'gymNames[]';
-      input.placeholder = 'Enter gym name';
-      input.required = true;
-      input.value = value;
-      input.classList.add('gym-input');
-      gymInputsContainer.appendChild(input);
-    }
+<button type="submit">Generate My Plan</button>
+</form>
 
-    window.addEventListener("DOMContentLoaded", () => {
-      addGymField();
-    });
+<div class="output" id="outputBox" style="display:none">
+<h2>Your Training Plan</h2>
+<div id="training-container"></div>
+<textarea id="trainingPlanContent" readonly></textarea> 
+<button id="continueButton">Export Plan</button>
+<div id="finalStatus"></div>
+</div>
+</div>
 
-    document.getElementById('addGymButton').addEventListener('click', () => {
-      addGymField();
-    });
+<script type="module">
+import { generateTrainingPlan } from './planLogic.js';
 
-    document.getElementById('trainingForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+// !!! ZDE MUSÍ BÝT URL TVÉHO NASAZENÉHO CLOUDFLARE WORKERU !!!
+const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/'; 
 
-      const formData = {
-        goal: document.getElementById('goal').value,
-        frequency: document.getElementById('frequency').value,
-        equipment: document.getElementById('equipment').value,
-        gymNames: Array.from(document.querySelectorAll('input[name="gymNames[]"]'))
-          .map(input => input.value.trim())
-          .filter(val => val !== '')
-      };
+function addGymField(value = '') {
+const wrapper = document.createElement('div');
+wrapper.className = 'gym-input-wrapper';
 
-      await generateTrainingPlan(formData);
-      populateTrainingPlanTextarea();
+const input = document.createElement('input');
+input.type = 'text';
+input.className = 'gymName';
+input.placeholder = 'Your gym...';
+input.value = value;
 
-      const outputBox = document.getElementById('outputBox');
-      outputBox.style.display = 'block';
+const removeBtn = document.createElement('button');
+removeBtn.className = 'remove-btn';
+removeBtn.textContent = '✖';
+removeBtn.onclick = () => wrapper.remove();
 
-      // Enable drag-and-drop on training container
-      Sortable.create(document.getElementById('training-container'), {
-        animation: 150,
-        ghostClass: 'sortable-ghost'
-      });
-    });
+wrapper.appendChild(input);
+wrapper.appendChild(removeBtn);
+document.getElementById('gymFields').appendChild(wrapper);
+}
 
-    document.getElementById('exportButton').addEventListener('click', async () => {
-      await exportToGoogleSheets();
-    });
-  </script>
+function activateDragAndDrop() {
+document.querySelectorAll('.day').forEach(day => {
+Sortable.create(day, {
+group: 'exercises',
+handle: '.exercise', 
+animation: 150,
+onEnd: function (evt) {
+updateTrainingPlanContentInTextarea(); // Voláme po D&D
+}
+});
+});
+}
+
+// !!! POUZE JEDNA FUNKCE PRO AKTUALIZACI TEXTAREA, S OPRAVENOU LOGIKOU !!!
+function updateTrainingPlanContentInTextarea() {
+const container = document.getElementById('training-container');
+const textarea = document.getElementById('trainingPlanContent');
+if (!container || !textarea) {
+console.warn("❌ Missing training container or textarea.");
+return;
+}
+
+let output = '';
+const days = container.querySelectorAll('.day');
+
+if (!days || days.length === 0) {
+console.warn("❌ No training days found in DOM for textarea update.");
+textarea.value = ''; // Vyčistí textarea pokud nejsou dny
+return;
+}
+
+days.forEach((day, i) => {
+const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+output += `${title}\n`;
+
+day.querySelectorAll('.exercise').forEach(ex => {
+// Nový, robustnější přístup pro získání textu cvičení
+// Vytvoříme klon elementu, odstraníme nežádoucí části a získáme text
+const tempEx = ex.cloneNode(true);
+tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
+
+// Nyní získáme text, který by měl obsahovat jen název cviku a série/opakování
+// Normalizujeme mezery, aby se odstranily nadbytečné whitespace
+let cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
+
+output += `- ${cleanedText}\n`;
+});
+output += '\n'; 
+});
+
+textarea.value = output.trim();
+console.log("📋 Textarea updated with current plan:\n", textarea.value);
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+addGymField();
+
+document.getElementById('addGymButton').addEventListener('click', () => {
+addGymField();
+});
+
+// PŘIDÁNO: Logika pro zobrazení/skrytí pole "Specific Gym Name"
+const equipmentSelect = document.getElementById('equipment');
+const specificGymNameContainer = document.getElementById('specificGymNameContainer');
+const specificGymNameInput = document.getElementById('specificGymName');
+
+equipmentSelect.addEventListener('change', () => {
+if (equipmentSelect.value === 'other') {
+specificGymNameContainer.style.display = 'block';
+} else {
+specificGymNameContainer.style.display = 'none';
+specificGymNameInput.value = ''; // Vyčisti pole, když není potřeba
+}
+});
+// Zavolej to jednou při načtení stránky, pokud je již vybrána "other"
+equipmentSelect.dispatchEvent(new Event('change'));
+});
+
+// ✅ blok Enter v inputu
+document.getElementById('trackerForm').addEventListener('keydown', function(e) {
+if (e.key === 'Enter' && e.target.classList.contains('gymName')) {
+e.preventDefault();
+}
+// PŘIDÁNO: Zablokování Enteru i pro specificGymName
+if (e.key === 'Enter' && e.target.id === 'specificGymName') {
+e.preventDefault();
+}
+});
+
+// ✅ formulář submit - generování plánu
+document.getElementById('trackerForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+
+const gymNames = Array.from(document.querySelectorAll('.gymName'))
+.map(x => x.value.trim()).filter(x => x);
+
+// PŘIDÁNO: Získání specifického názvu gymu
+const equipmentValue = document.getElementById('equipment').value;
+const specificGymName = document.getElementById('specificGymName').value.trim();
+
+if (equipmentValue === 'other') {
+if (!specificGymName) {
+return alert('Please specify the name of your other gym.');
+}
+// Přidá zadaný název na začátek pole gymNames
+// Apps Script použije dataObject.gymNames[0]
+gymNames.unshift(specificGymName); 
+}
+
+if (!gymNames.length) return alert('Add at least one gym.'); // Toto by se nemělo stát s "other"
+
+const data = {
+goal: goal.value,
+frequency: frequency.value,
+equipment: equipmentValue, // Použijeme aktuální hodnotu equipment
+experience: experience.value,
+fixed: fixed.value,
+gymNames, // Nyní může obsahovat i specificGymName
+email: email.value.trim()
+};
+
+try {
+document.getElementById('outputBox').style.display = 'none';
+
+await generateTrainingPlan(data); // Toto by mělo naplnit #training-container
+
+setTimeout(() => {
+activateDragAndDrop();
+updateTrainingPlanContentInTextarea(); // Naplní textarea po vygenerování
+document.getElementById('outputBox').style.display = 'block';
+document.getElementById('trainingPlanContent').setAttribute('readonly', true);
+}, 50); 
+} catch (err) {
+alert('❌ Error generating plan: ' + err.message);
+}
+});
+
+// ✅ Tlačítko Export Plan
+document.getElementById('continueButton').addEventListener('click', async () => {
+const finalStatus = document.getElementById('finalStatus');
+finalStatus.textContent = '';
+finalStatus.style.color = '#ffa500';
+
+updateTrainingPlanContentInTextarea(); // Před exportem zajistíme nejaktuálnější stav
+
+const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+// Zde už není potřeba znovu získávat gymNames a userName, jsou již v data proměnné
+const gymNames = Array.from(document.querySelectorAll('.gymName'))
+.map(x => x.value.trim()).filter(x => x);
+const userName = document.getElementById('email').value.trim() || "Anonymous";
+
+// PŘIDÁNO: Znovu získáme specifický název gymu, aby se ujistil, že je nejaktuálnější pro odeslání
+const equipmentValue = document.getElementById('equipment').value;
+const specificGymName = document.getElementById('specificGymName').value.trim();
+
+if (equipmentValue === 'other' && specificGymName) {
+// Pokud je vybráno "other" a uživatel zadal název, použij ho
+// Důležité: Tímto zajistíš, že pole gymNames je správné i po případných změnách
+gymNames.unshift(specificGymName);
+}
+
+
+console.log("Attempting to export plan:");
+console.log(" Training Plan Content Length:", trainingPlan.length);
+console.log(" Training Plan (first 200 chars):", trainingPlan.substring(0, 200) + (trainingPlan.length > 200 ? '...' : ''));
+console.log(" Gym Names:", gymNames); // Zkontroluj v konzoli, že zde je i specificGymName
+console.log(" User Name:", userName);
+
+if (!trainingPlan) {
+finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
+finalStatus.style.color = '#ff3333';
+console.error("🚫 Export failed: Training plan is empty.");
+return;
+}
+
+try {
+finalStatus.textContent = '📤 Uploading plan...';
+const res = await fetch(apiUrl, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ userName, trainingPlan, gymNames })
+});
+
+const json = await res.json();
+
+if (json.success) {
+finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
+finalStatus.style.color = '#00ff88';
+console.log("✅ Plan successfully exported!");
+} else {
+throw new Error(json.error || "Unexpected server error.");
+}
+} catch (err) {
+finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
+finalStatus.style.color = '#ff3333';
+console.error("🚫 Export error:", err);
+}
+});
+
+// !!! DŮLEŽITÉ: ZDE MUSÍŠ IMPLEMENTOVAT LOGIKU PRO ZMĚNU ALTERNATIVY !!!
+// Tato část kódu POUZE PŘÍKLADEM, je potřeba ji dopracovat, aby skutečně měnila HTML.
+document.getElementById('training-container').addEventListener('click', async (event) => {
+if (event.target.classList.contains('alt-button')) {
+const altButton = event.target;
+const exerciseElement = altButton.closest('.exercise');
+if (!exerciseElement) return;
+
+const dayElement = altButton.closest('.day');
+const dayIndex = Array.from(dayElement.parentNode.children).indexOf(dayElement); // Získej index dne
+const exerciseIndex = Array.from(dayElement.querySelectorAll('.exercise')).indexOf(exerciseElement); // Získej index cvičení v rámci dne
+
+console.log(`Clicked alt button for Day ${dayIndex}, Exercise ${exerciseIndex}`);
+
+// Zde budeš potřebovat přístup k datům tréninkového plánu, který generuje planLogic.js.
+// Ideálně by planLogic.js měl mít funkci, která ti vrátí data pro další alternativu
+// a umožní ti aktualizovat DOM.
+// PŘÍKLAD (předpokládá, že generateTrainingPlan vrací nebo má přístup k datům plánu):
+// const newExerciseData = await getNextAlternativeFor(dayIndex, exerciseIndex);
+// if (newExerciseData) {
+// // Vytvoř nový HTML pro cvičení z newExerciseData
+// const newExerciseHtml = `<strong>${newExerciseData.name}</strong> - ${newExerciseData.setsReps} ...`;
+// exerciseElement.innerHTML = newExerciseHtml; // Aktualizuj HTML cvičení
+// updateTrainingPlanContentInTextarea(); // Až PO aktualizaci DOMu zavolej aktualizaci textarea
+// }
+
+// Pro účely testování a aby se nic nerozbilo, zatím jen zaloguj
+alert('Logika pro změnu alternativy není zatím implementována! Musíte ji dopsat do planLogic.js a zde volat.');
+
+// Po jakékoli změně v DOMu, volej:
+// updateTrainingPlanContentInTextarea(); 
+}
+});
+</script>
 </body>
 </html>
+
