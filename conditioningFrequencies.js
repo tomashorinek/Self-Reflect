@@ -1,20 +1,16 @@
 function loadConditioningData() {
   return new Promise((resolve, reject) => {
     window.conditioningFrequencies = {
-      // Definice plánů s vlastní vahou (BODYWEIGHT)
+      // Definice plánů s vlastní vahou (BODYWEIGHT) s novou, detailní strukturou
       bodyweight: {
         "1-2": {
           "Day 1": {
             warmup: ["20x Jumping Jacks", "10x Arm Circles (each direction)", "10x Air Squats", "30s Plank Hold"],
-            workout: {
-              type: "EMOM",
-              rounds: 3,
-              exercises: [{ name: "Push-ups", reps: "12x", description: "A bodyweight chest press that also targets the triceps and shoulders.", alternatives: ["Knee Push-ups", "Incline Push-ups"] }, { name: "Lunges", reps: "20x", description: "Stepping forward with one leg to work quads, hamstrings, and glutes.", alternatives: ["Step-ups", "Split Squats"] }, { name: "Leg Raises", reps: "10x", description: "Lying flat, lifting legs to work lower abs.", alternatives: ["Reverse Crunches", "V-Ups"] }, { name: "Bear Crawl (forward + back)", reps: "10x", description: "A core and coordination-focused move using all four limbs to crawl.", alternatives: ["Crab Walk", "Mountain Climbers"] }, { name: "Plank Shoulder Taps", reps: "30s", description: "From plank position, alternate tapping shoulders to work core stability.", alternatives: ["Plank Hold", "Bird Dog"] }]
-            },
+            workout: { type: "EMOM", rounds: 3, exercises: [{ name: "Push-ups", reps: "12x", description: "A bodyweight chest press that also targets the triceps and shoulders.", alternatives: ["Knee Push-ups", "Incline Push-ups"] }, { name: "Lunges", reps: "20x", description: "Stepping forward with one leg to work quads, hamstrings, and glutes.", alternatives: ["Step-ups", "Split Squats"] }, { name: "Leg Raises", reps: "10x", description: "Lying flat, lifting legs to work lower abs.", alternatives: ["Reverse Crunches", "V-Ups"] }, { name: "Bear Crawl (forward + back)", reps: "10x", description: "A core and coordination-focused move using all four limbs to crawl.", alternatives: ["Crab Walk", "Mountain Climbers"] }, { name: "Plank Shoulder Taps", reps: "30s", description: "From plank position, alternate tapping shoulders to work core stability.", alternatives: ["Plank Hold", "Bird Dog"] }] },
             running: { type: "Easy Run", duration: "20–25 min", description: "Light run focused on technique, posture, and relaxed breathing.", alternative: "2 min run / 1 min walk" }
           }
         },
-        "3-4": {
+        "3-4": { 
           "Day 1": {
             warmup: ["20x Jumping Jacks", "10x Arm Circles (each direction)", "10x Air Squats", "30s Plank Hold"],
             workout: { type: "Strength Block", rounds: 3, exercises: [{ name: "Push-ups", reps: "12x", description: "A bodyweight chest press that also targets the triceps and shoulders.", alternatives: ["Knee Push-ups", "Incline Push-ups"] }, { name: "Air Squats", reps: "15x", description: "A lower body exercise targeting quads, hamstrings, and glutes.", alternatives: ["Wall Sit", "Chair Squats"] }, { name: "V-ups / Leg Raises", reps: "10x", description: "Core-focused movement, lifting legs or combining with crunch for full-body engagement.", alternatives: ["Toe Touches", "Crunches"] }, { name: "Bear Crawl (forward + back)", reps: "10x", description: "A core and coordination-focused move using all four limbs to crawl.", alternatives: ["Crab Walk", "Mountain Climbers"] }, { name: "Plank Shoulder Taps", reps: "30s", description: "From plank position, alternate tapping shoulders to work core stability.", alternatives: ["Plank Hold", "Bird Dog"] }] },
@@ -36,7 +32,7 @@ function loadConditioningData() {
             running: { type: "Recovery Run or Walk", duration: "20–25 min", description: "Use this day for active recovery. Maintain a relaxed pace.", alternative: "2 min jog / 1 min walk" }
           }
         },
-        "5": {
+        "5": { 
           "Day 1": {
             warmup: ["20x Jumping Jacks", "10x Arm Circles (each direction)", "10x Air Squats", "30s Plank Hold"],
             workout: { type: "Strength Block", rounds: 3, exercises: [{ name: "Push-ups", reps: "12x", description: "A bodyweight chest press that also targets the triceps and shoulders.", alternatives: ["Knee Push-ups", "Incline Push-ups"] }, { name: "Air Squats", reps: "15x", description: "A lower body exercise targeting quads, hamstrings, and glutes.", alternatives: ["Wall Sit", "Chair Squats"] }, { name: "V-ups or Leg Raises", reps: "10x", description: "Core-focused movement for strengthening the lower and upper abdominal area.", alternatives: ["Crunches", "Toe Touches"] }, { name: "Bear Crawl (forward + back)", reps: "10x", description: "A core and coordination-focused move using all four limbs to crawl.", alternatives: ["Crab Walk", "Mountain Climbers"] }, { name: "Plank Shoulder Taps", reps: "30s", description: "From plank position, alternate tapping shoulders to work core stability.", alternatives: ["Plank Hold", "Bird Dog"] }] },
@@ -97,12 +93,10 @@ function loadConditioningData() {
           }
         }
       },
-      // Definice plánů pro posilovnu (GYM) z původního souboru
+      // Zde jsou definovány plány pro posilovnu (GYM) s upravenou strukturou, aby odpovídala novému formátu
       gym: {
         "1-2": {
-          "Day 1": {
-            workout: { exercises: [{ name: "Full Body Circuit", sets: "3 rounds", alt: ["Full Body Machines", "Barbell Complex"] }, { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] }, { name: "DB Thrusters", sets: "3x15", alt: ["Leg Press + Shoulder Press", "Wall Balls"] }, { name: "Battle Ropes", sets: "3x30s", alt: ["Jump Rope", "Kettlebell Swings"] }] }
-          }
+          "Day 1": { workout: { exercises: [{ name: "Full Body Circuit", sets: "3 rounds", alt: ["Full Body Machines", "Barbell Complex"] }, { name: "Rowing Machine", sets: "10 min moderate pace", alt: ["Bike", "Treadmill"] }, { name: "DB Thrusters", sets: "3x15", alt: ["Leg Press + Shoulder Press", "Wall Balls"] }, { name: "Battle Ropes", sets: "3x30s", alt: ["Jump Rope", "Kettlebell Swings"] }] } }
         },
         "3-4": {
           "Day 1": { workout: { exercises: [{ name: "Row Intervals", sets: "5x250m / 60s rest", alt: ["Assault Bike", "Treadmill Sprints"] }, { name: "DB Lunges", sets: "3x12", alt: ["Walking Lunges", "Leg Press"] }, { name: "Push Press", sets: "3x10", alt: ["Overhead Press Machine", "Dumbbell Shoulder Press"] }] } },
