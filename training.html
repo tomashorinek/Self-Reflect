@@ -110,6 +110,52 @@
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
+  <script>
+  // Přidání nového gym inputu
+  function addGymField() {
+    const gymFieldsContainer = document.getElementById("gymFields");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Enter Gym Name";
+    input.className = "gym-input";
+    gymFieldsContainer.appendChild(input);
+  }
+
+  // Automaticky přidá 1. pole po načtení stránky
+  window.addEventListener("DOMContentLoaded", () => {
+    addGymField();
+  });
+
+  // Přidávání dalších gymů kliknutím
+  document.getElementById("addGymButton").addEventListener("click", () => {
+    addGymField();
+  });
+
+  // Zachytí odeslání formuláře a zavolá generateTrainingPlan
+  const form = document.getElementById("training-form");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const goal = document.getElementById("goal").value;
+    const frequency = document.getElementById("frequency").value;
+    const equipment = document.getElementById("equipment").value;
+
+    const gymInputs = document.querySelectorAll(".gym-input");
+    const gyms = Array.from(gymInputs)
+      .map((input) => input.value.trim())
+      .filter((val) => val.length > 0);
+
+    const plan = {
+      goal,
+      frequency,
+      equipment,
+      gyms,
+    };
+
+    generateTrainingPlan(plan); // volá logiku z planLogic.js
+  });
+</script>
   <div class="container">
     <h1>Self-Coaching Plan Generator</h1>
     <form id="trackerForm">
@@ -133,7 +179,7 @@
       <select id="equipment">
         <option value="gym">Gym</option>
         <option value="home">Home</option>
-        <option value="other">Other Gym (specify below)</option> </select>
+       </select>
 
       <div id="specificGymNameContainer" style="display:none;">
         <label for="specificGymName">Specify Other Gym Name:</label>
@@ -171,6 +217,11 @@
       <div id="finalStatus"></div>
     </div>
   </div>
+<script>
+  
+  window.addEventListener("DOMContentLoaded", () => {
+    addGymField(); // přidá první gym input
+  });
 
 <script type="module">
   import { generateTrainingPlan } from './planLogic.js';
