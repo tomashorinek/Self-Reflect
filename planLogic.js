@@ -371,5 +371,4 @@ enforceUniqueExercises(currentPlan);
 renderPlan(currentPlan, adjustedFreq, formData);
 }
 }
-  return currentPlan; // ✅ DŮLEŽITÉ: přidáno i zde
-}
+
