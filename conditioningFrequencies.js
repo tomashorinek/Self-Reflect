@@ -1,6 +1,6 @@
-export const conditioningFrequencies = {
-      // Definice plánů s vlastní vahou (BODYWEIGHT) s novou, detailní strukturou
-      bodyweight: {
+(function() {
+  const conditioningFrequencies = {
+    bodyweight: {
         "1-2": {
           "Day 1": {
             warmup: ["20x Jumping Jacks", "10x Arm Circles (each direction)", "10x Air Squats", "30s Plank Hold"],
@@ -120,35 +120,12 @@ export const conditioningFrequencies = {
       }
     };
     
-   export function loadConditioningData() {
-  return new Promise((resolve) => {
-    if (typeof window !== "undefined") {
+  function loadConditioningData() {
+    return new Promise((resolve) => {
       window.conditioningFrequencies = conditioningFrequencies;
-
-      // Zbytek kódu, který se týká zobrazení tooltipu
-      const observer = new MutationObserver(() => {
-        const container = document.querySelector(".training-day-header");
-        if (container && !document.querySelector(".alt-tip")) {
-          const tip = document.createElement("div");
-          tip.className = "alt-tip";
-          tip.textContent = "💡 Tip: Click 🔁 to swap this exercise for an alternative!";
-          tip.style.cssText = "background:#fffbdd;border-left:4px solid #ffd43b;padding:8px;margin-top:10px;font-size:14px;font-weight:500;color:#4b4b00;";
-          container.parentNode.insertBefore(tip, container.nextSibling);
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    resolve();
-  });
-}
-
-// Tento kód spustí funkci, aby se data načetla
-if (typeof window !== "undefined") {
-  window.loadConditioningData = loadConditioningData;
-  if (!window.conditioningFrequencies) {
-    loadConditioningData();
+      resolve();
+    });
   }
-}
 
-export default conditioningFrequencies;
+  window.loadConditioningData = loadConditioningData;
+})();
