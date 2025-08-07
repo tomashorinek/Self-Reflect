@@ -235,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-// !!! POUZE JEDNA FUNKCE PRO AKTUALIZACI TEXTAREA, S OPRAVENOU LOGIKOU !!!
+<script type="module">
+  import { generateTrainingPlan } from './planLogic.js';
 function updateTrainingPlanContentInTextarea() {
   const container = document.getElementById('training-container');
   const textarea = document.getElementById('trainingPlanContent');
@@ -451,4 +452,4 @@ alert('Logika pro změnu alternativy není zatím implementována! Musíte ji do
 </script>
 </body>
 </html>
-
+</script>
