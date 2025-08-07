@@ -1,41 +1,7 @@
+import { loadConditioningData } from "./conditioningFrequencies.js";
+import { generatePlan as generateConditioningPlan } from "./conditioningLogic.js";
 
-// === conditioningFrequencies.js loader ===
 let currentPlan = null;
-function loadConditioningData() {
-return new Promise((resolve, reject) => {
-if (window.conditioningFrequencies) {
-resolve();
-return;
-}
-
-const script = document.createElement('script');
-script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
-script.onload = async () => {
-try {
-if (window.conditioningFrequencies) {
-console.log("✅ Conditioning loaded", window.conditioningFrequencies);
-resolve();
-return;
-}
-// Tato část je zde navíc, pokud conditioningFrequencies.js také načítá něco asynchronně
-if (window.loadConditioningData) { // Předpokládám, že conditioningFrequencies.js má také exportovanou funkci pro načítání
-await window.loadConditioningData();
-console.log("✅ Conditioning loaded", window.conditioningFrequencies);
-resolve();
-} else {
-console.error("❌ Conditioning data not available after script load");
-reject("Conditioning data not found after script load");
-}
-} catch (err) {
-console.error("❌ Error initializing conditioning data", err);
-reject(err);
-}
-};
-script.onerror = () => reject("❌ Failed to load conditioning data script");
-
-document.head.appendChild(script);
-});
-}
 
 // Add fallback and alternative mappings for conditioning plans
 function extendConditioningAlternatives(plan) {
@@ -290,12 +256,7 @@ const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
 
 if (formData.goal === "Improve conditioning") {
 await loadConditioningData();
-const equipmentMap = {
-gym: "gym",
-home: "bodyweight"
-};
-formData.equipment = equipmentMap[formData.equipment] || formData.equipment;
-let basePlan = window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey];
+let basePlan = generateConditioningPlan(formData.goal, formData.equipment, frequencyKey);
 
 // If a frequency entry is just an array of exercises, wrap it in a single day
 if (Array.isArray(basePlan)) {
@@ -308,8 +269,10 @@ alert("⚠️ Conditioning plan not found");
 return;
 }
 currentPlan = JSON.parse(JSON.stringify(basePlan));
+  if (Array.isArray(Object.values(currentPlan)[0])) {
 extendConditioningAlternatives(currentPlan);
-enforceUniqueExercises(currentPlan);
+enforceUniqueExercises(currentPlan); 
+}
 renderPlan(currentPlan, frequencyKey, formData);
 } else {
 await loadTrainingData(formData.goal, formData.equipment);
