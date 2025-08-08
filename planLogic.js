@@ -14,7 +14,20 @@ function validateExercises(exercises, context = '') {
   return true;
 }
 let currentPlan = null;
+// === Core Functions ===
+let currentPlan = null;
 
+async function loadConditioningData() {
+  if (window.conditioningFrequencies) return;
+  
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://www.webbyfe.com/conditioningFrequencies.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject('Failed to load conditioning data');
+    document.head.appendChild(script);
+  });
+}
 function loadConditioningData() {
   return new Promise((resolve, reject) => {
     if (window.conditioningFrequencies) {
@@ -67,7 +80,114 @@ function adaptConditioningExercise(exercise, type = '', rounds = '') {
   
   return adapted;
 }
+export async function generateTrainingPlan(formData) {
+  try {
+    const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
+    
+    // Handle all goal types
+    switch(formData.goal) {
+      case "Improve conditioning":
+        await handleConditioningPlan(formData, frequencyKey);
+        break;
+        
+      case "Build muscle":
+      case "Lose fat":
+      case "Get stronger":
+        await handleStandardPlan(formData, frequencyKey);
+        break;
+        
+      default:
+        throw new Error("Unsupported goal type");
+    }
+    
+    return currentPlan;
+  } catch (error) {
+    console.error("Plan generation failed:", error);
+    alert(`Error: ${error.message}`);
+    return null;
+  }
+}
 
+async function handleConditioningPlan(formData, frequencyKey) {
+  await loadConditioningData();
+  
+  const equipmentMap = {
+    gym: "gym",
+    home: "bodyweight",
+    other: "gym"
+  };
+  
+  const eq = equipmentMap[formData.equipment] || formData.equipment;
+  const basePlan = window.conditioningFrequencies?.[eq]?.[frequencyKey];
+  
+  if (!basePlan) {
+    throw new Error(`No conditioning plan found for ${eq}/${frequencyKey}`);
+  }
+  
+  // Normalize different plan formats
+  currentPlan = normalizePlanStructure(basePlan);
+  processPlan(currentPlan, formData);
+}
+
+async function handleStandardPlan(formData, frequencyKey) {
+  await loadTrainingData(formData.goal, formData.equipment);
+  
+  let basePlan;
+  if (formData.equipment === "home") {
+    basePlan = formData.goal === "Get stronger" 
+      ? window.trainingDataStrongHome?.strong?.[frequencyKey]
+      : window.trainingDataCalisthenics?.[frequencyKey];
+  } else {
+    basePlan = formData.goal === "Get stronger"
+      ? window.trainingDataStrong?.[frequencyKey]
+      : window.trainingDataGym?.[frequencyKey];
+  }
+  
+  if (!basePlan) {
+    throw new Error(`No ${formData.goal} plan found for ${frequencyKey} days`);
+  }
+  
+  currentPlan = JSON.parse(JSON.stringify(basePlan));
+  processPlan(currentPlan, formData);
+}
+
+function normalizePlanStructure(plan) {
+  // Handle array-only plans
+  if (Array.isArray(plan)) {
+    return { "Day 1": { exercises: plan } };
+  }
+  
+  // Convert nested structures to consistent format
+  const normalized = {};
+  for (const [day, data] of Object.entries(plan)) {
+    normalized[day] = {
+      exercises: data?.workout?.exercises || data?.exercises || []
+    };
+  }
+  return normalized;
+}
+
+function processPlan(plan, formData) {
+  // Apply fat loss modifications if needed
+  if (formData.goal === "Lose fat") {
+    Object.values(plan).forEach(exercises => {
+      exercises.unshift({
+        name: formData.equipment === "home" 
+          ? "Fast walking 10-15min" 
+          : "Treadmill Warm-up",
+        sets: formData.equipment === "home" 
+          ? "Light effort" 
+          : "10 min",
+        alt: []
+      });
+    });
+  }
+  
+  // Apply your standard processing
+  extendConditioningAlternatives(plan);
+  enforceUniqueExercises(plan);
+  renderPlan(plan, formData.frequency, formData);
+}
 function adaptConditioningWorkout(workout, dayName = '') {
   if (!workout) return [];
   
@@ -205,14 +325,6 @@ function adaptConditioningPlan(plan) {
 
   return adaptedPlan;
 }
-
-// === Rest of your original functions ===
-// [Keep ALL your existing functions exactly as they were, including:]
-// - extendConditioningAlternatives
-// - getUniqueExercise
-// - enforceUniqueExercises
-// - loadTrainingData
-// - renderPlan
 
 // === Updated generateTrainingPlan ===
 export async function generateTrainingPlan(formData) {
