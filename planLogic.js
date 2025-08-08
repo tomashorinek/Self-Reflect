@@ -1,4 +1,4 @@
-// planLogic.js  — ES module
+// planLogic.js  — ES module (s debug logy)
 
 // ============ Conditioning loader ============
 let currentPlan = null;
@@ -121,6 +121,7 @@ function loadTrainingData(goal, equipment) {
     if (window[globalName]) return resolve();
 
     if (!useScript) {
+      console.log("📦 importing", modulePath, "->", globalName);
       import(modulePath)
         .then(mod => {
           window[globalName] = mod.default || mod[globalName] || mod.trainingData || mod;
@@ -169,6 +170,7 @@ function pickFreq(obj, key) {
 
 // ============ render ============
 function renderPlan(plan, freq, formData) {
+  console.log("🧱 renderPlan()", { freq, hasPlan: !!plan, days: plan && Object.keys(plan) });
   const container = document.getElementById('training-container');
   if (!container) {
     console.error("❌ Container #training-container not found in DOM.");
@@ -227,24 +229,6 @@ function renderPlan(plan, freq, formData) {
     container.appendChild(dayDiv);
   }
 
-  // alt switch
-  document.querySelectorAll('.alt-button').forEach(btn => {
-    btn.setAttribute('title', 'switch for alternative');
-    btn.addEventListener('click', () => {
-      const day = btn.getAttribute('data-day');
-      const index = parseInt(btn.getAttribute('data-index'), 10);
-      const exercises = plan[day];
-      const current = exercises[index];
-      if (current.alt && current.alt.length > 0) {
-        const next = current.alt.shift();
-        current.alt.push(current.name);
-        current.name = next;
-        renderPlan(plan, freq, formData);
-      }
-    });
-  });
-
-  // refresh textarea, pokud existuje globální updater (HTML ho vystavuje na window)
   if (typeof window.updateTrainingPlanContentInTextarea === 'function') {
     window.updateTrainingPlanContentInTextarea();
   }
@@ -252,15 +236,21 @@ function renderPlan(plan, freq, formData) {
 
 // ============ hlavní router ============
 export async function generateTrainingPlan(formData) {
+  console.clear();
+  console.log("🚀 generateTrainingPlan called with:", JSON.parse(JSON.stringify(formData)));
+
   // normalizace klíče frekvence
   const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
+  console.log("🔑 frequencyKey:", frequencyKey);
 
   // ===== Conditioning =====
   if (formData.goal === "Improve conditioning") {
     await loadConditioningData();
+    console.log("✅ conditioningFrequencies loaded:", !!window.conditioningFrequencies, window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 
     // mapuj home→bodyweight, „other“ už mapuje HTML na gym
     const equipKey = (formData.equipment === 'home') ? 'bodyweight' : 'gym';
+    console.log("🧭 conditioning equipKey:", equipKey);
 
     let basePlan = window.conditioningFrequencies?.[equipKey]?.[frequencyKey]
                 || window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey]
@@ -268,6 +258,8 @@ export async function generateTrainingPlan(formData) {
 
     // single-day array -> wrap
     if (Array.isArray(basePlan)) basePlan = { "Full Body": basePlan };
+
+    console.log("📦 basePlan (conditioning):", basePlan);
 
     if (!basePlan) {
       console.warn("⚠️ Conditioning plan undefined", { equipKey, frequencyKey, cf: !!window.conditioningFrequencies });
@@ -284,6 +276,13 @@ export async function generateTrainingPlan(formData) {
 
   // ===== Strength / Build / Lose – gym/home =====
   await loadTrainingData(formData.goal, formData.equipment);
+  console.log("✅ training data loaded. Available:", {
+    trainingDataGym: !!window.trainingDataGym,
+    trainingDataStrong: !!window.trainingDataStrong,
+    trainingDataStrongHome: !!window.trainingDataStrongHome,
+    trainingDataCalisthenics: !!window.trainingDataCalisthenics
+  });
+
   const adjustedFreq = frequencyKey;
 
   let basePlan = null;
@@ -299,8 +298,11 @@ export async function generateTrainingPlan(formData) {
     basePlan = pickFreq(window.trainingDataGym, adjustedFreq);
   }
 
+  console.log("📦 basePlan (strength/build/lose):", basePlan);
+
   if (!basePlan) {
     alert("❌ Training plan not found for frequency: " + adjustedFreq);
+    console.error("❌ No basePlan for", { goal: formData.goal, equipment: formData.equipment, adjustedFreq });
     return;
   }
 
@@ -309,6 +311,10 @@ export async function generateTrainingPlan(formData) {
   // ===== Decorace pro Lose fat =====
   if (formData.goal === "Lose fat") {
     Object.entries(currentPlan).forEach(([day, exercises]) => {
+      if (!Array.isArray(exercises)) {
+        console.warn("⚠️ Unexpected day structure in Lose fat decorator:", day, exercises);
+        return;
+      }
       if (formData.equipment === "home") {
         exercises.unshift({
           name: "fast walking 10-15minutes",
