@@ -5,112 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Self-Coaching Plan Generator</title>
 <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #121212;
-  color: #e0e0e0;
-  margin: 0;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.container {
-  width: 100%;
-  max-width: 700px;
-}
-h1 { color: #ff8c00; }
-form, .output {
-  background: #1e1e1e;
-  padding: 2rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  width: 100%;
-  box-sizing: border-box;
-}
-label {
-  display: block;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-select, input, textarea {
-  width: 100%;
-  padding: 0.75rem;
-  background: #2a2a2a;
-  color: #e0e0e0;
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-button {
-  background: #ff8c00;
-  color: #121212;
-  font-weight: bold;
-  padding: 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 2rem;
-  font-size: 1rem;
-}
-.gym-input-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.remove-btn {
-  background-color: #8b0000;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-}
-.day {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #222;
-  border-radius: 6px;
-}
-.exercise {
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  background: #333;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: grab;
-}
-.alt-button {
-  cursor: pointer;
-  margin-left: 1rem;
-}
-#trainingPlanContent {
-  width: 100%;
-  height: 300px;
-  background: #1c1c1c;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-top: 1rem;
-}
-#specificGymNameContainer {
-  margin-top: 1rem;
-  display: block;
-}
-#specificGymNameContainer label {
-  margin-bottom: 0.25rem;
-}
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .container { width: 100%; max-width: 700px; }
+  h1 { color: #ff8c00; }
+  form, .output {
+    background: #1e1e1e; padding: 2rem; border-radius: 8px;
+    border: 1px solid #333; width: 100%; box-sizing: border-box;
+  }
+  label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: bold; }
+  select, input, textarea {
+    width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0;
+    border: 1px solid #444; border-radius: 4px; box-sizing: border-box;
+  }
+  button {
+    background: #ff8c00; color: #121212; font-weight: bold; padding: 1rem;
+    border: none; border-radius: 4px; cursor: pointer; width: 100%;
+    margin-top: 2rem; font-size: 1rem;
+  }
+  .gym-input-wrapper { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+  .remove-btn { background-color: #8b0000; padding: 0.5rem; border: none; border-radius: 4px; color: #fff; cursor: pointer; }
+  .day { margin-bottom: 1.5rem; padding: 1rem; background: #222; border-radius: 6px; }
+  .exercise {
+    padding: 0.5rem; margin-bottom: 0.5rem; background: #333; border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: center; cursor: grab;
+  }
+  .alt-button { cursor: pointer; margin-left: 1rem; }
+  #trainingPlanContent {
+    width: 100%; height: 300px; background: #1c1c1c; color: #fff;
+    border: 1px solid #444; padding: 1rem; border-radius: 6px; margin-top: 1rem;
+  }
+  #specificGymNameContainer { margin-top: 1rem; display: block; }
+  #specificGymNameContainer label { margin-bottom: 0.25rem; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<!-- Sortable.js pro drag&drop uvnitř dnů (používá ho planLogic.js) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 <div class="container">
   <h1>Self-Coaching Plan Generator</h1>
+
   <form id="trackerForm">
     <label for="goal">What's your main goal?</label>
     <select id="goal">
@@ -172,10 +115,11 @@ button {
   </div>
 </div>
 
+<!-- Hlavní modul – volá generateTrainingPlan z planLogic.js -->
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/';
   const goal = document.getElementById('goal');
   const frequency = document.getElementById('frequency');
@@ -183,8 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const experience = document.getElementById('experience');
   const fixed = document.getElementById('fixed');
   const email = document.getElementById('email');
+  const gymFields = document.getElementById('gymFields');
+  const specificGymNameContainer = document.getElementById('specificGymNameContainer');
+  const specificGymNameInput = document.getElementById('specificGymName');
 
-  // Funkce pro přidání gym input pole
+  // Přidání gym input pole
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
@@ -202,21 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wrapper.appendChild(input);
     wrapper.appendChild(removeBtn);
-    document.getElementById('gymFields').appendChild(wrapper);
+    gymFields.appendChild(wrapper);
   }
 
-  // Přidání prvního gym pole při načtení stránky
+  // první pole při načtení
   addGymField();
 
-  // Přidání listeneru pro tlačítko přidání gymu
-  document.getElementById('addGymButton').addEventListener('click', () => {
-    addGymField();
-  });
+  // tlačítko „Add another gym“
+  document.getElementById('addGymButton').addEventListener('click', () => addGymField());
 
-  // Logika pro zobrazení/skrytí pole "Specific Gym Name"
-  const specificGymNameContainer = document.getElementById('specificGymNameContainer');
-  const specificGymNameInput = document.getElementById('specificGymName');
-
+  // zobrazení/skrytí „Specific Gym Name“
   equipment.addEventListener('change', () => {
     if (equipment.value === 'other') {
       specificGymNameContainer.style.display = 'block';
@@ -225,18 +167,16 @@ document.addEventListener('DOMContentLoaded', () => {
       specificGymNameInput.value = '';
     }
   });
-
-  // Zavolání změny při načtení stránky
   equipment.dispatchEvent(new Event('change'));
 
-  // Blokování Enter v inputu
-  document.getElementById('trackerForm').addEventListener('keydown', function(e) {
+  // blok Enteru v gym inputech
+  document.getElementById('trackerForm').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.target.classList.contains('gymName') || e.target.id === 'specificGymName')) {
       e.preventDefault();
     }
   });
 
-  // Funkce pro aktualizaci textarea s plánem
+  // === Globální updater textarea, aby ho viděl planLogic.js ===
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
@@ -266,39 +206,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     textarea.value = output.trim();
   }
+  // EXPOSE:
+  window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
-  // Funkce pro aktivaci drag and drop
-  function activateDragAndDrop() {
-    const container = document.getElementById('training-container');
-    if (container) {
-      new Sortable(container, {
-        animation: 150,
-        handle: '.exercise',
-        onEnd: updateTrainingPlanContentInTextarea
-      });
-    }
-  }
-
-  // Odeslání formuláře - generování plánu
+  // Submit – generování plánu
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim())
-      .filter(x => x);
+      .filter(Boolean);
 
-    // Získání specifického názvu gymu
-    const equipmentValue = equipment.value;
+    // „Other Gym“ předřadíme jako první
+    const equipmentValueRaw = equipment.value;
     const specificGymName = specificGymNameInput.value.trim();
 
-    if (equipmentValue === 'other') {
-      if (!specificGymName) {
-        return alert('Please specify the name of your other gym.');
-      }
+    if (equipmentValueRaw === 'other') {
+      if (!specificGymName) return alert('Please specify the name of your other gym.');
       gymNames.unshift(specificGymName);
     }
-
     if (!gymNames.length) return alert('Add at least one gym.');
+
+    // POZOR: pro generování mapujeme "other" → "gym", aby router v planLogic fungoval
+    const equipmentValue = (equipmentValueRaw === 'other') ? 'gym' : equipmentValueRaw;
 
     const data = {
       goal: goal.value,
@@ -312,21 +242,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       document.getElementById('outputBox').style.display = 'none';
-
       window.formData = data;
+
       await generateTrainingPlan(data);
+
+      // necháme planLogic vyrenderovat a poté jen obnovíme textarea
       setTimeout(() => {
-        activateDragAndDrop();
         updateTrainingPlanContentInTextarea();
         document.getElementById('outputBox').style.display = 'block';
         document.getElementById('trainingPlanContent').setAttribute('readonly', true);
       }, 50);
     } catch (err) {
-      alert('❌ Error generating plan: ' + err.message);
+      alert('❌ Error generating plan: ' + (err?.message || err));
+      console.error(err);
     }
   });
 
-  // Tlačítko Export Plan
+  // Export Plan
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
@@ -337,14 +269,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
       .map(x => x.value.trim())
-      .filter(x => x);
+      .filter(Boolean);
     const userName = email.value.trim() || "Anonymous";
 
-    const equipmentValue = equipment.value;
+    // Pokud je „other“, už jsme přemapovali při generování; tady jen zajistíme,
+    // že se název přidal do seznamu gymů:
+    const equipmentValueRaw = equipment.value;
     const specificGymName = specificGymNameInput.value.trim();
-
-    if (equipmentValue === 'other' && specificGymName) {
-      gymNames.unshift(specificGymName);
+    if (equipmentValueRaw === 'other' && specificGymName) {
+      if (!gymNames.includes(specificGymName)) gymNames.unshift(specificGymName);
     }
 
     if (!trainingPlan) {
@@ -364,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json();
 
       if (json.success) {
-        finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank">Open Logbook</a>`;
+        finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
         finalStatus.style.color = '#00ff88';
       } else {
         throw new Error(json.error || "Unexpected server error.");
@@ -375,22 +308,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Logika pro změnu alternativy
-  document.getElementById('training-container').addEventListener('click', async (event) => {
-    if (event.target.classList.contains('alt-button')) {
-      const altButton = event.target;
-      const exerciseElement = altButton.closest('.exercise');
-      if (!exerciseElement) return;
+  // POZOR: Nepřidávám žádný vlastní DnD nebo alt-button listener.
+  // Ty řeší planLogic.js (po každém renderu volá náš window.updateTrainingPlanContentInTextarea()).
+}
 
-      const dayElement = altButton.closest('.day');
-      const dayIndex = Array.from(dayElement.parentNode.children).indexOf(dayElement);
-      const exerciseIndex = Array.from(dayElement.querySelectorAll('.exercise')).indexOf(exerciseElement);
-
-      console.log(`Clicked alt button for Day ${dayIndex}, Exercise ${exerciseIndex}`);
-      alert('Alternative exercise logic needs to be implemented in planLogic.js');
-    }
-  });
-});
+// Spusť init spolehlivě, i když DOMContentLoaded už proběhl
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
