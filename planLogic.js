@@ -1,5 +1,74 @@
 
 // === conditioningFrequencies.js loader ===
+function loadTrainingData(goal, equipment) {
+  return new Promise((resolve, reject) => {
+    let globalName, src, modulePath, useScript = true;
+
+    if (equipment === 'home') {
+      useScript = false;
+      if (goal === 'Get stronger') {
+        globalName = 'trainingDataStrongHome';
+        modulePath = './trainingDataStrongHome.js';
+      } else {
+        globalName = 'trainingDataCalisthenics';
+        modulePath = './trainingDataCalisthenics.js';
+      }
+    } else if (goal === 'Get stronger') {
+      globalName = 'trainingDataStrong';
+      src = 'https://www.webbyfe.com/trainingData_strong.js';
+      useScript = true;
+    } else {
+      globalName = 'trainingDataGym';
+      modulePath = './trainingData.js';
+      useScript = false;
+    }
+
+    if (window[globalName]) return resolve();
+
+    if (!useScript) {
+      console.log("📦 importing", modulePath, "->", globalName);
+      import(modulePath)
+        .then(mod => {
+          window[globalName] = mod.default || mod[globalName] || mod.trainingData || mod;
+          console.log(`✅ Imported ${globalName} from ${modulePath}`);
+          resolve();
+        })
+        .catch(err => {
+          console.error(`❌ Failed to import ${modulePath}`, err);
+          reject('trainingData import error');
+        });
+      return;
+    }
+
+    // externí skript
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => {
+      const candidates = [
+        window[globalName],
+        window.trainingData,
+        window.trainingDataStrong,
+        window.trainingData_strong,
+        window.trainingDataGym
+      ].filter(Boolean);
+
+      if (candidates.length) {
+        window[globalName] = candidates[0];
+        console.log(`✅ Loaded and mapped to ${globalName}`);
+        resolve();
+      } else {
+        console.error("❌ trainingData missing after script load");
+        reject("trainingData not found");
+      }
+    };
+    script.onerror = (e) => {
+      console.error("❌ Failed to load training data", e);
+      reject("trainingData load error");
+    };
+    document.head.appendChild(script);
+  });
+}
+
 let currentPlan = null;
 function loadConditioningData() {
 return new Promise((resolve, reject) => {
