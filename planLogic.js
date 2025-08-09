@@ -27,6 +27,37 @@ function loadConditioningData() {
     document.head.appendChild(script);
   });
 }
+function validateConditioningData(cf) {
+    const errs = [];
+    const branches = ["bodyweight","gym"];
+    const freqs = ["1-2","3-4","5","5+"];
+
+    if (!cf || typeof cf !== 'object') return ["conditioningFrequencies missing or not an object"];
+
+    for (const br of branches) {
+        if (!cf[br]) { errs.push(`Missing branch: ${br}`); continue; }
+        for (const f of freqs) {
+            const block = cf[br][f];
+            if (!block) { errs.push(`Missing frequency: ${br}.${f}`); continue; }
+
+            if (Array.isArray(block)) {
+                block.forEach((ex,i) => {
+                    if (!ex?.name || !ex?.sets) errs.push(`Bad exercise in ${br}.${f}[${i}]`);
+                });
+            } else if (typeof block === 'object') {
+                Object.entries(block).forEach(([day, list]) => {
+                    if (!Array.isArray(list)) errs.push(`Day is not array in ${br}.${f}.${day}`);
+                    else list.forEach((ex,i) => {
+                        if (!ex?.name || !ex?.sets) errs.push(`Bad exercise in ${br}.${f}.${day}[${i}]`);
+                    });
+                });
+            } else {
+                errs.push(`Invalid block type in ${br}.${f} (expected array or object)`);
+            }
+        }
+    }
+    return errs;
+}
 
 // ============ Conditioning helpers ============
 function extendConditioningAlternatives(plan) {
@@ -346,6 +377,114 @@ export async function generateTrainingPlan(formData) {
       }
     });
   }
+// === Conditioning normalizer: převod tvého formátu -> {Day: [ {name, sets, alt[]} ]} ===
+function normalizeConditioningPlan(basePlan) {
+  // basePlan je objekt dnů: { "Day 1": { warmup, workout, running, finisher, core, cooldown, ... }, ... }
+  const out = {};
+  Object.entries(basePlan).forEach(([day, block]) => {
+    out[day] = normalizeConditioningDay(block);
+  });
+  return out;
+}
+
+function normalizeConditioningDay(block) {
+  // block může mít klíče: warmup (array stringů), workout{type, rounds, exercises[]}, running{...},
+  // finisher{...}, core{...}, cooldown{...} atd.
+  const list = [];
+
+  // Warmup (sloučíme do jedné položky, ať to není 5 řádků warmupu)
+  if (Array.isArray(block?.warmup) && block.warmup.length) {
+    list.push({
+      name: "Warm-up",
+      sets: block.warmup.join(" · "),
+      alt: []
+    });
+  }
+
+  // Workout (rozepíšeme po cvicích; rounds přidáme do sets)
+  const wo = block?.workout;
+  if (wo?.exercises && Array.isArray(wo.exercises)) {
+    const roundTag = wo.rounds ? `${wo.rounds} rounds` : (wo.type ? wo.type : "");
+    wo.exercises.forEach(ex => {
+      // podpora různých názvů polí ve tvých datech: reps/sets/alternatives/alt
+      const repsOrSets = ex.reps || ex.sets || "";
+      const alt = ex.alternatives || ex.alt || [];
+      list.push({
+        name: ex.name,
+        sets: [roundTag, repsOrSets].filter(Boolean).join(" · "),
+        alt: Array.isArray(alt) ? alt : []
+      });
+    });
+  }
+
+  // Running (uděláme jednu položku)
+  if (block?.running) {
+    const r = block.running;
+    const sets = [r.duration, r.description || r.structure?.join(" / "), r.alternative].filter(Boolean).join(" · ");
+    list.push({
+      name: `Running${r.type ? `: ${r.type}` : ""}`,
+      sets: sets || "as prescribed",
+      alt: []
+    });
+  }
+
+  // Finisher
+  if (block?.finisher) {
+    const f = block.finisher;
+    const desc = Array.isArray(f.exercises) ? f.exercises.join(" · ") : (f.description || "");
+    const roundsTag = f.rounds ? `${f.rounds} rounds` : "";
+    list.push({
+      name: `Finisher${f.type ? `: ${f.type}` : ""}`,
+      sets: [roundsTag, desc].filter(Boolean).join(" · "),
+      alt: []
+    });
+  }
+
+  // Core (pokud existuje mimo finisher)
+  if (block?.core) {
+    const c = block.core;
+    const desc = Array.isArray(c.exercises) ? c.exercises.join(" · ") : (c.description || "");
+    const roundsTag = c.rounds ? `${c.rounds} rounds` : "";
+    list.push({
+      name: `Core${c.type ? `: ${c.type}` : ""}`,
+      sets: [roundsTag, desc].filter(Boolean).join(" · "),
+      alt: []
+    });
+  }
+
+  // Cooldown
+  if (block?.cooldown) {
+    const cd = block.cooldown;
+    const desc = Array.isArray(cd.focus) ? cd.focus.join(", ") : (cd.description || "");
+    const dur = cd.duration || "";
+    list.push({
+      name: "Cooldown",
+      sets: [dur, desc].filter(Boolean).join(" · "),
+      alt: []
+    });
+  }
+
+  // Gym varianta ve tvých datech může mít pouze workout.exercises s "sets"
+  if (!block?.workout && block?.workout?.exercises === undefined && Array.isArray(block?.exercises)) {
+    // safety: kdyby byl někde jednodušší tvar
+    block.exercises.forEach(ex => list.push({
+      name: ex.name,
+      sets: ex.sets || ex.reps || "",
+      alt: ex.alt || ex.alternatives || []
+    }));
+  }
+
+  // pokud by byl den už rovnou jako pole cviků, vrať ho jak je
+  if (Array.isArray(block)) {
+    return (block || []).map(ex => ({
+      name: ex.name,
+      sets: ex.sets || ex.reps || "",
+      alt: ex.alt || ex.alternatives || []
+    }));
+  }
+
+  return list;
+}
 
   enforceUniqueExercises(currentPlan);
   renderPlan(currentPlan, adjustedFreq, formData);
