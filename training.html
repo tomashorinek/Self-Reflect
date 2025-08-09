@@ -198,9 +198,10 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      if (!window.conditioningFrequencies) {
-        throw new Error('Conditioning data not found. Make sure conditioningLocal.js sets window.conditioningFrequencies.');
-      }
+      // ❌ odstraněna globální kontrola na conditioningFrequencies
+      // if (data.goal === 'Improve conditioning' && !window.conditioningFrequencies) {
+      //   alert('⚠️ Conditioning data not found. Check conditioningLocal.js or network.');
+      // }
 
       await generateTrainingPlan(data);
 
