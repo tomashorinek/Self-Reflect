@@ -265,38 +265,40 @@ function renderPlan(plan, freq, formData) {
   }
 }
 
-// ============ hlavní router ============
-export async function generateTrainingPlan(formData) {
-  console.clear();
-  console.log("🚀 generateTrainingPlan called with:", JSON.parse(JSON.stringify(formData)));
+// ===== Conditioning =====
+if (formData.goal === "Improve conditioning") {
+  await loadConditioningData();
+  console.log("✅ conditioningFrequencies loaded:", !!window.conditioningFrequencies, window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 
-  // normalizace klíče frekvence
-  const frequencyKey = formData.frequency === "5plus" ? "5+" : formData.frequency;
-  console.log("🔑 frequencyKey:", frequencyKey);
+  const equipKey = (formData.equipment === 'home') ? 'bodyweight' : 'gym';
+  console.log("🧭 conditioning equipKey:", equipKey);
 
-  // ===== Conditioning =====
-  if (formData.goal === "Improve conditioning") {
-    await loadConditioningData();
-    console.log("✅ conditioningFrequencies loaded:", !!window.conditioningFrequencies, window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
+  let basePlanRaw = window.conditioningFrequencies?.[equipKey]?.[frequencyKey]
+                 || window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey]
+                 || null;
 
-    // mapuj home→bodyweight, „other“ už mapuje HTML na gym
-    const equipKey = (formData.equipment === 'home') ? 'bodyweight' : 'gym';
-    console.log("🧭 conditioning equipKey:", equipKey);
+  // single-day array -> wrap, jinak čekáme objekt dnů
+  if (Array.isArray(basePlanRaw)) basePlanRaw = { "Full Body": basePlanRaw };
 
-    let basePlan = window.conditioningFrequencies?.[equipKey]?.[frequencyKey]
-                || window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey]
-                || null;
+  console.log("📦 basePlanRaw (conditioning):", basePlanRaw);
 
-    // single-day array -> wrap
-    if (Array.isArray(basePlan)) basePlan = { "Full Body": basePlan };
+  if (!basePlanRaw) {
+    console.warn("⚠️ Conditioning plan undefined", { equipKey, frequencyKey, cf: !!window.conditioningFrequencies });
+    alert("⚠️ Conditioning plan not found");
+    return;
+  }
 
-    console.log("📦 basePlan (conditioning):", basePlan);
+  // 🔄 NORMALIZACE na { Day: [ {name, sets, alt[]} ] }
+  const normalized = normalizeConditioningPlan(basePlanRaw);
+  console.log("🧰 normalized conditioning plan:", normalized);
 
-    if (!basePlan) {
-      console.warn("⚠️ Conditioning plan undefined", { equipKey, frequencyKey, cf: !!window.conditioningFrequencies });
-      alert("⚠️ Conditioning plan not found");
-      return;
-    }
+  currentPlan = JSON.parse(JSON.stringify(normalized));
+  extendConditioningAlternatives(currentPlan);
+  enforceUniqueExercises(currentPlan);
+  renderPlan(currentPlan, frequencyKey, formData);
+  return;
+}
+
 
     currentPlan = JSON.parse(JSON.stringify(basePlan));
     extendConditioningAlternatives(currentPlan);
