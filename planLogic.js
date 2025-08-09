@@ -47,8 +47,12 @@ async function loadConditioningData() {
     return tryLocalFallback(new Error("Conditioning data not found after script load"));
   }
 
-  console.log("[CF] ready. ver:", window.__COND_VER__ || "unknown",
-              "branches:", Object.keys(window.conditioningFrequencies || {}));
+  console.log(
+    "[CF] ready. ver:",
+    window.__COND_VER__ || "unknown",
+    "branches:",
+    Object.keys(window.conditioningFrequencies || {})
+  );
 }
 
 // util: polling
@@ -82,7 +86,6 @@ async function tryLocalFallback(reason) {
     throw new Error("Conditioning data could not be loaded from remote or local source.");
   }
 }
-
 
 
 // ---------------- Loader: trainingData ----------------
@@ -138,7 +141,7 @@ function loadTrainingData(goal, equipment) {
         reject("trainingData not found");
       }
     };
-    script.onerror = (e) => reject("trainingData load error");
+    script.onerror = () => reject("trainingData load error");
     document.head.appendChild(script);
   });
 }
