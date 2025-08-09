@@ -1,4 +1,5 @@
 // planLogic.js  — ES module (s debug logy)
+import { adaptConditioningPlan } from './conditioningAdapter.js';
 
 // ============ Conditioning loader ============
 let currentPlan = null;
