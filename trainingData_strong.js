@@ -80,7 +80,7 @@ const trainingData = {
       { name: "Leg Curl", sets: "1x12 (warm-up)", alt: ["Seated", "Laying", "Cable Curl"] },
       { name: "Adduction Machine", sets: "1x10-12 (warm-up)", alt: ["Cable Adduction", "Sumo Hold"] },
       { name: "RDL", sets: "4x6-3", alt: ["DB RDL", "Smith RDL"] },
-      { name: "Leg Curl", sets: "2x10", alt: ["Seated", "Laying", "Cable Curl"] },
+      { name: "Hamstring leg Curl", sets: "2x10", alt: ["Seated hamstring curl", "Cable ham Curl"] },
       { name: "Adduction Machine", sets: "2x10-12", alt: ["Cable Adduction", "Sumo Hold"] },
       { name: "Leg Press", sets: "3x10", alt: ["Hack Squat", "Belt Squat"] },
       { name: "EZ Bar Curl", sets: "3x10", alt: ["Cable Curl", "Incline Curl"] },
