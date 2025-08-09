@@ -18,7 +18,7 @@
   .exercise{padding:.5rem; margin-bottom:.5rem; background:#333; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:grab;}
   .alt-button{cursor:pointer; margin-left:1rem;}
   #trainingPlanContent{width:100%; height:300px; background:#1c1c1c; color:#fff; border:1px solid #444; padding:1rem; border-radius:6px; margin-top:1rem;}
-  #specificGymNameContainer{margin-top:1rem; display:block;}
+  #specificGymNameContainer{margin-top:1rem; display:none;}
   #specificGymNameContainer label{margin-bottom:.25rem;}
 </style>
 
@@ -43,7 +43,6 @@
       <option value="1-2">1–2</option>
       <option value="3-4">3–4</option>
       <option value="5">5</option>
-      <!-- FIX: klíč v datech je "5+" → používej stejné value -->
       <option value="5+">5+</option>
     </select>
 
@@ -54,7 +53,7 @@
       <option value="other">Other Gym (specify below)</option>
     </select>
 
-    <div id="specificGymNameContainer" style="display:none;">
+    <div id="specificGymNameContainer">
       <label for="specificGymName">Specify Other Gym Name:</label>
       <input type="text" id="specificGymName" placeholder="E.g., Local Fitness, My Garage" />
     </div>
@@ -91,19 +90,10 @@
   </div>
 </div>
 
-<!-- Nejdřív načti conditioningLocal.js, aby nastavilo window.conditioningFrequencies -->
+<!-- 👉 conditioningLocal.js musí jen nastavit window.conditioningFrequencies = { bodyweight, gym } -->
 <script src="./conditioningLocal.js"></script>
 
-<!-- Pak načti hlavní modul -->
-<script type="module">
-  import { generateTrainingPlan } from './planLogic.js';
-
-  console.log('[conditioning] loaded', 
-    window.conditioningFrequencies && Object.keys(window.conditioningFrequencies)
-  );
-</script>
-
-<!-- 2) Hlavní modul – spouští logiku, až když jsou data na window -->
+<!-- Hlavní modul -->
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
@@ -119,6 +109,7 @@ function init() {
   const specificGymNameContainer = document.getElementById('specificGymNameContainer');
   const specificGymNameInput = document.getElementById('specificGymName');
 
+  // UI helpers
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
@@ -142,19 +133,24 @@ function init() {
   });
   equipment.dispatchEvent(new Event('change'));
 
+  // blok Enteru v gym inputech
   document.getElementById('trackerForm').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.target.classList.contains('gymName') || e.target.id === 'specificGymName')) e.preventDefault();
   });
 
+  // textarea updater
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
     if (!container || !textarea) return;
+
     let output = '';
     const days = container.querySelectorAll('.day');
     if (!days || days.length === 0) { textarea.value = ''; return; }
+
     const gymNames = window.formData?.gymNames?.join(', ') || 'None';
     output += `Gyms: ${gymNames}\n\n`;
+
     days.forEach((day, i) => {
       const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
       output += `${title}\n`;
@@ -166,10 +162,12 @@ function init() {
       });
       output += '\n';
     });
+
     textarea.value = output.trim();
   }
   window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
+  // submit → generate
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -178,16 +176,17 @@ function init() {
 
     const equipmentValueRaw = equipment.value;
     const specificGymName = specificGymNameInput.value.trim();
+
     if (equipmentValueRaw === 'other') {
       if (!specificGymName) return alert('Please specify the name of your other gym.');
-      gymNames.unshift(specificGymName);
+      gymNames.unshift(specificGymName); // Other gym first
     }
     if (!gymNames.length) return alert('Add at least one gym.');
 
     // mapuj „other“ → „gym“
     const data = {
       goal: goal.value,
-      frequency: frequency.value,            // teď bude "5+" (shoda s daty)
+      frequency: frequency.value,                  // "1-2" | "3-4" | "5" | "5+"
       equipment: (equipmentValueRaw === 'other') ? 'gym' : equipmentValueRaw,
       experience: experience.value,
       fixed: fixed.value,
@@ -199,9 +198,8 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      // sanity check – data už musí být na window z předchozího modulu
       if (!window.conditioningFrequencies) {
-        throw new Error('Conditioning data not found after script load');
+        throw new Error('Conditioning data not found. Make sure conditioningLocal.js sets window.conditioningFrequencies.');
       }
 
       await generateTrainingPlan(data);
@@ -217,6 +215,7 @@ function init() {
     }
   });
 
+  // Export / upload
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
@@ -243,7 +242,7 @@ function init() {
 
     try {
       finalStatus.textContent = '📤 Uploading plan...';
-      const res = await fetch('https://webbyfe-proxy.quiet-king-42b1.workers.dev/', {
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userName, trainingPlan, gymNames })
@@ -267,6 +266,9 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+// jen pro debug:
+console.log('[conditioning] loaded', window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 </script>
 </body>
 </html>
