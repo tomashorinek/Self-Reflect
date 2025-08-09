@@ -1,7 +1,15 @@
-// conditioningAdapter.js - new file to keep code organized
+// conditioningAdapter.js
+export function validateExercises(exs, ctx = '') {
+  if (!Array.isArray(exs)) throw new Error(`Expected exercises array in ${ctx}`);
+  exs.forEach((ex, i) => {
+    if (!ex || typeof ex !== 'object') throw new Error(`Exercise ${i} in ${ctx} is not an object`);
+    if (!ex.name) throw new Error(`Exercise ${i} in ${ctx} missing name`);
+    // reps/sets nejsou povinné, render si poradí
+  });
+}
+
 export function adaptConditioningDayToList(dayObj, dayName = '') {
   const list = [];
-  const context = `day ${dayName}`;
 
   // Warm-up
   if (Array.isArray(dayObj.warmup) && dayObj.warmup.length) {
@@ -14,81 +22,82 @@ export function adaptConditioningDayToList(dayObj, dayName = '') {
   }
 
   // Workout
-  if (dayObj.workout) {
-    try {
-      validateExercises(dayObj.workout.exercises, `workout for ${dayName}`);
-      
-      const rounds = dayObj.workout.rounds ? ` (${dayObj.workout.rounds} rounds)` : '';
-      const typePrefix = dayObj.workout.type ? `${dayObj.workout.type}: ` : '';
-      
-      dayObj.workout.exercises.forEach(ex => {
-        list.push({
-          name: `${typePrefix}${ex.name}`,
-          sets: (ex.reps || '') + rounds,
-          alt: Array.isArray(ex.alternatives) ? ex.alternatives : [],
-          description: ex.description || '',
-          type: 'workout'
-        });
+  if (dayObj.workout && Array.isArray(dayObj.workout.exercises)) {
+    validateExercises(dayObj.workout.exercises, `workout for ${dayName}`);
+    const rounds = dayObj.workout.rounds ? ` (${dayObj.workout.rounds} rounds)` : '';
+    const typePrefix = dayObj.workout.type ? `${dayObj.workout.type}: ` : '';
+    dayObj.workout.exercises.forEach(ex => {
+      const alt = Array.isArray(ex.alternatives) ? ex.alternatives : (Array.isArray(ex.alt) ? ex.alt : []);
+      list.push({
+        name: `${typePrefix}${ex.name}`,
+        sets: [ex.reps || ex.sets || '', rounds].filter(Boolean).join(' · '),
+        alt,
+        type: 'workout'
       });
-    } catch (e) {
-      console.error(`Skipping workout for ${dayName} due to error:`, e.message);
-    }
+    });
   }
 
   // Finisher
-  if (dayObj.finisher) {
-    try {
-      validateExercises(dayObj.finisher.exercises, `finisher for ${dayName}`);
-      
-      const rounds = dayObj.finisher.rounds ? ` (${dayObj.finisher.rounds} rounds)` : '';
-      list.push({
-        name: dayObj.finisher.type ? `Finisher: ${dayObj.finisher.type}` : "Finisher",
-        sets: dayObj.finisher.exercises.join(" • ") + rounds,
-        alt: [],
-        type: 'finisher'
-      });
-    } catch (e) {
-      console.error(`Skipping finisher for ${dayName} due to error:`, e.message);
-    }
+  if (dayObj.finisher && Array.isArray(dayObj.finisher.exercises)) {
+    const rounds = dayObj.finisher.rounds ? ` (${dayObj.finisher.rounds} rounds)` : '';
+    list.push({
+      name: dayObj.finisher.type ? `Finisher: ${dayObj.finisher.type}` : "Finisher",
+      sets: dayObj.finisher.exercises.join(" • ") + rounds,
+      alt: [],
+      type: 'finisher'
+    });
   }
 
-  // Running/Cardio
+  // Running / Cardio
   if (dayObj.running) {
-    let sets = '';
-    if (dayObj.running.duration) sets += dayObj.running.duration;
-    if (Array.isArray(dayObj.running.structure)) {
-      sets += (sets ? " • " : "") + dayObj.running.structure.join(" / ");
-    }
-    if (dayObj.running.description) {
-      sets += (sets ? " • " : "") + dayObj.running.description;
-    }
-    
+    const parts = [];
+    if (dayObj.running.duration) parts.push(dayObj.running.duration);
+    if (Array.isArray(dayObj.running.structure)) parts.push(dayObj.running.structure.join(" / "));
+    if (dayObj.running.description) parts.push(dayObj.running.description);
     list.push({
       name: dayObj.running.type ? `Cardio: ${dayObj.running.type}` : "Cardio",
-      sets: sets || "See description",
+      sets: parts.join(" • ") || "as prescribed",
       alt: dayObj.running.alternative ? [dayObj.running.alternative] : [],
       type: 'cardio'
     });
   }
 
-  console.log(`Adapted ${dayName} to ${list.length} items`);
+  // Core (mimo finisher)
+  if (dayObj.core) {
+    const rounds = dayObj.core.rounds ? ` (${dayObj.core.rounds} rounds)` : '';
+    const desc = Array.isArray(dayObj.core.exercises) ? dayObj.core.exercises.join(" • ") : (dayObj.core.description || "");
+    list.push({
+      name: dayObj.core.type ? `Core: ${dayObj.core.type}` : "Core",
+      sets: [desc, rounds].filter(Boolean).join(' '),
+      alt: [],
+      type: 'core'
+    });
+  }
+
+  // Kdyby byl den už rovnou pole cviků
+  if (Array.isArray(dayObj)) {
+    return dayObj.map(ex => ({
+      name: ex.name,
+      sets: ex.sets || ex.reps || "",
+      alt: ex.alt || ex.alternatives || [],
+      type: 'workout'
+    }));
+  }
+
   return list;
 }
 
 export function adaptConditioningPlan(plan) {
-  if (!plan) {
-    console.error('❌ No plan provided to adapter');
-    throw new Error('Cannot adapt undefined plan');
+  if (!plan || typeof plan !== 'object') {
+    throw new Error('Cannot adapt undefined/invalid plan');
   }
-
-  const adaptedPlan = {};
-  
+  const adapted = {};
   for (const [dayName, dayObj] of Object.entries(plan)) {
     try {
-      adaptedPlan[dayName] = adaptConditioningDayToList(dayObj, dayName);
+      adapted[dayName] = adaptConditioningDayToList(dayObj, dayName);
     } catch (e) {
       console.error(`Failed to adapt day ${dayName}:`, e);
-      adaptedPlan[dayName] = [{
+      adapted[dayName] = [{
         name: `ERROR: Could not load day ${dayName}`,
         sets: 'Please check console for details',
         alt: [],
@@ -96,6 +105,5 @@ export function adaptConditioningPlan(plan) {
       }];
     }
   }
-
-  return adaptedPlan;
+  return adapted;
 }
