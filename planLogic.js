@@ -66,9 +66,9 @@ function waitFor(fn, timeoutMs = 1000, stepMs = 50) {
 
 // fallback: zkus lokální modul (měj kopii souboru vedle stránky)
 async function tryLocalFallback(reason) {
-  console.warn("[CF] fallback to ./conditioningFrequencies.local.js because:", reason?.message || reason);
+  console.warn("[CF] fallback to ./conditioningLocal.js because:", reason?.message || reason);
   try {
-    const mod = await import("./conditioningFrequencies.local.js");
+    const mod = await import("./conditioningLocal.js");
     // ber default nebo pojmenovaný export
     const data = mod.default || mod.conditioningFrequencies || mod;
     if (data && typeof data === "object") {
@@ -82,6 +82,7 @@ async function tryLocalFallback(reason) {
     throw new Error("Conditioning data could not be loaded from remote or local source.");
   }
 }
+
 
 
 // ---------------- Loader: trainingData ----------------
