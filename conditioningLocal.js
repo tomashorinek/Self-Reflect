@@ -332,9 +332,7 @@ const gym = {
 // const bodyweight = { ... }  // (nebo necháš přímo inline v exportu níže)
 
 // --- Export ---
-export const conditioningFrequencies = {
-  bodyweight: { /* vlož svůj dlouhý BODYWEIGHT blok sem */ },
-  gym
-};
+export const conditioningFrequencies = { bodyweight, gym };
+export default conditioningFrequencies;
 
 export default conditioningFrequencies;
