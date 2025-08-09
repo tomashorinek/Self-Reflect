@@ -269,36 +269,29 @@ function renderPlan(plan, freq, formData) {
 // ===== Conditioning =====
 if (formData.goal === "Improve conditioning") {
   await loadConditioningData();
-  console.log("✅ conditioningFrequencies loaded:", !!window.conditioningFrequencies, window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 
   const equipKey = (formData.equipment === 'home') ? 'bodyweight' : 'gym';
-  console.log("🧭 conditioning equipKey:", equipKey);
-
-  let basePlanRaw = window.conditioningFrequencies?.[equipKey]?.[frequencyKey]
-                 || window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey]
+  const canonFreq = frequencyKey; // už máš mapování 5plus -> 5+
+  let basePlanRaw = window.conditioningFrequencies?.[equipKey]?.[canonFreq]
+                 || window.conditioningFrequencies?.[formData.equipment]?.[canonFreq]
                  || null;
 
-  // single-day array -> wrap, jinak čekáme objekt dnů
   if (Array.isArray(basePlanRaw)) basePlanRaw = { "Full Body": basePlanRaw };
-
-  console.log("📦 basePlanRaw (conditioning):", basePlanRaw);
-
   if (!basePlanRaw) {
-    console.warn("⚠️ Conditioning plan undefined", { equipKey, frequencyKey, cf: !!window.conditioningFrequencies });
     alert("⚠️ Conditioning plan not found");
     return;
   }
 
-  // 🔄 NORMALIZACE na { Day: [ {name, sets, alt[]} ] }
-  const normalized = normalizeConditioningPlan(basePlanRaw);
-  console.log("🧰 normalized conditioning plan:", normalized);
+  // 🔄 Převod bohatého dne -> jednoduchý seznam cviků
+  const normalized = adaptConditioningPlan(basePlanRaw);
 
   currentPlan = JSON.parse(JSON.stringify(normalized));
-  extendConditioningAlternatives(currentPlan);
+  extendConditioningAlternatives(currentPlan); // doplní alt mapy
   enforceUniqueExercises(currentPlan);
-  renderPlan(currentPlan, frequencyKey, formData);
+  renderPlan(currentPlan, canonFreq, formData);
   return;
 }
+
 
 
     currentPlan = JSON.parse(JSON.stringify(basePlan));
