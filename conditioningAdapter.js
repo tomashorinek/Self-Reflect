@@ -1,109 +1,199 @@
-// conditioningAdapter.js
-export function validateExercises(exs, ctx = '') {
+// conditioningAdapter.js — FINAL
+
+// --- utils ---
+function toText(x) {
+  if (x == null) return "";
+  if (typeof x === "string") return x.trim();
+  if (typeof x === "number") return String(x);
+  if (Array.isArray(x)) return x.map(toText).filter(Boolean).join(" • ");
+  if (typeof x === "object") {
+    // typické {name, reps} apod.
+    const parts = [x.name, x.reps || x.sets, x.description].map(toText).filter(Boolean);
+    return parts.join(" – ");
+  }
+  return String(x);
+}
+
+function arrOfStrings(xs) {
+  if (!Array.isArray(xs)) return [];
+  return xs.map(toText).filter(Boolean);
+}
+
+export function validateExercises(exs, ctx = "") {
   if (!Array.isArray(exs)) throw new Error(`Expected exercises array in ${ctx}`);
   exs.forEach((ex, i) => {
-    if (!ex || typeof ex !== 'object') throw new Error(`Exercise ${i} in ${ctx} is not an object`);
+    if (!ex || typeof ex !== "object") throw new Error(`Exercise ${i} in ${ctx} is not an object`);
     if (!ex.name) throw new Error(`Exercise ${i} in ${ctx} missing name`);
-    // reps/sets nejsou povinné, render si poradí
   });
 }
 
-export function adaptConditioningDayToList(dayObj, dayName = '') {
+// vezme {name,reps/sets,alt/alternatives} -> normalizovaný záznam
+function normalizeExercise(ex, opt = {}) {
+  const alt =
+    Array.isArray(ex.alternatives) ? ex.alternatives
+    : Array.isArray(ex.alt) ? ex.alt
+    : [];
+
+  const reps = ex.reps || ex.sets || "";
+  const rounds = opt.rounds ? ` (${opt.rounds} rounds)` : "";
+  const typePrefix = opt.type ? `${opt.type}: ` : "";
+
+  return {
+    name: `${typePrefix}${ex.name}`,
+    sets: [toText(reps), rounds].filter(Boolean).join(" · "),
+    alt: arrOfStrings(alt),
+    type: opt.slotType || "workout"
+  };
+}
+
+export function adaptConditioningDayToList(dayObj, dayName = "") {
+  // pokud už je den pole cviků (legacy), jen přemapuj
+  if (Array.isArray(dayObj)) {
+    return dayObj.map(ex => normalizeExercise(
+      typeof ex === "string" ? { name: ex, reps: "" } : ex,
+      { slotType: "workout" }
+    ));
+  }
+
+  if (!dayObj || typeof dayObj !== "object") {
+    return [{
+      name: `ERROR: Day "${dayName}" has invalid structure`,
+      sets: "Expected an object or an array",
+      alt: [],
+      type: "error"
+    }];
+  }
+
   const list = [];
 
-  // Warm-up
-  if (Array.isArray(dayObj.warmup) && dayObj.warmup.length) {
-    list.push({
-      name: "Warm-up",
-      sets: dayObj.warmup.join(" • "),
-      alt: [],
-      type: 'warmup'
-    });
-  }
+  // WARM-UP (stringy nebo objekty)
+  if (dayObj.warmup) {
+    const wu = Array.isArray(dayObj.warmup)
+      ? dayObj.warmup.map(toText).filter(Boolean)
+      : [toText(dayObj.warmup)].filter(Boolean);
 
-  // Workout
-  if (dayObj.workout && Array.isArray(dayObj.workout.exercises)) {
-    validateExercises(dayObj.workout.exercises, `workout for ${dayName}`);
-    const rounds = dayObj.workout.rounds ? ` (${dayObj.workout.rounds} rounds)` : '';
-    const typePrefix = dayObj.workout.type ? `${dayObj.workout.type}: ` : '';
-    dayObj.workout.exercises.forEach(ex => {
-      const alt = Array.isArray(ex.alternatives) ? ex.alternatives : (Array.isArray(ex.alt) ? ex.alt : []);
+    if (wu.length) {
       list.push({
-        name: `${typePrefix}${ex.name}`,
-        sets: [ex.reps || ex.sets || '', rounds].filter(Boolean).join(' · '),
-        alt,
-        type: 'workout'
+        name: "Warm-up",
+        sets: wu.join(" • "),
+        alt: [],
+        type: "warmup"
       });
-    });
+    }
   }
 
-  // Finisher
-  if (dayObj.finisher && Array.isArray(dayObj.finisher.exercises)) {
-    const rounds = dayObj.finisher.rounds ? ` (${dayObj.finisher.rounds} rounds)` : '';
-    list.push({
-      name: dayObj.finisher.type ? `Finisher: ${dayObj.finisher.type}` : "Finisher",
-      sets: dayObj.finisher.exercises.join(" • ") + rounds,
-      alt: [],
-      type: 'finisher'
-    });
+  // WORKOUT
+  if (dayObj.workout) {
+    const { type, rounds, exercises } = dayObj.workout;
+    if (Array.isArray(exercises)) {
+      validateExercises(exercises, `workout for ${dayName}`);
+      exercises.forEach(ex =>
+        list.push(
+          normalizeExercise(ex, {
+            type,                                            // např. EMOM / Strength Block
+            rounds: rounds ? toText(rounds) : "",            // 3 nebo "2–3"
+            slotType: "workout"
+          })
+        )
+      );
+    }
   }
 
-  // Running / Cardio
+  // FINISHER (stringy/objekty)
+  if (dayObj.finisher) {
+    const f = dayObj.finisher;
+    const title = f.type ? `Finisher: ${toText(f.type)}` : "Finisher";
+    const fRounds = f.rounds ? ` (${toText(f.rounds)} rounds)` : "";
+
+    let fBody = "";
+    if (Array.isArray(f.exercises)) {
+      fBody = f.exercises.map(toText).filter(Boolean).join(" • ");
+    } else if (f.exercises) {
+      fBody = toText(f.exercises);
+    } else if (f.description) {
+      fBody = toText(f.description);
+    }
+
+    if (fBody || fRounds) {
+      list.push({
+        name: title,
+        sets: `${fBody}${fRounds}`,
+        alt: [],
+        type: "finisher"
+      });
+    }
+  }
+
+  // RUNNING / CARDIO
   if (dayObj.running) {
+    const r = dayObj.running;
     const parts = [];
-    if (dayObj.running.duration) parts.push(dayObj.running.duration);
-    if (Array.isArray(dayObj.running.structure)) parts.push(dayObj.running.structure.join(" / "));
-    if (dayObj.running.description) parts.push(dayObj.running.description);
+    if (r.duration) parts.push(toText(r.duration));
+    if (Array.isArray(r.structure) && r.structure.length) parts.push(r.structure.map(toText).join(" / "));
+    if (r.description) parts.push(toText(r.description));
+
+    const alt = [];
+    if (r.alternative) {
+      if (Array.isArray(r.alternative)) alt.push(...arrOfStrings(r.alternative));
+      else alt.push(toText(r.alternative));
+    }
+
     list.push({
-      name: dayObj.running.type ? `Cardio: ${dayObj.running.type}` : "Cardio",
-      sets: parts.join(" • ") || "as prescribed",
-      alt: dayObj.running.alternative ? [dayObj.running.alternative] : [],
-      type: 'cardio'
+      name: r.type ? `Cardio: ${toText(r.type)}` : "Cardio",
+      sets: parts.filter(Boolean).join(" • ") || "as prescribed",
+      alt,
+      type: "cardio"
     });
   }
 
-  // Core (mimo finisher)
+  // CORE (mimo finisher)
   if (dayObj.core) {
-    const rounds = dayObj.core.rounds ? ` (${dayObj.core.rounds} rounds)` : '';
-    const desc = Array.isArray(dayObj.core.exercises) ? dayObj.core.exercises.join(" • ") : (dayObj.core.description || "");
-    list.push({
-      name: dayObj.core.type ? `Core: ${dayObj.core.type}` : "Core",
-      sets: [desc, rounds].filter(Boolean).join(' '),
-      alt: [],
-      type: 'core'
-    });
+    const c = dayObj.core;
+    const cRounds = c.rounds ? ` (${toText(c.rounds)} rounds)` : "";
+    const desc = Array.isArray(c.exercises)
+      ? c.exercises.map(toText).filter(Boolean).join(" • ")
+      : (c.description ? toText(c.description) : "");
+
+    if (desc || cRounds) {
+      list.push({
+        name: c.type ? `Core: ${toText(c.type)}` : "Core",
+        sets: [desc, cRounds].filter(Boolean).join(" "),
+        alt: [],
+        type: "core"
+      });
+    }
   }
 
-  // Kdyby byl den už rovnou pole cviků
-  if (Array.isArray(dayObj)) {
-    return dayObj.map(ex => ({
-      name: ex.name,
-      sets: ex.sets || ex.reps || "",
-      alt: ex.alt || ex.alternatives || [],
-      type: 'workout'
-    }));
+  // pokud se nic nenašlo, dej info
+  if (!list.length) {
+    list.push({
+      name: `NOTE: Day "${dayName}" has no sections`,
+      sets: "Check warmup/workout/finisher/cardio/core presence",
+      alt: [],
+      type: "note"
+    });
   }
 
   return list;
 }
 
 export function adaptConditioningPlan(plan) {
-  if (!plan || typeof plan !== 'object') {
-    throw new Error('Cannot adapt undefined/invalid plan');
+  if (!plan || typeof plan !== "object") {
+    throw new Error("Cannot adapt undefined/invalid plan");
   }
-  const adapted = {};
+  const out = {};
   for (const [dayName, dayObj] of Object.entries(plan)) {
     try {
-      adapted[dayName] = adaptConditioningDayToList(dayObj, dayName);
+      out[dayName] = adaptConditioningDayToList(dayObj, dayName);
     } catch (e) {
       console.error(`Failed to adapt day ${dayName}:`, e);
-      adapted[dayName] = [{
+      out[dayName] = [{
         name: `ERROR: Could not load day ${dayName}`,
-        sets: 'Please check console for details',
+        sets: "Please check console for details",
         alt: [],
-        type: 'error'
+        type: "error"
       }];
     }
   }
-  return adapted;
+  return out;
 }
