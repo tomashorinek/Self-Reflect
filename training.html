@@ -91,14 +91,16 @@
   </div>
 </div>
 
-<!-- 1) BRIDGE: načteme local data jako ES modul a dáme je na window,
-        aby je planLogic.js mohl použít i když čeká window.* -->
+<!-- Nejdřív načti conditioningLocal.js, aby nastavilo window.conditioningFrequencies -->
+<script src="./conditioningLocal.js"></script>
+
+<!-- Pak načti hlavní modul -->
 <script type="module">
-  import conditioningFrequencies from './conditioningLocal.js';   // musí exportovat default/pojmenovaný objekt
-  // pokud exportuje "export const conditioningFrequencies = {...}", můžeš:
-  // import { conditioningFrequencies } from './conditioningLocal.js';
-  window.conditioningFrequencies = conditioningFrequencies;
-  console.log('[conditioning] loaded', conditioningFrequencies && Object.keys(conditioningFrequencies));
+  import { generateTrainingPlan } from './planLogic.js';
+
+  console.log('[conditioning] loaded', 
+    window.conditioningFrequencies && Object.keys(window.conditioningFrequencies)
+  );
 </script>
 
 <!-- 2) Hlavní modul – spouští logiku, až když jsou data na window -->
