@@ -5,49 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Self-Coaching Plan Generator</title>
 <style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #121212;
-    color: #e0e0e0;
-    margin: 0;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .container { width: 100%; max-width: 700px; }
-  h1 { color: #ff8c00; }
-  form, .output {
-    background: #1e1e1e; padding: 2rem; border-radius: 8px;
-    border: 1px solid #333; width: 100%; box-sizing: border-box;
-  }
-  label { display: block; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: bold; }
-  select, input, textarea {
-    width: 100%; padding: 0.75rem; background: #2a2a2a; color: #e0e0e0;
-    border: 1px solid #444; border-radius: 4px; box-sizing: border-box;
-  }
-  button {
-    background: #ff8c00; color: #121212; font-weight: bold; padding: 1rem;
-    border: none; border-radius: 4px; cursor: pointer; width: 100%;
-    margin-top: 2rem; font-size: 1rem;
-  }
-  .gym-input-wrapper { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-  .remove-btn { background-color: #8b0000; padding: 0.5rem; border: none; border-radius: 4px; color: #fff; cursor: pointer; }
-  .day { margin-bottom: 1.5rem; padding: 1rem; background: #222; border-radius: 6px; }
-  .exercise {
-    padding: 0.5rem; margin-bottom: 0.5rem; background: #333; border-radius: 4px;
-    display: flex; justify-content: space-between; align-items: center; cursor: grab;
-  }
-  .alt-button { cursor: pointer; margin-left: 1rem; }
-  #trainingPlanContent {
-    width: 100%; height: 300px; background: #1c1c1c; color: #fff;
-    border: 1px solid #444; padding: 1rem; border-radius: 6px; margin-top: 1rem;
-  }
-  #specificGymNameContainer { margin-top: 1rem; display: block; }
-  #specificGymNameContainer label { margin-bottom: 0.25rem; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background:#121212; color:#e0e0e0; margin:0; padding:2rem; display:flex; flex-direction:column; align-items:center;}
+  .container{width:100%; max-width:700px;}
+  h1{color:#ff8c00;}
+  form,.output{background:#1e1e1e; padding:2rem; border-radius:8px; border:1px solid #333; width:100%; box-sizing:border-box;}
+  label{display:block; margin-top:1rem; margin-bottom:.5rem; font-weight:bold;}
+  select,input,textarea{width:100%; padding:.75rem; background:#2a2a2a; color:#e0e0e0; border:1px solid #444; border-radius:4px; box-sizing:border-box;}
+  button{background:#ff8c00; color:#121212; font-weight:bold; padding:1rem; border:none; border-radius:4px; cursor:pointer; width:100%; margin-top:2rem; font-size:1rem;}
+  .gym-input-wrapper{display:flex; gap:.5rem; margin-top:.5rem;}
+  .remove-btn{background:#8b0000; padding:.5rem; border:none; border-radius:4px; color:#fff; cursor:pointer;}
+  .day{margin-bottom:1.5rem; padding:1rem; background:#222; border-radius:6px;}
+  .exercise{padding:.5rem; margin-bottom:.5rem; background:#333; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:grab;}
+  .alt-button{cursor:pointer; margin-left:1rem;}
+  #trainingPlanContent{width:100%; height:300px; background:#1c1c1c; color:#fff; border:1px solid #444; padding:1rem; border-radius:6px; margin-top:1rem;}
+  #specificGymNameContainer{margin-top:1rem; display:block;}
+  #specificGymNameContainer label{margin-bottom:.25rem;}
 </style>
 
-<!-- Sortable.js pro drag&drop uvnitř dnů (používá ho planLogic.js) -->
+<!-- Sortable.js (pro DnD v planLogic.js) -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
@@ -68,7 +43,8 @@
       <option value="1-2">1–2</option>
       <option value="3-4">3–4</option>
       <option value="5">5</option>
-      <option value="5plus">5+</option>
+      <!-- FIX: klíč v datech je "5+" → používej stejné value -->
+      <option value="5+">5+</option>
     </select>
 
     <label for="equipment">Equipment Access:</label>
@@ -115,7 +91,17 @@
   </div>
 </div>
 
-<!-- Hlavní modul – volá generateTrainingPlan z planLogic.js -->
+<!-- 1) BRIDGE: načteme local data jako ES modul a dáme je na window,
+        aby je planLogic.js mohl použít i když čeká window.* -->
+<script type="module">
+  import conditioningFrequencies from './conditioningLocal.js';   // musí exportovat default/pojmenovaný objekt
+  // pokud exportuje "export const conditioningFrequencies = {...}", můžeš:
+  // import { conditioningFrequencies } from './conditioningLocal.js';
+  window.conditioningFrequencies = conditioningFrequencies;
+  console.log('[conditioning] loaded', conditioningFrequencies && Object.keys(conditioningFrequencies));
+</script>
+
+<!-- 2) Hlavní modul – spouští logiku, až když jsou data na window -->
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
@@ -131,34 +117,19 @@ function init() {
   const specificGymNameContainer = document.getElementById('specificGymNameContainer');
   const specificGymNameInput = document.getElementById('specificGymName');
 
-  // Přidání gym input pole
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'gymName';
-    input.placeholder = 'Your gym...';
-    input.value = value;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-btn';
-    removeBtn.textContent = '✖';
+    const input = Object.assign(document.createElement('input'), { type:'text', className:'gymName', placeholder:'Your gym...', value });
+    const removeBtn = Object.assign(document.createElement('button'), { className:'remove-btn', textContent:'✖' });
     removeBtn.onclick = () => wrapper.remove();
-
-    wrapper.appendChild(input);
-    wrapper.appendChild(removeBtn);
+    wrapper.append(input, removeBtn);
     gymFields.appendChild(wrapper);
   }
-
-  // první pole při načtení
   addGymField();
 
-  // tlačítko „Add another gym“
   document.getElementById('addGymButton').addEventListener('click', () => addGymField());
 
-  // zobrazení/skrytí „Specific Gym Name“
   equipment.addEventListener('change', () => {
     if (equipment.value === 'other') {
       specificGymNameContainer.style.display = 'block';
@@ -169,29 +140,19 @@ function init() {
   });
   equipment.dispatchEvent(new Event('change'));
 
-  // blok Enteru v gym inputech
   document.getElementById('trackerForm').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.target.classList.contains('gymName') || e.target.id === 'specificGymName')) {
-      e.preventDefault();
-    }
+    if (e.key === 'Enter' && (e.target.classList.contains('gymName') || e.target.id === 'specificGymName')) e.preventDefault();
   });
 
-  // === Globální updater textarea, aby ho viděl planLogic.js ===
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
     if (!container || !textarea) return;
-
     let output = '';
     const days = container.querySelectorAll('.day');
-    if (!days || days.length === 0) {
-      textarea.value = '';
-      return;
-    }
-
+    if (!days || days.length === 0) { textarea.value = ''; return; }
     const gymNames = window.formData?.gymNames?.join(', ') || 'None';
     output += `Gyms: ${gymNames}\n\n`;
-
     days.forEach((day, i) => {
       const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
       output += `${title}\n`;
@@ -203,37 +164,29 @@ function init() {
       });
       output += '\n';
     });
-
     textarea.value = output.trim();
   }
-  // EXPOSE:
   window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
-  // Submit – generování plánu
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
-      .map(x => x.value.trim())
-      .filter(Boolean);
+      .map(x => x.value.trim()).filter(Boolean);
 
-    // „Other Gym“ předřadíme jako první
     const equipmentValueRaw = equipment.value;
     const specificGymName = specificGymNameInput.value.trim();
-
     if (equipmentValueRaw === 'other') {
       if (!specificGymName) return alert('Please specify the name of your other gym.');
       gymNames.unshift(specificGymName);
     }
     if (!gymNames.length) return alert('Add at least one gym.');
 
-    // POZOR: pro generování mapujeme "other" → "gym", aby router v planLogic fungoval
-    const equipmentValue = (equipmentValueRaw === 'other') ? 'gym' : equipmentValueRaw;
-
+    // mapuj „other“ → „gym“
     const data = {
       goal: goal.value,
-      frequency: frequency.value,
-      equipment: equipmentValue,
+      frequency: frequency.value,            // teď bude "5+" (shoda s daty)
+      equipment: (equipmentValueRaw === 'other') ? 'gym' : equipmentValueRaw,
       experience: experience.value,
       fixed: fixed.value,
       gymNames,
@@ -244,9 +197,13 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
+      // sanity check – data už musí být na window z předchozího modulu
+      if (!window.conditioningFrequencies) {
+        throw new Error('Conditioning data not found after script load');
+      }
+
       await generateTrainingPlan(data);
 
-      // necháme planLogic vyrenderovat a poté jen obnovíme textarea
       setTimeout(() => {
         updateTrainingPlanContentInTextarea();
         document.getElementById('outputBox').style.display = 'block';
@@ -258,7 +215,6 @@ function init() {
     }
   });
 
-  // Export Plan
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
@@ -268,16 +224,13 @@ function init() {
 
     const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
     const gymNames = Array.from(document.querySelectorAll('.gymName'))
-      .map(x => x.value.trim())
-      .filter(Boolean);
+      .map(x => x.value.trim()).filter(Boolean);
     const userName = email.value.trim() || "Anonymous";
 
-    // Pokud je „other“, už jsme přemapovali při generování; tady jen zajistíme,
-    // že se název přidal do seznamu gymů:
     const equipmentValueRaw = equipment.value;
     const specificGymName = specificGymNameInput.value.trim();
-    if (equipmentValueRaw === 'other' && specificGymName) {
-      if (!gymNames.includes(specificGymName)) gymNames.unshift(specificGymName);
+    if (equipmentValueRaw === 'other' && specificGymName && !gymNames.includes(specificGymName)) {
+      gymNames.unshift(specificGymName);
     }
 
     if (!trainingPlan) {
@@ -288,14 +241,12 @@ function init() {
 
     try {
       finalStatus.textContent = '📤 Uploading plan...';
-      const res = await fetch(apiUrl, {
+      const res = await fetch('https://webbyfe-proxy.quiet-king-42b1.workers.dev/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userName, trainingPlan, gymNames })
       });
-
       const json = await res.json();
-
       if (json.success) {
         finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
         finalStatus.style.color = '#00ff88';
@@ -307,12 +258,8 @@ function init() {
       finalStatus.style.color = '#ff3333';
     }
   });
-
-  // POZOR: Nepřidávám žádný vlastní DnD nebo alt-button listener.
-  // Ty řeší planLogic.js (po každém renderu volá náš window.updateTrainingPlanContentInTextarea()).
 }
 
-// Spusť init spolehlivě, i když DOMContentLoaded už proběhl
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
