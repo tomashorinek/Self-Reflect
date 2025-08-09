@@ -4,29 +4,85 @@ import { adaptConditioningPlan } from "./conditioningAdapter.js";
 
 let currentPlan = null;
 
-// ---------------- Loader: conditioning ----------------
-function loadConditioningData() {
-  return new Promise((resolve, reject) => {
-    if (window.conditioningFrequencies) return resolve();
+async function loadConditioningData() {
+  if (window.conditioningFrequencies) return;
 
-    const script = document.createElement("script");
-    script.src = "https://www.webbyfe.com/conditioningFrequencies.js";
-    script.onload = async () => {
-      try {
-        if (window.conditioningFrequencies) return resolve();
-        if (window.loadConditioningData) {
-          await window.loadConditioningData();
-          if (window.conditioningFrequencies) return resolve();
-        }
-        reject("Conditioning data not found after script load");
-      } catch (e) {
-        reject(e?.message || e);
-      }
+  const CF_VERSION = "gym_v2_2025-08-09_02"; // kdykoli změň -> vynucený nový fetch
+  const url = `https://www.webbyfe.com/conditioningFrequencies.js?v=${encodeURIComponent(CF_VERSION)}`;
+
+  console.log("[CF] loading", url);
+
+  // vytvoř skript
+  const script = document.createElement("script");
+  script.src = url;
+
+  const onloadPromise = new Promise((resolve, reject) => {
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("network or CORS error"));
+  });
+
+  document.head.appendChild(script);
+
+  try {
+    await onloadPromise;
+  } catch (e) {
+    console.error("[CF] onerror:", e);
+    return tryLocalFallback(e);
+  }
+
+  // malý polling – kdyby IIFE nastavovala globál později
+  const ok = await waitFor(() => !!window.conditioningFrequencies || !!window.loadConditioningData, 2000, 50);
+
+  // když je tu pouze loader, zavolej ho
+  if (!window.conditioningFrequencies && typeof window.loadConditioningData === "function") {
+    try {
+      await window.loadConditioningData();
+    } catch (e) {
+      console.warn("[CF] loadConditioningData() threw:", e);
+    }
+  }
+
+  if (!window.conditioningFrequencies) {
+    console.warn("[CF] still missing after script load. Trying local fallback…");
+    return tryLocalFallback(new Error("Conditioning data not found after script load"));
+  }
+
+  console.log("[CF] ready. ver:", window.__COND_VER__ || "unknown",
+              "branches:", Object.keys(window.conditioningFrequencies || {}));
+}
+
+// util: polling
+function waitFor(fn, timeoutMs = 1000, stepMs = 50) {
+  return new Promise(resolve => {
+    const t0 = Date.now();
+    const tick = () => {
+      if (fn()) return resolve(true);
+      if (Date.now() - t0 >= timeoutMs) return resolve(false);
+      setTimeout(tick, stepMs);
     };
-    script.onerror = () => reject("Failed to load conditioning data script");
-    document.head.appendChild(script);
+    tick();
   });
 }
+
+// fallback: zkus lokální modul (měj kopii souboru vedle stránky)
+async function tryLocalFallback(reason) {
+  console.warn("[CF] fallback to ./conditioningFrequencies.local.js because:", reason?.message || reason);
+  try {
+    const mod = await import("./conditioningFrequencies.local.js");
+    // ber default nebo pojmenovaný export
+    const data = mod.default || mod.conditioningFrequencies || mod;
+    if (data && typeof data === "object") {
+      window.conditioningFrequencies = data;
+      console.log("[CF] loaded from local module. branches:", Object.keys(data));
+      return;
+    }
+    throw new Error("local module did not export data");
+  } catch (e) {
+    console.error("[CF] local fallback failed:", e);
+    throw new Error("Conditioning data could not be loaded from remote or local source.");
+  }
+}
+
 
 // ---------------- Loader: trainingData ----------------
 function loadTrainingData(goal, equipment) {
