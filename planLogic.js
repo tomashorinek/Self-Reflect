@@ -68,23 +68,55 @@ function waitFor(fn, timeoutMs = 1000, stepMs = 50) {
   });
 }
 
-// fallback: zkus lokální modul (měj kopii souboru vedle stránky)
+// fallback: zkus lokální modul i klasický <script>
 async function tryLocalFallback(reason) {
   console.warn("[CF] fallback to ./conditioningLocal.js because:", reason?.message || reason);
+
+  const tryCheck = (label) => {
+    if (window.conditioningFrequencies && typeof window.conditioningFrequencies === "object") {
+      console.log(`[CF] ${label}: using window.conditioningFrequencies. branches:`,
+        Object.keys(window.conditioningFrequencies || {}));
+      return true;
+    }
+    return false;
+  };
+
+  // 0) Pokud už to někdo načetl (třeba training.html), prostě skonči.
+  if (tryCheck("pre-existing")) return;
+
+  // 1) Zkus ESM import (spustí soubor; pokud nemá exporty, může i tak nastavit window.*)
   try {
     const mod = await import("./conditioningLocal.js");
-    // ber default nebo pojmenovaný export
-    const data = mod.default || mod.conditioningFrequencies || mod;
+    // a) někdy soubor při importu jen nastaví window.*
+    if (tryCheck("after ESM import")) return;
+
+    // b) nebo exportuje pojmenovaně/defaulťák
+    const data = mod?.default || mod?.conditioningFrequencies;
     if (data && typeof data === "object") {
       window.conditioningFrequencies = data;
-      console.log("[CF] loaded from local module. branches:", Object.keys(data));
+      console.log("[CF] loaded from ESM export. branches:", Object.keys(data));
       return;
     }
-    throw new Error("local module did not export data");
   } catch (e) {
-    console.error("[CF] local fallback failed:", e);
-    throw new Error("Conditioning data could not be loaded from remote or local source.");
+    console.warn("[CF] ESM import failed, will try classic script:", e);
   }
+
+  // 2) Klasický <script> inject jako poslední záchrana
+  try {
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "./conditioningLocal.js";
+      s.onload = () => res();
+      s.onerror = () => rej(new Error("classic script load error"));
+      document.head.appendChild(s);
+    });
+    if (tryCheck("after classic script")) return;
+  } catch (e) {
+    console.warn("[CF] classic script load failed:", e);
+  }
+
+  // 3) Když ani to nevyšlo, failni s jasnou hláškou
+  throw new Error("Conditioning data could not be loaded from remote or local source.");
 }
 
 
