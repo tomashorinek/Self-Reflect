@@ -298,6 +298,7 @@ function renderPlan(plan, freq, formData) {
         current.alt.push(current.name);
         current.name = next;
         renderPlan(plan, freq, formData);
+        
       }
     });
   });
@@ -305,6 +306,12 @@ function renderPlan(plan, freq, formData) {
   if (typeof window.updateTrainingPlanContentInTextarea === "function") {
     window.updateTrainingPlanContentInTextarea();
   }
+// === persist & expose for export ===
+try {
+  window.currentPlanJSON = JSON.stringify(plan);
+  localStorage.setItem('lastPlan', window.currentPlanJSON);
+  if (window.formData) localStorage.setItem('lastFormData', JSON.stringify(window.formData));
+} catch {}
 }
 
 // ---------------- Main router ----------------
