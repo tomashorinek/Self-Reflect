@@ -105,10 +105,8 @@ function init() {
     if (lastPlan && lastForm) {
       window.currentPlanJSON = lastPlan;
       window.formData = JSON.parse(lastForm);
-      // zobraz uložený text, ať má uživatel něco v textarea i po refreshi
       const textarea = document.getElementById('trainingPlanContent');
       if (textarea) {
-        // jen orientační info; skutečný DOM plánu se znovu vyrenderuje po "Generate"
         textarea.value = 'Last plan loaded from cache. Click "Generate" to rebuild view.';
         document.getElementById('outputBox').style.display = 'block';
       }
@@ -128,17 +126,24 @@ function init() {
 
   // UI helpers
   function addGymField(value = '') {
+    if (!gymFields) return;
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
-    const input = Object.assign(document.createElement('input'), { type:'text', className:'gymName', placeholder:'Your gym...', value });
-    const removeBtn = Object.assign(document.createElement('button'), { className:'remove-btn', textContent:'✖' });
+    const input = Object.assign(document.createElement('input'), {
+      type:'text', className:'gymName', placeholder:'Your gym...', value
+    });
+    const removeBtn = Object.assign(document.createElement('button'), {
+      type:'button', className:'remove-btn', textContent:'✖'
+    });
     removeBtn.onclick = () => wrapper.remove();
     wrapper.append(input, removeBtn);
     gymFields.appendChild(wrapper);
   }
+
+  // první pole hned po startu
   addGymField();
 
-  document.getElementById('addGymButton').addEventListener('click', () => addGymField());
+  document.getElementById('addGymButton')?.addEventListener('click', () => addGymField());
 
   equipment.addEventListener('change', () => {
     if (equipment.value === 'other') {
@@ -190,8 +195,9 @@ function init() {
     }
   })();
 
-  // ... zbytek tvého init() (textarea updater, submit handler, export handler atd.) beze změny ...
+  // …(zbytek tvého initu – textarea updater, submit handler, export handler atd.)
 }
+
 
 
   // textarea updater
