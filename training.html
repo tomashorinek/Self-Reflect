@@ -153,6 +153,8 @@ function init() {
       specificGymNameInput.value = '';
     }
   });
+  // ⬅️ zobraz/skrýj „Other Gym“ hned po načtení
+  equipment.dispatchEvent(new Event('change'));
 
   // === Copy tlačítka před "Export Plan" ===
   (function ensureCopyButtons() {
@@ -195,12 +197,7 @@ function init() {
     }
   })();
 
-  // …(zbytek tvého initu – textarea updater, submit handler, export handler atd.)
-}
-
-
-
-  // textarea updater
+  // === textarea updater (necháme ho v initu, ať je na jistotu k dispozici)
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
@@ -229,7 +226,7 @@ function init() {
   }
   window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
-  // submit → generate
+  // === submit → generate
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -245,7 +242,6 @@ function init() {
     }
     if (!gymNames.length) return alert('Add at least one gym.');
 
-    // mapuj „other“ → „gym“
     const data = {
       goal: goal.value,
       frequency: frequency.value,                  // "1-2" | "3-4" | "5" | "5+"
@@ -260,11 +256,6 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      // ❌ odstraněna globální kontrola na conditioningFrequencies
-      // if (data.goal === 'Improve conditioning' && !window.conditioningFrequencies) {
-      //   alert('⚠️ Conditioning data not found. Check conditioningLocal.js or network.');
-      // }
-
       await generateTrainingPlan(data);
 
       setTimeout(() => {
@@ -278,7 +269,7 @@ function init() {
     }
   });
 
-  // Export / upload
+  // === Export / upload
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
@@ -323,6 +314,7 @@ function init() {
     }
   });
 }
+
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
