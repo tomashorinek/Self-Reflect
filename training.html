@@ -98,6 +98,23 @@
 import { generateTrainingPlan } from './planLogic.js';
 
 function init() {
+  // === restore last state (optional) ===
+  try {
+    const lastPlan = localStorage.getItem('lastPlan');
+    const lastForm = localStorage.getItem('lastFormData');
+    if (lastPlan && lastForm) {
+      window.currentPlanJSON = lastPlan;
+      window.formData = JSON.parse(lastForm);
+      // zobraz uložený text, ať má uživatel něco v textarea i po refreshi
+      const textarea = document.getElementById('trainingPlanContent');
+      if (textarea) {
+        // jen orientační info; skutečný DOM plánu se znovu vyrenderuje po "Generate"
+        textarea.value = 'Last plan loaded from cache. Click "Generate" to rebuild view.';
+        document.getElementById('outputBox').style.display = 'block';
+      }
+    }
+  } catch {}
+
   const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/';
   const goal = document.getElementById('goal');
   const frequency = document.getElementById('frequency');
@@ -131,12 +148,51 @@ function init() {
       specificGymNameInput.value = '';
     }
   });
-  equipment.dispatchEvent(new Event('change'));
 
-  // blok Enteru v gym inputech
-  document.getElementById('trackerForm').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && (e.target.classList.contains('gymName') || e.target.id === 'specificGymName')) e.preventDefault();
-  });
+  // === Copy tlačítka před "Export Plan" ===
+  (function ensureCopyButtons() {
+    const exportBtn = document.getElementById('continueButton');
+    if (!exportBtn) return;
+
+    if (!document.getElementById('copyBtn')) {
+      exportBtn.insertAdjacentHTML('beforebegin', '<button id="copyBtn" type="button">Copy to clipboard</button>');
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.addEventListener('click', async () => {
+        const ta = document.getElementById('trainingPlanContent');
+        const txt = (ta && ta.value || '').trim();
+        if (!txt) { alert('Nothing to copy — generate a plan first.'); return; }
+        try {
+          await navigator.clipboard.writeText(txt);
+          copyBtn.textContent = 'Copied ✓';
+          setTimeout(() => (copyBtn.textContent = 'Copy to clipboard'), 1500);
+        } catch (e) {
+          console.error(e);
+          alert('Copy failed: ' + (e?.message || e));
+        }
+      });
+    }
+
+    if (!document.getElementById('copyJsonBtn')) {
+      exportBtn.insertAdjacentHTML('beforebegin', '<button id="copyJsonBtn" type="button">Copy JSON</button>');
+      const copyJsonBtn = document.getElementById('copyJsonBtn');
+      copyJsonBtn.addEventListener('click', async () => {
+        const json = window.currentPlanJSON || '';
+        if (!json) { alert('No JSON available — generate a plan first.'); return; }
+        try {
+          await navigator.clipboard.writeText(json);
+          copyJsonBtn.textContent = 'JSON copied ✓';
+          setTimeout(() => (copyJsonBtn.textContent = 'Copy JSON'), 1500);
+        } catch (e) {
+          console.error(e);
+          alert('Copy failed: ' + (e?.message || e));
+        }
+      });
+    }
+  })();
+
+  // ... zbytek tvého init() (textarea updater, submit handler, export handler atd.) beze změny ...
+}
+
 
   // textarea updater
   function updateTrainingPlanContentInTextarea() {
