@@ -18,11 +18,15 @@
   .exercise{padding:.5rem; margin-bottom:.5rem; background:#333; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:grab;}
   .alt-button{cursor:pointer; margin-left:1rem;}
   #trainingPlanContent{width:100%; height:300px; background:#1c1c1c; color:#fff; border:1px solid #444; padding:1rem; border-radius:6px; margin-top:1rem;}
-  #specificGymNameContainer{margin-top:1rem; display:none;}
-  #specificGymNameContainer label{margin-bottom:.25rem;}
+  .row{ margin:.5rem 0 0; }
+  .inline { display:flex; gap:1rem; align-items:center; }
+  .inline label { margin:0; }
+  .advice{ background:#2a210a; border:1px solid #5a3; border-radius:8px; padding:12px; margin-top:12px; }
+  .advice strong{ color:#ffd27a; }
+  #gymsBlock{ margin-top:1rem; }
 </style>
 
-<!-- Sortable.js (pro DnD v planLogic.js) -->
+<!-- Sortable.js (for DnD in planLogic.js) -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
@@ -46,33 +50,32 @@
       <option value="5+">5+</option>
     </select>
 
-    <label for="equipment">Equipment Access:</label>
-    <select id="equipment">
-      <option value="gym">Gym</option>
-      <option value="home">Home</option>
-    </select>
-
-    <div id="specificGymNameContainer">
-      <label for="specificGymName">Specify Other Gym Name:</label>
-      <input type="text" id="specificGymName" placeholder="E.g., Local Fitness, My Garage" />
+    <label>Location</label>
+    <div class="inline">
+      <label><input type="radio" name="loc" value="gym" checked> Gym</label>
+      <label><input type="radio" name="loc" value="home"> Home</label>
     </div>
 
-    <label for="experience">Training experience:</label>
-    <select id="experience">
-      <option value="Beginner">Beginner</option>
-      <option value="Intermediate">Intermediate</option>
-      <option value="Advanced">Advanced</option>
-    </select>
+    <div class="advice">
+      <strong>Starter advice</strong><br/>
+      For the first 4–8 weeks we recommend emphasizing <em>more isolated, machine-based</em>
+      movements (e.g., chest press, row machine, pulldown, leg extension/curl, lateral raise).
+      This reduces coordination demands, makes it easier to feel the target muscle, and helps you
+      practice full ROM and controlled tempo. Gradually introduce more free-weight compounds as
+      your control and confidence grow.
+    </div>
 
-    <label for="fixed">Fixed schedule?</label>
-    <select id="fixed">
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
+    <div class="row">
+      <label class="inline"><input id="preferMachines" type="checkbox" checked>
+        Prefer machines in the first 4–8 weeks
+      </label>
+    </div>
 
-    <label>Your Gyms:</label>
-    <div id="gymFields"></div>
-    <button type="button" id="addGymButton">➕ Add another gym</button>
+    <div id="gymsBlock">
+      <label>Your Gyms:</label>
+      <div id="gymFields"></div>
+      <button type="button" id="addGymButton">➕ Add another gym</button>
+    </div>
 
     <label for="email">Your email (optional):</label>
     <input type="email" id="email" placeholder="you@example.com" />
@@ -89,10 +92,10 @@
   </div>
 </div>
 
-<!-- 👉 conditioningLocal.js musí jen nastavit window.conditioningFrequencies = { bodyweight, gym } -->
+<!-- conditioningLocal.js only needs to set window.conditioningFrequencies = { bodyweight, gym } -->
 <script src="./conditioningLocal.js"></script>
 
-<!-- Hlavní modul -->
+<!-- Main module -->
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
@@ -115,17 +118,16 @@ function init() {
   const apiUrl = 'https://webbyfe-proxy.quiet-king-42b1.workers.dev/';
   const goal = document.getElementById('goal');
   const frequency = document.getElementById('frequency');
-  const equipment = document.getElementById('equipment');
-  const experience = document.getElementById('experience');
-  const fixed = document.getElementById('fixed');
   const email = document.getElementById('email');
+
   const gymFields = document.getElementById('gymFields');
-  const specificGymNameContainer = document.getElementById('specificGymNameContainer');
-  const specificGymNameInput = document.getElementById('specificGymName');
+  const addGymButton = document.getElementById('addGymButton');
+  const gymsBlock = document.getElementById('gymsBlock');
+  const preferMachinesEl = document.getElementById('preferMachines');
+  const locRadios = Array.from(document.querySelectorAll('input[name="loc"]'));
 
   // UI helpers
   function addGymField(value = '') {
-    if (!gymFields) return;
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
     const input = Object.assign(document.createElement('input'), {
@@ -139,23 +141,25 @@ function init() {
     gymFields.appendChild(wrapper);
   }
 
-  // první pole hned po startu
+  // first input on start (for Gym mode)
   addGymField();
 
-  document.getElementById('addGymButton')?.addEventListener('click', () => addGymField());
-
-  equipment.addEventListener('change', () => {
-    if (equipment.value === 'other') {
-      specificGymNameContainer.style.display = 'block';
+  function applyLocationUI(){
+    const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
+    if (loc === 'home') {
+      gymsBlock.style.display = 'none';
     } else {
-      specificGymNameContainer.style.display = 'none';
-      specificGymNameInput.value = '';
+      gymsBlock.style.display = '';
+      // ensure at least one field exists
+      if (!gymFields.querySelector('.gymName')) addGymField();
     }
-  });
-  // ⬅️ zobraz/skrýj „Other Gym“ hned po načtení
-  equipment.dispatchEvent(new Event('change'));
+  }
+  locRadios.forEach(r => r.addEventListener('change', applyLocationUI));
+  applyLocationUI();
 
-  // === Copy tlačítka před "Export Plan" ===
+  addGymButton?.addEventListener('click', () => addGymField());
+
+  // === Copy buttons before "Export Plan" ===
   (function ensureCopyButtons() {
     const exportBtn = document.getElementById('continueButton');
     if (!exportBtn) return;
@@ -196,7 +200,7 @@ function init() {
     }
   })();
 
-  // === textarea updater (necháme ho v initu, ať je na jistotu k dispozici)
+  // === textarea updater ===
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
@@ -229,33 +233,38 @@ function init() {
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const gymNames = Array.from(document.querySelectorAll('.gymName'))
-      .map(x => x.value.trim()).filter(Boolean);
+    const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
 
-    const equipmentValueRaw = equipment.value;
-    const specificGymName = specificGymNameInput.value.trim();
-
-    if (equipmentValueRaw === 'other') {
-      if (!specificGymName) return alert('Please specify the name of your other gym.');
-      gymNames.unshift(specificGymName); // Other gym first
+    // collect gym names (Gym mode) or force ["Home"] (Home mode)
+    let gymNames = [];
+    if (loc === 'home') {
+      gymNames = ['Home'];
+    } else {
+      gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
+      if (!gymNames.length) return alert('Add at least one gym.');
     }
-    if (!gymNames.length) return alert('Add at least one gym.');
 
     const data = {
       goal: goal.value,
-      frequency: frequency.value,                  // "1-2" | "3-4" | "5" | "5+"
-      equipment: (equipmentValueRaw === 'other') ? 'gym' : equipmentValueRaw,
-      experience: experience.value,
-      fixed: fixed.value,
+      frequency: frequency.value,            // "1-2" | "3-4" | "5" | "5+"
+      equipment: (loc === 'home') ? 'home' : 'gym',
+      // keep legacy keys so planLogic.js won’t break if it expects them
+      experience: 'N/A',
+      fixed: 'Yes',
       gymNames,
-      email: email.value.trim()
+      email: email.value.trim(),
+      meta: {
+        trainingLocation: loc,               // 'gym' | 'home'
+        gymName: (loc === 'home') ? 'Home' : (gymNames[0] || 'My Gym'),
+        preferMachinesFirstBlock: !!preferMachinesEl.checked
+      }
     };
 
     try {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      await generateTrainingPlan(data);
+      await generateTrainingPlan(data);      // your existing generator
 
       setTimeout(() => {
         updateTrainingPlanContentInTextarea();
@@ -277,21 +286,23 @@ function init() {
     updateTrainingPlanContentInTextarea();
 
     const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
-    const gymNames = Array.from(document.querySelectorAll('.gymName'))
-      .map(x => x.value.trim()).filter(Boolean);
-    const userName = email.value.trim() || "Anonymous";
-
-    const equipmentValueRaw = equipment.value;
-    const specificGymName = specificGymNameInput.value.trim();
-    if (equipmentValueRaw === 'other' && specificGymName && !gymNames.includes(specificGymName)) {
-      gymNames.unshift(specificGymName);
-    }
-
     if (!trainingPlan) {
       finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
       finalStatus.style.color = '#ff3333';
       return;
     }
+
+    // recompute gym names at export time (keeps it robust)
+    const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
+    let gymNames = [];
+    if (loc === 'home') {
+      gymNames = ['Home'];
+    } else {
+      gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
+      if (!gymNames.length) gymNames = ['My Gym'];
+    }
+
+    const userName = email.value.trim() || "Anonymous";
 
     try {
       finalStatus.textContent = '📤 Uploading plan...';
@@ -314,14 +325,12 @@ function init() {
   });
 }
 
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
 }
 
-// jen pro debug:
 console.log('[conditioning] loaded', window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 </script>
 </body>
