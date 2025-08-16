@@ -1,18 +1,20 @@
-// planLogic.js — clean ES module
-// -------------------------------------------------
+// planLogic.js — clean ES module (with machine-first bias)
+// -------------------------------------------------------
 import { adaptConditioningPlan } from "./conditioningAdapter.js";
 
 let currentPlan = null;
 
+/* ===========================
+   Conditioning data loader
+   =========================== */
 async function loadConditioningData() {
   if (window.conditioningFrequencies) return;
 
-  const CF_VERSION = "gym_v2_2025-08-09_02"; // kdykoli změň -> vynucený nový fetch
+  const CF_VERSION = "gym_v2_2025-08-09_02";
   const url = `https://www.webbyfe.com/conditioningFrequencies.js?v=${encodeURIComponent(CF_VERSION)}`;
 
   console.log("[CF] loading", url);
 
-  // vytvoř skript
   const script = document.createElement("script");
   script.src = url;
 
@@ -30,10 +32,8 @@ async function loadConditioningData() {
     return tryLocalFallback(e);
   }
 
-  // malý polling – kdyby IIFE nastavovala globál později
   const ok = await waitFor(() => !!window.conditioningFrequencies || !!window.loadConditioningData, 2000, 50);
 
-  // když je tu pouze loader, zavolej ho
   if (!window.conditioningFrequencies && typeof window.loadConditioningData === "function") {
     try {
       await window.loadConditioningData();
@@ -68,7 +68,7 @@ function waitFor(fn, timeoutMs = 1000, stepMs = 50) {
   });
 }
 
-// fallback: zkus lokální modul i klasický <script>
+// fallback to local
 async function tryLocalFallback(reason) {
   console.warn("[CF] fallback to ./conditioningLocal.js because:", reason?.message || reason);
 
@@ -81,16 +81,11 @@ async function tryLocalFallback(reason) {
     return false;
   };
 
-  // 0) Pokud už to někdo načetl (třeba training.html), prostě skonči.
   if (tryCheck("pre-existing")) return;
 
-  // 1) Zkus ESM import (spustí soubor; pokud nemá exporty, může i tak nastavit window.*)
   try {
     const mod = await import("./conditioningLocal.js");
-    // a) někdy soubor při importu jen nastaví window.*
     if (tryCheck("after ESM import")) return;
-
-    // b) nebo exportuje pojmenovaně/defaulťák
     const data = mod?.default || mod?.conditioningFrequencies;
     if (data && typeof data === "object") {
       window.conditioningFrequencies = data;
@@ -101,7 +96,6 @@ async function tryLocalFallback(reason) {
     console.warn("[CF] ESM import failed, will try classic script:", e);
   }
 
-  // 2) Klasický <script> inject jako poslední záchrana
   try {
     await new Promise((res, rej) => {
       const s = document.createElement("script");
@@ -115,12 +109,12 @@ async function tryLocalFallback(reason) {
     console.warn("[CF] classic script load failed:", e);
   }
 
-  // 3) Když ani to nevyšlo, failni s jasnou hláškou
   throw new Error("Conditioning data could not be loaded from remote or local source.");
 }
 
-
-// ---------------- Loader: trainingData ----------------
+/* ===========================
+   Training data loader
+   =========================== */
 function loadTrainingData(goal, equipment) {
   return new Promise((resolve, reject) => {
     let globalName, src, modulePath, useScript = true;
@@ -178,7 +172,9 @@ function loadTrainingData(goal, equipment) {
   });
 }
 
-// ---------------- Helpers ----------------
+/* ===========================
+   Helpers (general)
+   =========================== */
 function pickFreq(obj, key) {
   return obj?.[key] || obj?.gym?.[key] || obj?.home?.[key] || null;
 }
@@ -194,7 +190,6 @@ function extendConditioningAlternatives(plan) {
     "Plank Series": ["Side Plank", "Bird Dog"],
     "Jump Rope": ["High Knees", "Jumping Jacks"]
   };
-  // two-way
   Object.entries(baseAltMap).forEach(([main, alts]) => {
     alts.forEach(alt => {
       if (!baseAltMap[alt]) baseAltMap[alt] = alts.filter(a => a !== alt).concat(main);
@@ -230,7 +225,80 @@ function enforceUniqueExercises(plan) {
   });
 }
 
-// ---------------- Render ----------------
+/* ===========================
+   Machine-first bias helpers
+   =========================== */
+function isMachineLikeName(name) {
+  if (!name) return false;
+  return /\b(machine|smith|cable|pulldown|lat pull|leg press|hack|pec deck|assisted|hammer strength|selectorized|plate[- ]loaded|lever)\b/i
+    .test(String(name));
+}
+
+function findMachineAltFromList(alts) {
+  if (!Array.isArray(alts)) return null;
+  return alts.find(isMachineLikeName) || null;
+}
+
+const _machineFallbacks = [
+  { re: /\bfront|back\b.*\bsquat\b|\bsquat\b/i, to: "Leg Press" },
+  { re: /\bbench\b|\bchest\b.*\bpress\b/i, to: "Chest Press Machine" },
+  { re: /\bohp\b|\boverhead\b.*\bpress\b|\bshoulder\b.*\bpress\b/i, to: "Shoulder Press Machine" },
+  { re: /\b(row|pendlay)\b/i, to: "Seated Row Machine" },
+  { re: /\bpull-?up\b|\bchin-?up\b/i, to: "Lat Pulldown" },
+  { re: /\bdeadlift\b|\bromanian\b|\brdl\b/i, to: "Hamstring Curl Machine" },
+  { re: /\blunge\b/i, to: "Smith Machine Lunge" },
+  { re: /\blateral raise\b|\bside delt\b/i, to: "Machine Lateral Raise" },
+  { re: /\brear delt\b|\breverse fly\b/i, to: "Reverse Pec Deck" },
+  { re: /\bcurl\b/i, to: "Cable Curl" },
+  { re: /\btriceps\b|\bskullcrusher\b|\bextension\b/i, to: "Cable Pressdown" },
+];
+
+function getFallbackMachine(name) {
+  if (!name) return null;
+  for (const { re, to } of _machineFallbacks) {
+    if (re.test(String(name))) return to;
+  }
+  return null;
+}
+
+/**
+ * Mutates `plan`: if meta.preferMachinesFirstBlock && equipment === 'gym',
+ * prefer machine-based variants:
+ *  1) swap to a machine-like `alt` if present
+ *  2) otherwise use a reasonable fallback (push original into `alt`)
+ */
+function applyMachineBias(plan, meta, equipment) {
+  if (!meta || !meta.preferMachinesFirstBlock) return;
+  if (equipment === "home") return;
+
+  Object.values(plan).forEach((dayExercises) => {
+    if (!Array.isArray(dayExercises)) return;
+    dayExercises.forEach((ex) => {
+      if (!ex || !ex.name) return;
+
+      if (isMachineLikeName(ex.name)) return;
+
+      const mAlt = findMachineAltFromList(ex.alt);
+      if (mAlt) {
+        ex.alt = (ex.alt || []).filter(a => a !== mAlt);
+        ex.alt.push(ex.name);
+        ex.name = mAlt;
+        return;
+      }
+
+      const fallback = getFallbackMachine(ex.name);
+      if (fallback) {
+        ex.alt = ex.alt || [];
+        ex.alt.push(ex.name);
+        ex.name = fallback;
+      }
+    });
+  });
+}
+
+/* ===========================
+   Render
+   =========================== */
 function renderPlan(plan, freq, formData) {
   const container = document.getElementById("training-container");
   if (!container) return console.error("Container #training-container not found");
@@ -298,7 +366,6 @@ function renderPlan(plan, freq, formData) {
         current.alt.push(current.name);
         current.name = next;
         renderPlan(plan, freq, formData);
-        
       }
     });
   });
@@ -306,15 +373,18 @@ function renderPlan(plan, freq, formData) {
   if (typeof window.updateTrainingPlanContentInTextarea === "function") {
     window.updateTrainingPlanContentInTextarea();
   }
-// === persist & expose for export ===
-try {
-  window.currentPlanJSON = JSON.stringify(plan);
-  localStorage.setItem('lastPlan', window.currentPlanJSON);
-  if (window.formData) localStorage.setItem('lastFormData', JSON.stringify(window.formData));
-} catch {}
+
+  // persist
+  try {
+    window.currentPlanJSON = JSON.stringify(plan);
+    localStorage.setItem("lastPlan", window.currentPlanJSON);
+    if (window.formData) localStorage.setItem("lastFormData", JSON.stringify(window.formData));
+  } catch {}
 }
 
-// ---------------- Main router ----------------
+/* ===========================
+   Main router
+   =========================== */
 export async function generateTrainingPlan(formData) {
   console.clear();
   console.log("generateTrainingPlan()", JSON.parse(JSON.stringify(formData)));
@@ -331,14 +401,12 @@ export async function generateTrainingPlan(formData) {
       window.conditioningFrequencies?.[formData.equipment]?.[frequencyKey] ??
       null;
 
-    // single array -> wrap to one day
     if (Array.isArray(basePlanRaw)) basePlanRaw = { "Full Body": basePlanRaw };
     if (!basePlanRaw) {
       alert("⚠️ Conditioning plan not found");
       return;
     }
 
-    // normalize rich day objects -> arrays of {name, sets, alt}
     const normalized = adaptConditioningPlan(basePlanRaw);
 
     currentPlan = JSON.parse(JSON.stringify(normalized));
@@ -380,7 +448,16 @@ export async function generateTrainingPlan(formData) {
 
   currentPlan = JSON.parse(JSON.stringify(basePlan));
 
-  // ---- Decorace pro Lose fat ----
+  // ---- Prefer machines first block (Gym only; controlled by training.html meta) ----
+  if (formData?.meta?.preferMachinesFirstBlock) {
+    applyMachineBias(currentPlan, formData.meta, formData.equipment);
+    // (optional mini-tag in sets to visualize mode)
+    // Object.values(currentPlan).forEach(day => Array.isArray(day) && day.forEach(ex => {
+    //   if (ex?.sets && !/machine-first/i.test(ex.sets)) ex.sets = `${ex.sets} · machine-first`;
+    // }));
+  }
+
+  // ---- Decor for Lose fat ----
   if (formData.goal === "Lose fat") {
     Object.entries(currentPlan).forEach(([day, exercises]) => {
       if (!Array.isArray(exercises)) return;
