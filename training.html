@@ -113,6 +113,64 @@
   </div>
 </template>
 
+<!-- ===== HOMEPAGE BLOCK: Explainer + Disclaimer (embedded here) ===== -->
+<section id="scp-hero" class="scp-wrap">
+  <style>
+    .scp-wrap{ max-width:960px; margin:3rem auto; padding:0 1rem; color:#e0e0e0; }
+    .scp-hero{ background:#121212; border:1px solid #2b2b2b; border-radius:10px; padding:2rem; }
+    .scp-hero h1{ color:#ff8c00; margin:0 0 .5rem 0; }
+    .scp-hero p{ line-height:1.6; margin:.5rem 0 0 0; }
+    .scp-cta{ margin-top:1rem; display:flex; gap:.75rem; flex-wrap:wrap; }
+    .scp-btn{ background:#ff8c00; color:#121212; font-weight:700; padding:.8rem 1rem; border-radius:8px; text-decoration:none; display:inline-block; }
+    .scp-btn.ghost{ background:transparent; color:#ff8c00; border:1px solid #ff8c00; }
+    .scp-cols{ display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem; }
+    .scp-card{ background:#1b1b1b; border:1px solid #2b2b2b; border-radius:8px; padding:1rem; }
+    .scp-card h3{ color:#ffd27a; margin:.25rem 0 .5rem 0; }
+    @media (min-width: 900px){ .scp-cols{ grid-template-columns:1fr 1fr; } }
+    .scp-disclaimer{ background:#1b1710; border:1px solid #5a3; color:#ffd27a; border-radius:8px; padding:1rem; margin-top:1rem; }
+  </style>
+
+  <div class="scp-hero">
+    <h1>Self-Coaching Plan Generator</h1>
+    <p>
+      Coach yourself, without the fluff. Pick a goal, generate a plan, log your sets,
+      and let our performance chip guide next steps. Your data lives in your Google Sheet—
+      transparent, portable, yours.
+    </p>
+    <div class="scp-cta">
+      <a class="scp-btn" href="#trackerForm">Open the generator</a>
+      <a class="scp-btn ghost" href="#scp-how">See how it works</a>
+    </div>
+
+    <div id="scp-how" class="scp-cols" style="margin-top:1rem;">
+      <div class="scp-card">
+        <h3>What you get</h3>
+        <ul>
+          <li>Goal-based plan (Gym or Home) with smart alternatives.</li>
+          <li>Export to Google Sheets: Training Plan, Daily Log, Weekly Feedback.</li>
+          <li>Performance chip: instant “up / hold / down” signal.</li>
+        </ul>
+      </div>
+      <div class="scp-card">
+        <h3>Why it’s different</h3>
+        <ul>
+          <li>No paywall to see your own data.</li>
+          <li>Progress compared only within the same gym.</li>
+          <li>Fast, simple, designed for consistency.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="scp-disclaimer">
+      <strong>Health & Legal Notice</strong><br>
+      The Self-Coaching Plan Generator is for educational purposes only and is not medical advice.
+      Consult a qualified professional before starting any exercise program, especially if you have
+      injuries, conditions, or concerns about exercise readiness. Use at your own risk.
+    </div>
+  </div>
+</section>
+<!-- ===== /BLOCK ===== -->
+
 <!-- conditioningLocal.js only needs to set window.conditioningFrequencies = { bodyweight, gym } -->
 <script src="./conditioningLocal.js"></script>
 
