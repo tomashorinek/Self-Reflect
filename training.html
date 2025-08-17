@@ -21,9 +21,11 @@
   .row{ margin:.5rem 0 0; }
   .inline { display:flex; gap:1rem; align-items:center; }
   .inline label { margin:0; }
-  .advice{ background:#2a210a; border:1px solid #5a3; border-radius:8px; padding:12px; margin-top:12px; }
-  .advice strong{ color:#ffd27a; }
   #gymsBlock{ margin-top:1rem; }
+
+  /* Advice (injected after generation) */
+  .advice-card{margin:1rem 0;padding:1rem;border:1px solid #6b5f1a;border-radius:8px;background:#1b1a12;color:#f1e7b6}
+  .advice-card b{font-weight:700}
 </style>
 
 <!-- Sortable.js (for DnD in planLogic.js) -->
@@ -56,14 +58,7 @@
       <label><input type="radio" name="loc" value="home"> Home</label>
     </div>
 
-    <div class="advice">
-      <strong>Starter advice</strong><br/>
-      For the first 4–8 weeks we recommend emphasizing <em>more isolated, machine-based</em>
-      movements (e.g., chest press, row machine, pulldown, leg extension/curl, lateral raise).
-      This reduces coordination demands, makes it easier to feel the target muscle, and helps you
-      practice full ROM and controlled tempo. Gradually introduce more free-weight compounds as
-      your control and confidence grow.
-    </div>
+    <!-- removed visible advice here; it will be injected after generation -->
 
     <div class="row">
       <label class="inline"><input id="preferMachines" type="checkbox" checked>
@@ -84,13 +79,39 @@
   </form>
 
   <div class="output" id="outputBox" style="display:none">
+    <div id="starterAdviceMount"></div>  <!-- advice appears here after generation -->
     <h2>Your Training Plan</h2>
+
     <div id="training-container"></div>
     <textarea id="trainingPlanContent" readonly></textarea>
     <button id="continueButton">Export Plan</button>
     <div id="finalStatus"></div>
+
+    <!-- Brief explainer -->
+    <details style="margin-top:1rem">
+      <summary><b>How this works</b></summary>
+      <div style="margin-top:.5rem;opacity:.9">
+        <p><b>Logging:</b> write sets as <code>weight x reps</code> in the plan cells (e.g., <code>60x10 / 60x9</code>).</p>
+        <p><b>Performance chip:</b> daily result is one of: Highly Progressive, Progressive, Maintaining, Temporary Setback — based on volume/weight/reps vs. the previous comparable session.</p>
+        <p><b>Progression:</b> aim to add a rep or a little weight with solid technique and full ROM. If form slips, hold or reduce slightly.</p>
+        <p><b>Starter advice:</b> for the first 4–8 weeks prefer machines & simpler isolation work, then re-introduce more free-weight compounds.</p>
+        <p><b>Export:</b> copy the plan, copy JSON, or send to your Logbook Google Sheet.</p>
+      </div>
+    </details>
   </div>
 </div>
+
+<!-- Template for advice (injected only after generation) -->
+<template id="starterAdviceTpl">
+  <div class="advice-card">
+    <b>Starter advice</b><br>
+    For the first 4–8 weeks we recommend emphasizing <i>more isolated, machine-based</i>
+    movements (e.g., chest press, row machine, pulldown, leg extension/curl, lateral raise).
+    This reduces coordination demands, makes it easier to feel the target muscle, and helps you
+    practice full ROM and controlled tempo. Gradually introduce more free-weight compounds as
+    your control and confidence grow.
+  </div>
+</template>
 
 <!-- conditioningLocal.js only needs to set window.conditioningFrequencies = { bodyweight, gym } -->
 <script src="./conditioningLocal.js"></script>
@@ -111,6 +132,8 @@ function init() {
       if (textarea) {
         textarea.value = 'Last plan loaded from cache. Click "Generate" to rebuild view.';
         document.getElementById('outputBox').style.display = 'block';
+        // mount advice even for restored view (once)
+        mountAdviceOnce();
       }
     }
   } catch {}
@@ -229,6 +252,17 @@ function init() {
   }
   window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
+  // inject advice once
+  function mountAdviceOnce(){
+    if (window.__adviceMounted) return;
+    const tpl  = document.getElementById('starterAdviceTpl');
+    const slot = document.getElementById('starterAdviceMount');
+    if (tpl && slot) {
+      slot.appendChild(tpl.content.cloneNode(true));
+      window.__adviceMounted = true;
+    }
+  }
+
   // === submit → generate
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -248,7 +282,7 @@ function init() {
       goal: goal.value,
       frequency: frequency.value,            // "1-2" | "3-4" | "5" | "5+"
       equipment: (loc === 'home') ? 'home' : 'gym',
-      // keep legacy keys so planLogic.js won’t break if it expects them
+      // legacy keys kept for compatibility
       experience: 'N/A',
       fixed: 'Yes',
       gymNames,
@@ -264,11 +298,16 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      await generateTrainingPlan(data);      // your existing generator
+      await generateTrainingPlan(data);      // existing generator
+
+      // after generation: mount advice, show output, scroll
+      mountAdviceOnce();
 
       setTimeout(() => {
         updateTrainingPlanContentInTextarea();
-        document.getElementById('outputBox').style.display = 'block';
+        const out = document.getElementById('outputBox');
+        out.style.display = 'block';
+        out.scrollIntoView({ behavior: 'smooth', block: 'start' });
         document.getElementById('trainingPlanContent').setAttribute('readonly', true);
       }, 50);
     } catch (err) {
@@ -292,7 +331,7 @@ function init() {
       return;
     }
 
-    // recompute gym names at export time (keeps it robust)
+    // recompute gym names at export time (robust)
     const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
     let gymNames = [];
     if (loc === 'home') {
