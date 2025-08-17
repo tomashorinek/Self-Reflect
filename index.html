@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Self-Reflect</title>
   <style>
+    html { scroll-behavior: smooth; } /* CSS smooth scroll (fallback níže v JS) */
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,10 +14,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
       text-align: center;
-      padding: 2rem;
+      padding: 2rem 1rem 4rem;
+    }
+    .hero {
+      max-width: 900px;
+      margin: 2rem auto 1rem;
     }
     h1 { font-size: 2.8rem; margin-bottom: 1rem; }
     p { font-size: 1.2rem; margin-bottom: 2rem; color: #ccc; }
@@ -29,13 +34,162 @@
       font-size: 1.1rem;
       font-weight: bold;
       transition: background 0.3s ease;
+      display: inline-block;
     }
     a.button:hover { background-color: #e65c00; }
+
+    /* global list styling for explainer */
+    ul { margin: .5rem 0 0 1.2rem; text-align:left; }
+    li { margin:.3rem 0; color:#ddd; }
   </style>
+
+  <!-- GA4 (safe loader) -->
+  <script>
+    // 👉 vyplň vlastní GA4 ID (ponech prázdné, pokud nechceš měřit)
+    const GA_ID = "G-XXXXXXXXXX";
+    (function(gid){
+      if(!gid) return; // no-op
+      const s=document.createElement('script'); s.async=true;
+      s.src=`https://www.googletagmanager.com/gtag/js?id=${gid}`;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', gid, { send_page_view: true });
+    })(GA_ID);
+  </script>
+
+  <!-- Meta Pixel (safe loader) -->
+  <script>
+    // 👉 vyplň vlastní Meta Pixel ID
+    const FB_PIXEL_ID = "XXXXXXXXXXXXXXX";
+    (function(pid){
+      if(!pid) return; // no-op
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', pid);
+      fbq('track', 'PageView');
+    })(FB_PIXEL_ID);
+  </script>
+  <noscript>
+    <!-- Optional noscript pixel; vyplň ID pokud chceš -->
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=XXXXXXXXXXXXXXX&ev=PageView&noscript=1"/>
+  </noscript>
 </head>
 <body>
-  <h1>Welcome to Self-Reflect</h1>
-  <p>Start building your own training program with our self-coaching system.</p>
-  <a class="button" href="training.html">Start Your Plan</a>
+  <div class="hero">
+    <h1>Welcome to Self-Reflect</h1>
+    <p>Start building your own training program with our self-coaching system.</p>
+    <a class="button" href="training.html" data-track="cta_start_plan">Start Your Plan</a>
+  </div>
+
+  <!-- ===== HOMEPAGE BLOCK: Explainer + Disclaimer ===== -->
+  <section id="scp-hero" class="scp-wrap" aria-labelledby="scp-title">
+    <style>
+      .scp-wrap{ max-width:960px; margin:3rem auto; padding:0 1rem; color:#e0e0e0; }
+      .scp-hero{
+        background:#121212; border:1px solid #2b2b2b; border-radius:10px; padding:2rem;
+      }
+      .scp-hero h1{ color:#ff8c00; margin:0 0 .5rem 0; }
+      .scp-hero p{ line-height:1.6; margin:.5rem 0 0 0; }
+      .scp-cta{ margin-top:1rem; display:flex; gap:.75rem; flex-wrap:wrap; justify-content:center; }
+      .scp-btn{
+        background:#ff8c00; color:#121212; font-weight:700; padding:.8rem 1rem;
+        border-radius:8px; text-decoration:none; display:inline-block;
+      }
+      .scp-btn.ghost{ background:transparent; color:#ff8c00; border:1px solid #ff8c00; }
+      .scp-cols{ display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem; text-align:left; }
+      .scp-card{
+        background:#1b1b1b; border:1px solid #2b2b2b; border-radius:8px; padding:1rem;
+      }
+      .scp-card h3{ color:#ffd27a; margin:.25rem 0 .5rem 0; }
+      @media (min-width: 900px){ .scp-cols{ grid-template-columns:1fr 1fr; } }
+      .scp-disclaimer{
+        background:#1b1710; border:1px solid #5a3; color:#ffd27a; border-radius:8px;
+        padding:1rem; margin-top:1rem; text-align:left;
+      }
+    </style>
+
+    <div class="scp-hero">
+      <h1 id="scp-title">Self-Coaching Plan Generator</h1>
+      <p>
+        Coach yourself, without the fluff. Pick a goal, generate a plan, log your sets,
+        and let our performance chip guide next steps. Your data lives in your Google Sheet —
+        transparent, portable, yours.
+      </p>
+      <div class="scp-cta">
+        <a class="scp-btn" href="training.html" data-track="cta_open_generator">Open the generator</a>
+        <a class="scp-btn ghost" href="#scp-how" data-track="cta_how_it_works">See how it works</a>
+      </div>
+
+      <div id="scp-how" class="scp-cols" style="margin-top:1rem;">
+        <div class="scp-card">
+          <h3>What you get</h3>
+          <ul>
+            <li>Goal-based plan (Gym or Home) with smart alternatives.</li>
+            <li>Export to Google Sheets: Training Plan, Daily Log, Weekly Feedback.</li>
+            <li>Performance chip: instant “up / hold / down” signal.</li>
+          </ul>
+        </div>
+        <div class="scp-card">
+          <h3>Why it’s different</h3>
+          <ul>
+            <li>No paywall to see your own data.</li>
+            <li>Progress compared only within the same gym.</li>
+            <li>Fast, simple, designed for consistency.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="scp-disclaimer">
+        <strong>Health & Legal Notice</strong><br>
+        The Self-Coaching Plan Generator is for educational purposes only and is not medical advice.
+        Consult a qualified professional before starting any exercise program, especially if you have
+        injuries, conditions, or concerns about exercise readiness. Use at your own risk.
+      </div>
+    </div>
+  </section>
+
+  <!-- Smooth-scroll fallback + Tracking -->
+  <script>
+    // Smooth-scroll fallback (Safari/older)
+    document.addEventListener('click', function(e){
+      const a = e.target.closest('a[href^="#"]');
+      if(!a) return;
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if(!el) return;
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Lightweight tracking helper (works even když GA/FB nejsou)
+    function track(eventName, params){
+      try {
+        if (window.gtag && typeof gtag === 'function' && typeof GA_ID === 'string' && GA_ID) {
+          gtag('event', eventName, params || {});
+        }
+        if (window.fbq && typeof fbq === 'function' && typeof FB_PIXEL_ID === 'string' && FB_PIXEL_ID) {
+          fbq('trackCustom', eventName, params || {});
+        }
+      } catch(_) {}
+    }
+
+    // Bind CTA tracking
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('[data-track]');
+      if(!btn) return;
+      const name = btn.getAttribute('data-track');
+      track(name, { location: 'index', href: btn.getAttribute('href') || '' });
+    });
+  </script>
 </body>
 </html>
