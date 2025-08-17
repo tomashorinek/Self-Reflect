@@ -3,193 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Self-Reflect</title>
+  <title>Self-Coaching Plan — Webbyfe</title>
   <style>
-    html { scroll-behavior: smooth; } /* CSS smooth scroll (fallback níže v JS) */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      text-align: center;
-      padding: 2rem 1rem 4rem;
+    :root{
+      --bg: #0d0d0d; --bg2:#141414; --card:#1b1b1b; --line:#2b2b2b;
+      --fg:#eaeaea; --muted:#bdbdbd; --brand:#ff8c00; --accent:#ffd27a;
     }
-    .hero {
-      max-width: 900px;
-      margin: 2rem auto 1rem;
+    *{box-sizing:border-box}
+    body{margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg);}
+    a{color:var(--brand); text-decoration:none}
+    .wrap{max-width:960px; margin:0 auto; padding:2rem 1.25rem;}
+    .hero{
+      margin-top:2rem; background:#121212; border:1px solid var(--line); border-radius:12px; padding:2rem;
     }
-    h1 { font-size: 2.8rem; margin-bottom: 1rem; }
-    p { font-size: 1.2rem; margin-bottom: 2rem; color: #ccc; }
-    a.button {
-      background-color: #ff6600;
-      color: white;
-      padding: 1rem 2rem;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      transition: background 0.3s ease;
-      display: inline-block;
-    }
-    a.button:hover { background-color: #e65c00; }
-
-    /* global list styling for explainer */
-    ul { margin: .5rem 0 0 1.2rem; text-align:left; }
-    li { margin:.3rem 0; color:#ddd; }
+    .hero h1{margin:0 0 .5rem 0; color:var(--brand); font-size:2.2rem; line-height:1.2;}
+    .hero p{margin:.25rem 0; color:var(--muted); font-size:1.05rem;}
+    .cta{margin-top:1rem; display:flex; gap:.75rem; flex-wrap:wrap}
+    .btn{background:var(--brand); color:#121212; padding:.85rem 1.1rem; border-radius:10px; font-weight:700; display:inline-block}
+    .btn.ghost{background:transparent; color:var(--brand); border:1px solid var(--brand)}
+    .grid{display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem}
+    @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
+    .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1rem;}
+    .card h3{color:var(--accent); margin:.25rem 0 .5rem 0}
+    .muted{color:var(--muted)}
+    .disclaimer{background:#1b1710; border:1px solid #5a3; color:#ffd27a; border-radius:10px; padding:1rem; margin-top:1rem}
+    footer{opacity:.7; font-size:.9rem; padding:2rem 0; text-align:center}
   </style>
-
-  <!-- GA4 (safe loader) -->
-  <script>
-    // 👉 vyplň vlastní GA4 ID (ponech prázdné, pokud nechceš měřit)
-    const GA_ID = "G-XXXXXXXXXX";
-    (function(gid){
-      if(!gid) return; // no-op
-      const s=document.createElement('script'); s.async=true;
-      s.src=`https://www.googletagmanager.com/gtag/js?id=${gid}`;
-      document.head.appendChild(s);
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){ dataLayer.push(arguments); }
-      window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', gid, { send_page_view: true });
-    })(GA_ID);
-  </script>
-
-  <!-- Meta Pixel (safe loader) -->
-  <script>
-    // 👉 vyplň vlastní Meta Pixel ID
-    const FB_PIXEL_ID = "XXXXXXXXXXXXXXX";
-    (function(pid){
-      if(!pid) return; // no-op
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', pid);
-      fbq('track', 'PageView');
-    })(FB_PIXEL_ID);
-  </script>
-  <noscript>
-    <!-- Optional noscript pixel; vyplň ID pokud chceš -->
-    <img height="1" width="1" style="display:none"
-      src="https://www.facebook.com/tr?id=XXXXXXXXXXXXXXX&ev=PageView&noscript=1"/>
-  </noscript>
 </head>
 <body>
-  <div class="hero">
-    <h1>Welcome to Self-Reflect</h1>
-    <p>Start building your own training program with our self-coaching system.</p>
-    <a class="button" href="training.html" data-track="cta_start_plan">Start Your Plan</a>
-  </div>
-
-  <!-- ===== HOMEPAGE BLOCK: Explainer + Disclaimer ===== -->
-  <section id="scp-hero" class="scp-wrap" aria-labelledby="scp-title">
-    <style>
-      .scp-wrap{ max-width:960px; margin:3rem auto; padding:0 1rem; color:#e0e0e0; }
-      .scp-hero{
-        background:#121212; border:1px solid #2b2b2b; border-radius:10px; padding:2rem;
-      }
-      .scp-hero h1{ color:#ff8c00; margin:0 0 .5rem 0; }
-      .scp-hero p{ line-height:1.6; margin:.5rem 0 0 0; }
-      .scp-cta{ margin-top:1rem; display:flex; gap:.75rem; flex-wrap:wrap; justify-content:center; }
-      .scp-btn{
-        background:#ff8c00; color:#121212; font-weight:700; padding:.8rem 1rem;
-        border-radius:8px; text-decoration:none; display:inline-block;
-      }
-      .scp-btn.ghost{ background:transparent; color:#ff8c00; border:1px solid #ff8c00; }
-      .scp-cols{ display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem; text-align:left; }
-      .scp-card{
-        background:#1b1b1b; border:1px solid #2b2b2b; border-radius:8px; padding:1rem;
-      }
-      .scp-card h3{ color:#ffd27a; margin:.25rem 0 .5rem 0; }
-      @media (min-width: 900px){ .scp-cols{ grid-template-columns:1fr 1fr; } }
-      .scp-disclaimer{
-        background:#1b1710; border:1px solid #5a3; color:#ffd27a; border-radius:8px;
-        padding:1rem; margin-top:1rem; text-align:left;
-      }
-    </style>
-
-    <div class="scp-hero">
-      <h1 id="scp-title">Self-Coaching Plan Generator</h1>
-      <p>
-        Coach yourself, without the fluff. Pick a goal, generate a plan, log your sets,
-        and let our performance chip guide next steps. Your data lives in your Google Sheet —
-        transparent, portable, yours.
-      </p>
-      <div class="scp-cta">
-        <a class="scp-btn" href="training.html" data-track="cta_open_generator">Open the generator</a>
-        <a class="scp-btn ghost" href="#scp-how" data-track="cta_how_it_works">See how it works</a>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Coach yourself — faster, cheaper, and trainer-friendly</h1>
+      <p>No subscriptions to view your data. Generate a plan, log your sets, and get instant feedback.</p>
+      <p class="muted">A smart runway for beginners and a clean data layer for future collaboration with a coach.</p>
+      <div class="cta">
+        <a class="btn" href="training.html">Open the Generator</a>
+        <a class="btn ghost" href="#how">See how it works</a>
       </div>
+    </section>
 
-      <div id="scp-how" class="scp-cols" style="margin-top:1rem;">
-        <div class="scp-card">
-          <h3>What you get</h3>
-          <ul>
-            <li>Goal-based plan (Gym or Home) with smart alternatives.</li>
-            <li>Export to Google Sheets: Training Plan, Daily Log, Weekly Feedback.</li>
-            <li>Performance chip: instant “up / hold / down” signal.</li>
-          </ul>
-        </div>
-        <div class="scp-card">
-          <h3>Why it’s different</h3>
-          <ul>
-            <li>No paywall to see your own data.</li>
-            <li>Progress compared only within the same gym.</li>
-            <li>Fast, simple, designed for consistency.</li>
-          </ul>
-        </div>
+    <section id="why" class="grid" style="margin-top:1rem">
+      <div class="card">
+        <h3>Why it’s different</h3>
+        <ul>
+          <li><b>Your data, your sheet.</b> Export to Google Sheets. Transparent and portable.</li>
+          <li><b>Immediate signal.</b> Performance chip shows up / hold / down — no guesswork.</li>
+          <li><b>Context-aware.</b> Progress is compared only within the same gym.</li>
+        </ul>
       </div>
+      <div class="card">
+        <h3>Cheaper than a trainer — and trainer-friendly</h3>
+        <p class="muted">
+          Great coaches adapt to you. Our system helps you build consistency and collect clean training data
+          at a fraction of the cost. When you hire a coach, you’ll bring structured logs and clear trends —
+          which makes coaching <b>easier, faster, and more affordable</b>.
+        </p>
+      </div>
+    </section>
 
-      <div class="scp-disclaimer">
-        <strong>Health & Legal Notice</strong><br>
-        The Self-Coaching Plan Generator is for educational purposes only and is not medical advice.
-        Consult a qualified professional before starting any exercise program, especially if you have
-        injuries, conditions, or concerns about exercise readiness. Use at your own risk.
+    <section id="how" class="grid" style="margin-top:1rem">
+      <div class="card">
+        <h3>How it works</h3>
+        <ol>
+          <li>Pick a goal, frequency, and Gym/Home. Generate your plan with built-in alternatives.</li>
+          <li>Log sets directly in the plan (e.g., <code>60x10 / 60x9</code>).</li>
+          <li>Export to your Logbook: daily chips, weekly roll-ups, and trends.</li>
+        </ol>
       </div>
+      <div class="card">
+        <h3>What you get</h3>
+        <ul>
+          <li>Self-coaching plan with drag-and-drop editing.</li>
+          <li>Daily Log & Performance chip (Highly Progressive → Temporary Setback).</li>
+          <li>Weekly Feedback for simple progression choices.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="disclaimer">
+      <strong>Health & Legal Notice</strong><br>
+      The Self-Coaching Plan is for educational purposes only and is not medical advice.
+      Consult a qualified professional before starting any exercise program, especially if you
+      have injuries, conditions, or concerns about exercise readiness. Use at your own risk.
+    </section>
+
+    <div class="cta" style="margin-top:1rem">
+      <a class="btn" href="training.html">Start for free</a>
+      <a class="btn ghost" href="training.html#how-it-works">Learn more</a>
     </div>
-  </section>
 
-  <!-- Smooth-scroll fallback + Tracking -->
-  <script>
-    // Smooth-scroll fallback (Safari/older)
-    document.addEventListener('click', function(e){
-      const a = e.target.closest('a[href^="#"]');
-      if(!a) return;
-      const id = a.getAttribute('href').slice(1);
-      const el = document.getElementById(id);
-      if(!el) return;
-      e.preventDefault();
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    // Lightweight tracking helper (works even když GA/FB nejsou)
-    function track(eventName, params){
-      try {
-        if (window.gtag && typeof gtag === 'function' && typeof GA_ID === 'string' && GA_ID) {
-          gtag('event', eventName, params || {});
-        }
-        if (window.fbq && typeof fbq === 'function' && typeof FB_PIXEL_ID === 'string' && FB_PIXEL_ID) {
-          fbq('trackCustom', eventName, params || {});
-        }
-      } catch(_) {}
-    }
-
-    // Bind CTA tracking
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('[data-track]');
-      if(!btn) return;
-      const name = btn.getAttribute('data-track');
-      track(name, { location: 'index', href: btn.getAttribute('href') || '' });
-    });
-  </script>
+    <footer>
+      © <script>document.write(new Date().getFullYear())</script> Webbyfe — Self-Coaching Plan
+    </footer>
+  </main>
 </body>
 </html>
