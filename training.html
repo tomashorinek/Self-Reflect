@@ -58,8 +58,6 @@
       <label><input type="radio" name="loc" value="home"> Home</label>
     </div>
 
-    <!-- removed visible advice here; it will be injected after generation -->
-
     <div class="row">
       <label class="inline"><input id="preferMachines" type="checkbox" checked>
         Prefer machines in the first 4–8 weeks
@@ -89,12 +87,11 @@
 
     <!-- Brief explainer -->
     <details style="margin-top:1rem">
-      <summary><b>How this works</b></summary>
+      <summary><b>How this works (quick)</b></summary>
       <div style="margin-top:.5rem;opacity:.9">
-        <p><b>Logging:</b> write sets as <code>weight x reps</code> in the plan cells (e.g., <code>60x10 / 60x9</code>).</p>
-        <p><b>Performance chip:</b> daily result is one of: Highly Progressive, Progressive, Maintaining, Temporary Setback — based on volume/weight/reps vs. the previous comparable session.</p>
-        <p><b>Progression:</b> aim to add a rep or a little weight with solid technique and full ROM. If form slips, hold or reduce slightly.</p>
-        <p><b>Starter advice:</b> for the first 4–8 weeks prefer machines & simpler isolation work, then re-introduce more free-weight compounds.</p>
+        <p><b>Logging:</b> write sets as <code>weight x reps</code> (e.g., <code>60x10 / 60x9</code>).</p>
+        <p><b>Performance chip:</b> Highly Progressive / Progressive / Maintaining / Temporary Setback — based on volume/weight/reps vs. your previous comparable session (same gym).</p>
+        <p><b>Progression:</b> add a rep or small load with full ROM & control; if form slips, hold or reduce.</p>
         <p><b>Export:</b> copy the plan, copy JSON, or send to your Logbook Google Sheet.</p>
       </div>
     </details>
@@ -166,55 +163,60 @@
 
   <div class="grid">
     <div class="card">
-      <h3>Why it works</h3>
-      <ul>
-        <li><strong>Clarity beats motivation</strong> — you get a simple day-by-day plan.</li>
-        <li><strong>Immediate feedback</strong> — the chip grades each session vs your history.</li>
-        <li><strong>Your data, your way</strong> — everything lives in your Google Sheet.</li>
-      </ul>
-
+      <h3>What happens when you click <em>Generate</em></h3>
+      <ol>
+        <li>We load a curated library for your goal (Gym/Home) and chosen frequency.</li>
+        <li>We assemble days with <b>sensible exercise order</b>, plus <b>alternatives</b> for each.</li>
+        <li>If “Prefer machines” is on, the first 4–8 weeks bias to isolation/machines for safer skill-building.</li>
+        <li>We enforce variety (no duplicate names in a day) and enable drag-and-drop editing.</li>
+      </ol>
       <div class="note" style="margin-top:.75rem;">
         <strong>Starter advice (appears after generation):</strong><br>
-        For the first 4–8 weeks, favor <em>more isolated, machine-based</em> work
-        (chest press, row machine, pulldown, leg extension/curl, lateral raise). It reduces coordination demands,
-        helps you feel the target muscle, and builds control/ROM. Gradually re-introduce free-weight compounds as
-        your technique and confidence grow.
+        Favor machine-based/isolation work for 4–8 weeks to learn control & ROM, then re-introduce more free-weight compounds.
       </div>
     </div>
 
     <div class="card">
-      <h3>Chip legend</h3>
+      <h3>How the performance chip works</h3>
+      <ul>
+        <li>Each session gets graded vs your <b>last comparable session in the same gym</b>.</li>
+        <li>We look at <b>total volume</b>, <b>top set weight</b>, and <b>max reps</b> across your sets.</li>
+        <li>Result is mapped to one of four chips (DV-safe text):</li>
+      </ul>
       <div class="legend">
         <div class="chip high">🟢 Highly Progressive</div>
         <div class="chip mid">🟢 Progressive</div>
         <div class="chip hold">🟡 Maintaining</div>
         <div class="chip drop">🔴 Temporary Setback</div>
       </div>
-
-      <h3 style="margin-top:1rem;">Export & sharing</h3>
-      <ul>
-        <li><strong>Export to Logbook</strong> — sends the plan to your Google Sheet.</li>
-        <li><strong>Copy plan</strong> — plain-text for notes/chat.</li>
-        <li><strong>Copy JSON</strong> — dev-friendly snapshot.</li>
-      </ul>
+      <p style="margin-top:.75rem;">
+        Your sheet stores the exact label (no “Invalid” flicker) and a note with the comparison detail.
+      </p>
     </div>
   </div>
 
   <div class="card" style="margin-top:1rem;">
-    <h3>Your Sheet includes</h3>
+    <h3>Export & your Google Sheet</h3>
     <ul>
-      <li><strong>Training Plan</strong> — your days/exercises with alternatives.</li>
-      <li><strong>Daily Log</strong> — date, gym, notes, performance chip.</li>
+      <li><strong>Training Plan</strong> — your days & exercises (with alternatives).</li>
+      <li><strong>Daily Log</strong> — date, gym (or <em>Home</em>), notes, performance chip.</li>
       <li><strong>Weekly Feedback</strong> — quick roll-ups and trends.</li>
     </ul>
     <p style="margin:.5rem 0 0 0;">
-      Training in multiple gyms? Add them in the form — we compare progress
-      <strong>only within the same gym</strong> so equipment differences don’t skew results.
-      <em>Home mode</em> hides gym fields and logs sessions under <strong>“Home”</strong>.
+      Multiple gyms? Add them in the generator — we compare progress <b>only within the same gym</b> so equipment differences don’t skew results.  
+      In <b>Home</b> mode the gym fields are hidden and sessions are logged under <b>“Home”</b>.
     </p>
   </div>
 
-  <!-- screenshot placeholders (replace src with your images) -->
+  <div class="card" style="margin-top:1rem;">
+    <h3>Mini-FAQ</h3>
+    <p><b>Do I need a trainer?</b> Not required. This is a low-cost way to learn consistency and self-coaching.
+       If you later work with a coach, your clean data & logs make collaboration faster and cheaper.</p>
+    <p style="margin:.25rem 0 0 0;"><b>How do I log sets?</b> Type like <code>60x10 / 60x9 / 55x11</code> directly into the plan cells.</p>
+    <p style="margin:.25rem 0 0 0;"><b>Can I change exercises?</b> Yes — drag to reorder, click the ↻ icon to rotate alternatives.</p>
+  </div>
+
+  <!-- placeholder screenshots (replace src with your own) -->
   <div class="shots" style="margin-top:1rem;">
     <img src="assets/screen-generator.png" alt="Generator form with goal, frequency, and location" />
     <img src="assets/screen-plan-drag.png" alt="Generated plan with drag-and-drop and alternatives" />
@@ -237,7 +239,6 @@
 import { generateTrainingPlan } from './planLogic.js';
 
 function init() {
-  // === restore last state (optional) ===
   try {
     const lastPlan = localStorage.getItem('lastPlan');
     const lastForm = localStorage.getItem('lastFormData');
@@ -248,7 +249,6 @@ function init() {
       if (textarea) {
         textarea.value = 'Last plan loaded from cache. Click "Generate" to rebuild view.';
         document.getElementById('outputBox').style.display = 'block';
-        // mount advice even for restored view (once)
         mountAdviceOnce();
       }
     }
@@ -258,14 +258,12 @@ function init() {
   const goal = document.getElementById('goal');
   const frequency = document.getElementById('frequency');
   const email = document.getElementById('email');
-
   const gymFields = document.getElementById('gymFields');
   const addGymButton = document.getElementById('addGymButton');
   const gymsBlock = document.getElementById('gymsBlock');
   const preferMachinesEl = document.getElementById('preferMachines');
   const locRadios = Array.from(document.querySelectorAll('input[name="loc"]'));
 
-  // UI helpers
   function addGymField(value = '') {
     const wrapper = document.createElement('div');
     wrapper.className = 'gym-input-wrapper';
@@ -279,8 +277,6 @@ function init() {
     wrapper.append(input, removeBtn);
     gymFields.appendChild(wrapper);
   }
-
-  // first input on start (for Gym mode)
   addGymField();
 
   function applyLocationUI(){
@@ -297,7 +293,6 @@ function init() {
 
   addGymButton?.addEventListener('click', () => addGymField());
 
-  // === Copy buttons before "Export Plan" ===
   (function ensureCopyButtons() {
     const exportBtn = document.getElementById('continueButton');
     if (!exportBtn) return;
@@ -338,7 +333,6 @@ function init() {
     }
   })();
 
-  // === textarea updater ===
   function updateTrainingPlanContentInTextarea() {
     const container = document.getElementById('training-container');
     const textarea = document.getElementById('trainingPlanContent');
@@ -367,7 +361,6 @@ function init() {
   }
   window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
 
-  // inject advice once
   function mountAdviceOnce(){
     if (window.__adviceMounted) return;
     const tpl  = document.getElementById('starterAdviceTpl');
@@ -378,13 +371,11 @@ function init() {
     }
   }
 
-  // === submit → generate
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
 
-    // collect gym names (Gym mode) or force ["Home"] (Home mode)
     let gymNames = [];
     if (loc === 'home') {
       gymNames = ['Home'];
@@ -395,15 +386,14 @@ function init() {
 
     const data = {
       goal: goal.value,
-      frequency: frequency.value,            // "1-2" | "3-4" | "5" | "5+"
+      frequency: frequency.value,
       equipment: (loc === 'home') ? 'home' : 'gym',
-      // legacy keys kept for compatibility
       experience: 'N/A',
       fixed: 'Yes',
       gymNames,
       email: email.value.trim(),
       meta: {
-        trainingLocation: loc,               // 'gym' | 'home'
+        trainingLocation: loc,
         gymName: (loc === 'home') ? 'Home' : (gymNames[0] || 'My Gym'),
         preferMachinesFirstBlock: !!preferMachinesEl.checked
       }
@@ -413,9 +403,8 @@ function init() {
       document.getElementById('outputBox').style.display = 'none';
       window.formData = data;
 
-      await generateTrainingPlan(data);      // existing generator
+      await generateTrainingPlan(data);
 
-      // after generation: mount advice, show output, scroll
       mountAdviceOnce();
 
       setTimeout(() => {
@@ -431,7 +420,6 @@ function init() {
     }
   });
 
-  // === Export / upload
   document.getElementById('continueButton').addEventListener('click', async () => {
     const finalStatus = document.getElementById('finalStatus');
     finalStatus.textContent = '';
@@ -446,7 +434,6 @@ function init() {
       return;
     }
 
-    // recompute gym names at export time (robust)
     const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
     let gymNames = [];
     if (loc === 'home') {
