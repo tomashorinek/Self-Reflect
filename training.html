@@ -579,58 +579,81 @@ function init() {
   });
 
   document.getElementById('continueButton').addEventListener('click', async () => {
-    const finalStatus = document.getElementById('finalStatus');
-    finalStatus.textContent = '';
-    finalStatus.style.color = '#ffa500';
+  const finalStatus = document.getElementById('finalStatus');
+  finalStatus.textContent = '';
+  finalStatus.style.color = '#ffa500';
 
-    updateTrainingPlanContentInTextarea();
+  // vždy nejdřív znovu poskládej textové znění
+  updateTrainingPlanContentInTextarea();
 
-    const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
-    if (!trainingPlan) {
-      finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
-      finalStatus.style.color = '#ff3333';
-      return;
-    }
+  const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+  if (!trainingPlan) {
+    finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
+    finalStatus.style.color = '#ff3333';
+    return;
+  }
 
-    const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
-    let gymNames = [];
-    if (loc === 'home') {
-      gymNames = ['Home'];
-    } else {
-      gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
-      if (!gymNames.length) gymNames = ['My Gym'];
-    }
+  const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
+  let gymNames = [];
+  if (loc === 'home') {
+    gymNames = ['Home'];
+  } else {
+    gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
+    if (!gymNames.length) gymNames = ['My Gym'];
+  }
 
-    const userName = email.value.trim() || "Anonymous";
+  const userName = email.value.trim() || 'Anonymous';
 
-    try {
-      finalStatus.textContent = '📤 Uploading plan...';
-      const planObj = collectPlanJSON();
-      const planJson = JSON.stringify(planObj);
+  try {
+    finalStatus.textContent = '📤 Uploading plan...';
 
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName,
-          trainingPlan,   // textová verze (zpětná kompatibilita)
-          gymNames,
-          planJson,       // strukturovaná verze s alternativami
-          meta: { version: 2, location: loc }
-        })
-      });
-      const json = await res.json();
-      if (json.success) {
-        finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
-        finalStatus.style.color = '#00ff88';
-      } else {
-        throw new Error(json.error || "Unexpected server error.");
+    // Strukturovaný plán (v2: dny, cviky, alternativy)
+    const planObj = collectPlanJSON();
+
+    // Payload – planJson posíláme jako OBJEKT (žádné dvojí stringify)
+    const payload = {
+      userName,
+      trainingPlan,   // text pro zpětnou kompatibilitu
+      gymNames,
+      planJson: planObj,
+      meta: {
+        version: 2,
+        location: loc,
+        preferMachinesFirstBlock: !!preferMachinesEl.checked
+      },
+      flags: {
+        createDropdowns: true,
+        writeBaseCol: 'AA',
+        baseColHeader: 'base_exercise'
       }
-    } catch (err) {
-      finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
-      finalStatus.style.color = '#ff3333';
+    };
+
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const json = await res.json();
+    if (json.success) {
+      finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
+      finalStatus.style.color = '#00ff88';
+
+      // ulož cache pro "Last plan loaded from cache"
+      try {
+        localStorage.setItem('lastPlan', JSON.stringify(planObj));
+        localStorage.setItem('lastFormData', JSON.stringify(window.formData || {}));
+      } catch (_) {}
+    } else {
+      throw new Error(json.error || 'Unexpected server error.');
     }
-  });
+  } catch (err) {
+    finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
+    finalStatus.style.color = '#ff3333';
+  }
+});
 }
 
 if (document.readyState === 'loading') {
