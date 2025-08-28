@@ -4,28 +4,121 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Self-Coaching Plan Generator</title>
+
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background:#121212; color:#e0e0e0; margin:0; padding:2rem; display:flex; flex-direction:column; align-items:center;}
+  :root{
+    --bg:#121212;
+    --panel:#1e1e1e;
+    --panel-2:#222;
+    --ink:#e0e0e0;
+    --ink-dim:#cfcfcf;
+    --ink-note:#ffd27a;
+    --line:#333;
+    --line-2:#2a2a2a;
+    --brand:#ff8c00;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink);
+    margin:0; padding:2rem;
+    display:flex; flex-direction:column; align-items:center;
+  }
   .container{width:100%; max-width:700px;}
-  h1{color:#ff8c00;}
-  form,.output{background:#1e1e1e; padding:2rem; border-radius:8px; border:1px solid #333; width:100%; box-sizing:border-box;}
+  h1{color:var(--brand); margin:0 0 1rem 0;}
+  h2{margin:.25rem 0 1rem 0;}
+  form,.output{
+    background:var(--panel); padding:2rem; border-radius:8px;
+    border:1px solid var(--line); width:100%; box-sizing:border-box;
+  }
   label{display:block; margin-top:1rem; margin-bottom:.5rem; font-weight:bold;}
-  select,input,textarea{width:100%; padding:.75rem; background:#2a2a2a; color:#e0e0e0; border:1px solid #444; border-radius:4px; box-sizing:border-box;}
-  button{background:#ff8c00; color:#121212; font-weight:bold; padding:1rem; border:none; border-radius:4px; cursor:pointer; width:100%; margin-top:2rem; font-size:1rem;}
+  select,input,textarea{
+    width:100%; padding:.75rem; background:#2a2a2a; color:var(--ink);
+    border:1px solid #444; border-radius:4px; box-sizing:border-box;
+  }
+  button{
+    background:var(--brand); color:#121212; font-weight:bold;
+    padding:1rem; border:none; border-radius:6px; cursor:pointer;
+    width:100%; margin-top:2rem; font-size:1rem;
+  }
   .gym-input-wrapper{display:flex; gap:.5rem; margin-top:.5rem;}
-  .remove-btn{background:#8b0000; padding:.5rem; border:none; border-radius:4px; color:#fff; cursor:pointer;}
-  .day{margin-bottom:1.5rem; padding:1rem; background:#222; border-radius:6px;}
-  .exercise{padding:.5rem; margin-bottom:.5rem; background:#333; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:grab;}
+  .remove-btn{background:#8b0000; padding:.5rem; border:none; border-radius:6px; color:#fff; cursor:pointer;}
+  .day{margin-bottom:1.5rem; padding:1rem; background:var(--panel-2); border-radius:6px;}
+  .exercise{
+    padding:.5rem; margin-bottom:.5rem; background:#333; border-radius:4px;
+    display:flex; justify-content:space-between; align-items:center; cursor:grab;
+  }
   .alt-button{cursor:pointer; margin-left:1rem;}
-  #trainingPlanContent{width:100%; height:300px; background:#1c1c1c; color:#fff; border:1px solid #444; padding:1rem; border-radius:6px; margin-top:1rem;}
+  #trainingPlanContent{
+    width:100%; height:300px; background:#1c1c1c; color:#fff;
+    border:1px solid #444; padding:1rem; border-radius:6px; margin-top:1rem;
+  }
   .row{ margin:.5rem 0 0; }
   .inline { display:flex; gap:1rem; align-items:center; }
   .inline label { margin:0; }
   #gymsBlock{ margin-top:1rem; }
 
   /* Advice (injected after generation) */
-  .advice-card{margin:1rem 0;padding:1rem;border:1px solid #6b5f1a;border-radius:8px;background:#1b1a12;color:#f1e7b6}
+  .advice-card{
+    margin:1rem 0; padding:1rem; border:1px solid #6b5f1a;
+    border-radius:8px; background:#1b1a12; color:#f1e7b6;
+  }
   .advice-card b{font-weight:700}
+
+  /* ===== How it works panel ===== */
+  #how-it-works.info-wrap{
+    width:100%; max-width:700px; margin:2rem auto 4rem auto;
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:8px; padding:2rem; color:var(--ink); box-sizing:border-box;
+  }
+  #how-it-works h2{ color:var(--brand); margin:0 0 .75rem 0; }
+  #how-it-works h3{ margin:1.25rem 0 .5rem 0; color:var(--ink-note); }
+  #how-it-works p, #how-it-works li{ line-height:1.55; }
+  #how-it-works .grid{ display:grid; grid-template-columns:1fr; gap:1rem; }
+  #how-it-works .card{
+    background:var(--panel-2); border:1px solid var(--line-2); border-radius:8px; padding:1rem;
+  }
+  #how-it-works .legend{ display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  #how-it-works .chip{
+    display:flex; align-items:center; gap:.5rem; padding:.5rem .65rem;
+    border-radius:6px; font-weight:600; color:#121212;
+  }
+  .chip.high{ background:#0B8043; color:#fff; }
+  .chip.mid{  background:#34A853; color:#fff; }
+  .chip.hold{ background:#FBC02D; color:#202124; }
+  .chip.drop{ background:#EA4335; color:#fff; }
+  #how-it-works .note{
+    background:#2a210a; border:1px solid #5a3; border-radius:8px; padding:12px; color:var(--ink-note);
+  }
+  @media (min-width: 820px){
+    #how-it-works .grid{ grid-template-columns:1fr 1fr; }
+  }
+
+  /* ===== Screenshots area ===== */
+  #how-it-works .shots{ display:grid; gap:1rem; margin-top:1rem; }
+  #how-it-works .shots figure{
+    margin:0; background:#1a1a1a; border:1px solid var(--line-2); border-radius:8px;
+    overflow:hidden; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset;
+  }
+  #how-it-works .shots figure a{ display:block; }
+  #how-it-works .shots img{ width:100%; height:auto; display:block; background:#111; }
+  #how-it-works .shots figcaption{
+    padding:.75rem .9rem; font-size:.95rem; color:var(--ink-dim);
+    border-top:1px solid var(--line-2);
+  }
+  #how-it-works .shots figcaption b{ color:var(--ink-note); }
+  @media (min-width: 900px){
+    #how-it-works .shots{ grid-template-columns:1fr 1fr; }
+  }
+
+  #how-it-works .cta-row { margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap;}
+  #how-it-works .btn{
+    background:var(--brand); color:#121212; font-weight:700; padding:.75rem 1rem;
+    border-radius:6px; text-decoration:none; display:inline-block;
+  }
+  #how-it-works .btn.ghost{
+    background:transparent; color:var(--brand); border:1px solid var(--brand);
+  }
 </style>
 
 <!-- Sortable.js (for DnD in planLogic.js) -->
@@ -110,70 +203,12 @@
   </div>
 </template>
 
-<!-- ===== HOW IT WORKS / INFO (for training page, under the generator) ===== -->
+<!-- ===== HOW IT WORKS / INFO (under the generator) ===== -->
 <section id="how-it-works" class="info-wrap">
-  <style>
-    #how-it-works.info-wrap{
-      width:100%; max-width:700px; margin:2rem auto 4rem auto;
-      background:#1e1e1e; border:1px solid #333; border-radius:8px; padding:2rem;
-      color:#e0e0e0; box-sizing:border-box;
-    }
-    #how-it-works h2{ color:#ff8c00; margin:0 0 .75rem 0; }
-    #how-it-works h3{ margin:1.25rem 0 .5rem 0; color:#ffd27a; }
-    #how-it-works p, #how-it-works li{ line-height:1.55; }
-    #how-it-works .grid{ display:grid; grid-template-columns:1fr; gap:1rem; }
-    #how-it-works .card{
-      background:#222; border:1px solid #2d2d2d; border-radius:8px; padding:1rem;
-    }
-    #how-it-works .legend{ display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
-    #how-it-works .chip{
-      display:flex; align-items:center; gap:.5rem; padding:.5rem .65rem;
-      border-radius:6px; font-weight:600; color:#121212;
-    }
-    .chip.high{ background:#0B8043; color:#fff; }
-    .chip.mid{  background:#34A853; color:#fff; }
-    .chip.hold{ background:#FBC02D; color:#202124; }
-    .chip.drop{ background:#EA4335; color:#fff; }
-    #how-it-works .note{
-      background:#2a210a; border:1px solid #5a3; border-radius:8px; padding:12px; color:#ffd27a;
-    }
-    @media (min-width: 820px){
-      #how-it-works .grid{ grid-template-columns:1fr 1fr; }
-    }
-
-    /* ===== Screenshots area ===== */
-    #how-it-works .shots{ display:grid; gap:1rem; margin-top:1rem; }
-    #how-it-works .shots figure{
-      margin:0; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px;
-      overflow:hidden; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset;
-    }
-    #how-it-works .shots figure a{ display:block; }
-    #how-it-works .shots img{
-      width:100%; height:auto; display:block; background:#111;
-    }
-    #how-it-works .shots figcaption{
-      padding:.75rem .9rem; font-size:.95rem; color:#cfcfcf;
-      border-top:1px solid #2a2a2a;
-    }
-    #how-it-works .shots figcaption b{ color:#ffd27a; }
-    @media (min-width: 900px){
-      #how-it-works .shots{ grid-template-columns:1fr 1fr; }
-    }
-
-    #how-it-works .cta-row { margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap;}
-    #how-it-works .btn{
-      background:#ff8c00; color:#121212; font-weight:700; padding:.75rem 1rem;
-      border-radius:6px; text-decoration:none; display:inline-block;
-    }
-    #how-it-works .btn.ghost{
-      background:transparent; color:#ff8c00; border:1px solid #ff8c00;
-    }
-  </style>
-
   <h2>How the Self-Coaching Plan works</h2>
   <p>
     Pick a goal and training frequency, choose <strong>Gym</strong> or <strong>Home</strong>, then generate your plan.
-    You can reorder exercises and swap built-in alternatives. When you export, your Google Sheet tracks sessions and
+    You can reorder exercises and rotate <em>Alternatives</em> on the web. When you export, your Google Sheet tracks sessions and
     shows a <em>performance chip</em> so you instantly know if you’re trending up.
   </p>
 
@@ -181,10 +216,10 @@
     <div class="card">
       <h3>What happens when you click <em>Generate</em></h3>
       <ol>
-        <li>We load a curated library for your goal (Gym/Home) and chosen frequency.</li>
-        <li>We assemble days with <b>sensible exercise order</b>, plus <b>alternatives</b> for each.</li>
+        <li>We load a curated exercise library that matches your goal (Gym/Home) and weekly frequency.</li>
+        <li>We assemble days with a sensible exercise order and attach <b>Alternatives</b> to every item.</li>
         <li>If “Prefer machines” is on, the first 4–8 weeks bias to isolation/machines for safer skill-building.</li>
-        <li>We enforce variety (no duplicate names in a day) and enable drag-and-drop editing.</li>
+        <li><b>Editing & swaps happen on the web</b> (Generated Training). The Google Sheet is for logging and reports.</li>
       </ol>
       <div class="note" style="margin-top:.75rem;">
         <strong>Starter advice (appears after generation):</strong><br>
@@ -211,68 +246,79 @@
     </div>
   </div>
 
+  <!-- Extra explainer for auto-fill -->
+  <div class="card" style="margin-top:1rem;">
+    <h3>Auto-fill & logging basics</h3>
+    <p>
+      When a session is synced from the web — or when you paste performed sets (e.g., <code>60x10 / 60x9</code>) — the log row can
+      <b>auto-stamp the Date and compute Performance</b> vs your last comparable session in the same gym.
+      If the exercise differs from the last comparable one (e.g., you switched to an Alternative), that day is scored as
+      <b>Maintaining (score 0)</b> to avoid false negatives. Next time with the same exercise, it will compare normally.
+    </p>
+  </div>
+
   <!-- ===== Screenshots with captions ===== -->
-<div class="shots" style="margin-top:1rem;">
-  <!-- Plan builder / drag & drop -->
-  <figure>
-    <a href="Assets/screen-plan-drag.png.png" target="_blank" rel="noopener">
-      <img src="Assets/screen-plan-drag.png.png"
-           alt="Generated plan with drag-and-drop and exercise alternatives"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Plan builder.</b> Drag & drop days/exercises. Every item includes <i>Alternatives</i> and a swap icon for quick equipment-friendly changes.</figcaption>
-  </figure>
+  <div class="shots" style="margin-top:1rem;">
+    <!-- Plan/logbook view -->
+    <figure>
+      <a href="Assets/screen-plan-drag.png.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-plan-drag.png.png"
+             alt="Logbook view with generated plan rows and weekly window"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Logbook view.</b> Your generated plan as rows in the Sheet. Editing and alternatives are done on the web; the log keeps your performed sets and performance results.</figcaption>
+    </figure>
 
-  <!-- Daily Log with performance chip -->
-  <figure>
-    <a href="Assets/screen-daily-log.png.png" target="_blank" rel="noopener">
-      <img src="Assets/screen-daily-log.png.png"
-           alt="Daily Log with date, weight, sleep, food adherence, performance chip, calories, mood, stress"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Daily Log.</b> One row per day with dropdowns (Sleep, Food Adherence, Performance, Mood, Stress) plus Calories and Weight for weekly roll-ups.</figcaption>
-  </figure>
+    <!-- Daily Log with performance chip -->
+    <figure>
+      <a href="Assets/screen-daily-log.png.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-daily-log.png.png"
+             alt="Daily Log sheet with date, weight, sleep, adherence, performance chip, calories, mood, stress"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Daily Log.</b> One row per day with dropdowns (Sleep, Food Adherence, Performance, Mood, Stress) plus Calories and Weight for weekly roll-ups.</figcaption>
+    </figure>
 
-  <!-- Weekly feedback roll-up -->
-  <figure>
-    <a href="Assets/screen-weekly-feedback.png.png" target="_blank" rel="noopener">
-      <img src="Assets/screen-weekly-feedback.png.png"
-           alt="Weekly Feedback summary with averages and Performance Index"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Weekly Feedback.</b> Averages, total calories, a Performance Index, and short phase-aware guidance for weight & intake.</figcaption>
-  </figure>
+    <!-- Weekly feedback roll-up -->
+    <figure>
+      <a href="Assets/screen-weekly-feedback.png.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-weekly-feedback.png.png"
+             alt="Weekly Feedback summary with averages and Performance Index"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Weekly Feedback.</b> Averages, total calories, a Performance Index and short, phase-aware recommendations for weight & intake.</figcaption>
+    </figure>
 
-  <!-- Daily reports (export/success context) -->
-  <figure>
-    <a href="Assets/screen-daily-reports.png.png" target="_blank" rel="noopener">
-      <img src="Assets/screen-daily-reports.png.png"
-           alt="Auto-generated Daily Feedback reports"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Daily Feedback Reports.</b> The newest summary always appends at the top (A2). Clear “Focus today” items help you act the same day.</figcaption>
-  </figure>
+    <!-- Daily reports (export/success context) -->
+    <figure>
+      <a href="Assets/screen-daily-reports.png.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-daily-reports.png.png"
+             alt="Auto-generated Daily Feedback reports in the sheet"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Daily Feedback Reports.</b> The newest daily summary always lands on top (A2). Clear “Focus today” items help you act the same day.</figcaption>
+    </figure>
 
-  <!-- Optional: Config -->
-  <figure>
-    <a href="Assets/Config.png" target="_blank" rel="noopener">
-      <img src="Assets/Config.png"
-           alt="Config sheet — phase, time rules, diagnostics and toggles"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Config.</b> Control center for phase, timing rules, diagnostics and auto-weekly/manual runs.</figcaption>
-  </figure>
+    <!-- Optional: Config -->
+    <figure>
+      <a href="Assets/Config.png" target="_blank" rel="noopener">
+        <img src="Assets/Config.png"
+             alt="Config sheet — control center with phase, time rules and toggles"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Config.</b> Control center: phase, time rules, manual toggles and the auto-weekly switch.</figcaption>
+    </figure>
 
-  <!-- Optional: Web training list -->
-  <figure>
-    <a href="Assets/WebTraining.png" target="_blank" rel="noopener">
-      <img src="Assets/WebTraining.png"
-           alt="Web training list with alternatives and swap icons"
-           loading="lazy" decoding="async">
-    </a>
-    <figcaption><b>Web — Generated Training.</b> Clean exercise list with alternatives and one-tap swap.</figcaption>
-  </figure>
-</div>
+    <!-- Optional: Web training -->
+    <figure>
+      <a href="Assets/WebTraining.png" target="_blank" rel="noopener">
+        <img src="Assets/WebTraining.png"
+             alt="Web Generated Training list with alternatives and swap icons"
+             loading="lazy" decoding="async">
+      </a>
+      <figcaption><b>Web — Generated Training.</b> Edit order, rotate Alternatives and then export to the logbook.</figcaption>
+    </figure>
+  </div>
 
   <div class="cta-row">
     <a class="btn" href="#trackerForm">Generate my plan</a>
