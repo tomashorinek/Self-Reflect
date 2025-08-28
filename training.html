@@ -334,6 +334,106 @@
 <script type="module">
 import { generateTrainingPlan } from './planLogic.js';
 
+function parseExercise(el) {
+  // kompletní text z dlaždice (1. řádek = název – rozsah, 2. řádek = "Alt: ...")
+  const raw = el.innerText.replace(/\s+/g, ' ').trim();
+
+  // rozdělíme na "main" a "alt část"
+  const parts = raw.split(/Alt:\s*/i);
+  const main = (parts[0] || '').trim();
+  const altStr = (parts[1] || '').trim();
+
+  // rozdělení názvu a rozsahu – en-dash (–) nebo pomlčka (-)
+  let name = main;
+  let range = '';
+  const dashIdx = main.indexOf('–') >= 0 ? main.indexOf('–') : main.indexOf(' - ');
+  const dashSimple = dashIdx < 0 ? main.indexOf('-') : dashIdx;
+  if (dashSimple > -1) {
+    name = main.slice(0, dashSimple).trim();
+    range = main.slice(dashSimple + 1).trim();
+  }
+
+  const alternatives = altStr
+    ? altStr.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
+
+  return { raw, main, name, range, alternatives };
+}
+
+/* Poskládá strukturovaný JSON celého plánu – pro Apps Script */
+function collectPlanJSON() {
+  const container = document.getElementById('training-container');
+  const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
+  const gymNames =
+    loc === 'home'
+      ? ['Home']
+      : Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
+
+  const days = [];
+  container?.querySelectorAll('.day')?.forEach(dayEl => {
+    const title = dayEl.querySelector('h3')?.innerText.trim() || 'Day';
+    const exercises = [];
+    dayEl.querySelectorAll('.exercise')?.forEach(exEl => {
+      const parsed = parseExercise(exEl);
+      exercises.push({
+        name: parsed.name,
+        range: parsed.range,
+        alternatives: parsed.alternatives
+      });
+    });
+    days.push({ title, exercises });
+  });
+
+  return {
+    version: 2,
+    meta: { location: loc, gymNames },
+    days
+  };
+}
+window.collectPlanJSON = collectPlanJSON;
+
+function updateTrainingPlanContentInTextarea() {
+  const container = document.getElementById('training-container');
+  const textarea = document.getElementById('trainingPlanContent');
+  if (!container || !textarea) return;
+
+  const days = container.querySelectorAll('.day');
+  if (!days || days.length === 0) { textarea.value = ''; return; }
+
+  const out = [];
+  const gymNames = window.formData?.gymNames?.join(', ') || 'None';
+  out.push(`Gyms: ${gymNames}`, '');
+
+  days.forEach((day, i) => {
+    const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
+    out.push(title);
+
+    day.querySelectorAll('.exercise').forEach(exEl => {
+      const ex = parseExercise(exEl);
+      // hlavní řádek
+      out.push(`- ${ex.main}`);
+      // pokud máme alternativy, vypíšeme je na další řádek
+      if (ex.alternatives.length) {
+        out.push(`  Alt: ${ex.alternatives.join(', ')}`);
+      }
+    });
+
+    out.push(''); // prázdný řádek mezi dny
+  });
+
+  textarea.value = out.join('\n').trim();
+}
+
+function mountAdviceOnce(){
+  if (window.__adviceMounted) return;
+  const tpl  = document.getElementById('starterAdviceTpl');
+  const slot = document.getElementById('starterAdviceMount');
+  if (tpl && slot) {
+    slot.appendChild(tpl.content.cloneNode(true));
+    window.__adviceMounted = true;
+  }
+}
+
 function init() {
   try {
     const lastPlan = localStorage.getItem('lastPlan');
@@ -415,8 +515,8 @@ function init() {
       exportBtn.insertAdjacentHTML('beforebegin', '<button id="copyJsonBtn" type="button">Copy JSON</button>');
       const copyJsonBtn = document.getElementById('copyJsonBtn');
       copyJsonBtn.addEventListener('click', async () => {
-        const json = window.currentPlanJSON || '';
-        if (!json) { alert('No JSON available — generate a plan first.'); return; }
+        const obj = collectPlanJSON();
+        const json = JSON.stringify(obj || {}, null, 2);
         try {
           await navigator.clipboard.writeText(json);
           copyJsonBtn.textContent = 'JSON copied ✓';
@@ -428,44 +528,6 @@ function init() {
       });
     }
   })();
-
-  function updateTrainingPlanContentInTextarea() {
-    const container = document.getElementById('training-container');
-    const textarea = document.getElementById('trainingPlanContent');
-    if (!container || !textarea) return;
-
-    let output = '';
-    const days = container.querySelectorAll('.day');
-    if (!days || days.length === 0) { textarea.value = ''; return; }
-
-    const gymNames = window.formData?.gymNames?.join(', ') || 'None';
-    output += `Gyms: ${gymNames}\n\n`;
-
-    days.forEach((day, i) => {
-      const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
-      output += `${title}\n`;
-      day.querySelectorAll('.exercise').forEach(ex => {
-        const tempEx = ex.cloneNode(true);
-        tempEx.querySelectorAll('.alt-list, .alt-button').forEach(el => el.remove());
-        const cleanedText = tempEx.textContent.replace(/\s+/g, ' ').trim();
-        output += `- ${cleanedText}\n`;
-      });
-      output += '\n';
-    });
-
-    textarea.value = output.trim();
-  }
-  window.updateTrainingPlanContentInTextarea = updateTrainingPlanContentInTextarea;
-
-  function mountAdviceOnce(){
-    if (window.__adviceMounted) return;
-    const tpl  = document.getElementById('starterAdviceTpl');
-    const slot = document.getElementById('starterAdviceMount');
-    if (tpl && slot) {
-      slot.appendChild(tpl.content.cloneNode(true));
-      window.__adviceMounted = true;
-    }
-  }
 
   document.getElementById('trackerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -543,10 +605,19 @@ function init() {
 
     try {
       finalStatus.textContent = '📤 Uploading plan...';
+      const planObj = collectPlanJSON();
+      const planJson = JSON.stringify(planObj);
+
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userName, trainingPlan, gymNames })
+        body: JSON.stringify({
+          userName,
+          trainingPlan,   // textová verze (zpětná kompatibilita)
+          gymNames,
+          planJson,       // strukturovaná verze s alternativami
+          meta: { version: 2, location: loc }
+        })
       });
       const json = await res.json();
       if (json.success) {
