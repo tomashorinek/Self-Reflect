@@ -140,10 +140,26 @@
     @media (min-width: 820px){
       #how-it-works .grid{ grid-template-columns:1fr 1fr; }
     }
-    #how-it-works .shots{ display:grid; gap:.75rem; }
-    #how-it-works .shots img{
-      width:100%; height:auto; border-radius:6px; background:#111; border:1px solid #2a2a2a;
+
+    /* ===== Screenshots area ===== */
+    #how-it-works .shots{ display:grid; gap:1rem; margin-top:1rem; }
+    #how-it-works .shots figure{
+      margin:0; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px;
+      overflow:hidden; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset;
     }
+    #how-it-works .shots figure a{ display:block; }
+    #how-it-works .shots img{
+      width:100%; height:auto; display:block; background:#111;
+    }
+    #how-it-works .shots figcaption{
+      padding:.75rem .9rem; font-size:.95rem; color:#cfcfcf;
+      border-top:1px solid #2a2a2a;
+    }
+    #how-it-works .shots figcaption b{ color:#ffd27a; }
+    @media (min-width: 900px){
+      #how-it-works .shots{ grid-template-columns:1fr 1fr; }
+    }
+
     #how-it-works .cta-row { margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap;}
     #how-it-works .btn{
       background:#ff8c00; color:#121212; font-weight:700; padding:.75rem 1rem;
@@ -195,49 +211,53 @@
     </div>
   </div>
 
-  <div class="card" style="margin-top:1rem;">
-    <h3>Export & your Google Sheet</h3>
-    <ul>
-      <li><strong>Training Plan</strong> — your days & exercises (with alternatives).</li>
-      <li><strong>Daily Log</strong> — date, gym (or <em>Home</em>), notes, performance chip.</li>
-      <li><strong>Weekly Feedback</strong> — quick roll-ups and trends.</li>
-    </ul>
-    <p style="margin:.5rem 0 0 0;">
-      Multiple gyms? Add them in the generator — we compare progress <b>only within the same gym</b> so equipment differences don’t skew results.  
-      In <b>Home</b> mode the gym fields are hidden and sessions are logged under <b>“Home”</b>.
-    </p>
+  <!-- ===== Screenshots with captions ===== -->
+  <div class="shots">
+    <figure>
+      <a href="Assets/screen-plan-drag.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-plan-drag.png"
+             alt="Generated plan with drag-and-drop, each exercise has alternatives and a swap icon"
+             loading="lazy" decoding="async" fetchpriority="low">
+      </a>
+      <figcaption><b>Plan builder.</b> Drag-and-drop days/exercises; each item includes <em>Alternatives</em> and a swap icon to rotate equipment-friendly options.</figcaption>
+    </figure>
+
+    <figure>
+      <a href="Assets/screen-daily-log.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-daily-log.png"
+             alt="Daily Log sheet with date, weight, sleep, food adherence, performance chip, calories, mood, stress"
+             loading="lazy" decoding="async" fetchpriority="low">
+      </a>
+      <figcaption><b>Daily Log.</b> One row per day. Color-coded dropdowns (Sleep, Food Adherence, Performance, Mood, Stress) + Calories and Weight for weekly roll-ups.</figcaption>
+    </figure>
+
+    <figure>
+      <a href="Assets/screen-weekly-feedback.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-weekly-feedback.png"
+             alt="Weekly Feedback summary with averages, Performance Index and status analysis"
+             loading="lazy" decoding="async" fetchpriority="low">
+      </a>
+      <figcaption><b>Weekly Feedback.</b> Averages, total calories, Performance Index and a short, phase-aware recommendation for weight & intake.</figcaption>
+    </figure>
+
+    <figure>
+      <a href="Assets/screen-daily-reports.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-daily-reports.png"
+             alt="Auto-generated Daily Feedback reports, newest entry appended at the top"
+             loading="lazy" decoding="async" fetchpriority="low">
+      </a>
+      <figcaption><b>Daily Feedback Reports.</b> Newest daily summary always lands on top (A2). Clear focus items help you act the same day.</figcaption>
+    </figure>
+
+    <figure>
+      <a href="Assets/screen-daily-reports-close.png" target="_blank" rel="noopener">
+        <img src="Assets/screen-daily-reports-close.png"
+             alt="Close-up of the right information panel that explains headers and behavior"
+             loading="lazy" decoding="async" fetchpriority="low">
+      </a>
+      <figcaption><b>Info panel detail.</b> Quick legend and behavior hints so anyone can understand the sheet in seconds.</figcaption>
+    </figure>
   </div>
-
-  <div class="card" style="margin-top:1rem;">
-    <h3>Mini-FAQ</h3>
-    <p><b>Do I need a trainer?</b> Not required. This is a low-cost way to learn consistency and self-coaching.
-       If you later work with a coach, your clean data & logs make collaboration faster and cheaper.</p>
-    <p style="margin:.25rem 0 0 0;"><b>How do I log sets?</b> Type like <code>60x10 / 60x9 / 55x11</code> directly into the plan cells.</p>
-    <p style="margin:.25rem 0 0 0;"><b>Can I change exercises?</b> Yes — drag to reorder, click the ↻ icon to rotate alternatives.</p>
-  </div>
-
-<div class="shots" style="margin-top:1rem;">
-  <!-- Plan builder / drag & drop -->
-  <img src="Assets/screen-plan-drag.png"
-       alt="Generated plan with drag-and-drop and alternatives"
-       loading="lazy" />
-
-  <!-- Daily Log with performance chip -->
-  <img src="Assets/screen-daily-log.png"
-       alt="Daily Log entry with performance chip result"
-       loading="lazy" />
-
-  <!-- Weekly feedback roll-up -->
-  <img src="Assets/screen-weekly-feedback.png"
-       alt="Weekly Feedback summary generated in the sheet"
-       loading="lazy" />
-
-  <!-- Daily reports (export/success context) -->
-  <img src="Assets/screen-daily-reports.png"
-       alt="Auto-generated Daily Feedback reports in the sheet"
-       loading="lazy" />
-</div>
-
 
   <div class="cta-row">
     <a class="btn" href="#trackerForm">Generate my plan</a>
