@@ -661,6 +661,7 @@ const supplementProfile = {
 // ===== /Supplements profile =====
     // Payload – planJson posíláme jako OBJEKT (žádné dvojí stringify)
     const payload = {
+       action: "createAndImport",
       userName,
       trainingPlan,   // text pro zpětnou kompatibilitu
       gymNames,
