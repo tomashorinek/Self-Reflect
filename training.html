@@ -165,6 +165,36 @@
 
     <label for="email">Your email (optional):</label>
     <input type="email" id="email" placeholder="you@example.com" />
+<!-- ===== Supplements (optional) ===== -->
+<label for="weightKg">Body weight (kg) (optional):</label>
+<input type="number" id="weightKg" min="30" max="250" step="0.1" placeholder="e.g., 82.5" />
+
+<label>What do you want help with? (optional)</label>
+<div class="row">
+  <label class="inline"><input type="checkbox" class="suppIssue" value="sleep"> Sleep</label>
+  <label class="inline"><input type="checkbox" class="suppIssue" value="stress"> Stress</label>
+  <label class="inline"><input type="checkbox" class="suppIssue" value="cramps"> Cramps</label>
+  <label class="inline"><input type="checkbox" class="suppIssue" value="lowBP"> Low blood pressure</label>
+  <label class="inline"><input type="checkbox" class="suppIssue" value="highBP"> High blood pressure</label>
+  <label class="inline"><input type="checkbox" class="suppIssue" value="digestion"> Digestion issues</label>
+</div>
+
+<label for="dietType">Diet type (optional)</label>
+<select id="dietType">
+  <option value="">Prefer not to say</option>
+  <option value="omnivore">Omnivore</option>
+  <option value="vegetarian">Vegetarian</option>
+  <option value="vegan">Vegan</option>
+</select>
+
+<label for="budgetTier">Budget (optional)</label>
+<select id="budgetTier">
+  <option value="">Doesn't matter</option>
+  <option value="low">Low</option>
+  <option value="mid">Medium</option>
+  <option value="high">High</option>
+</select>
+<!-- ===== /Supplements ===== -->
 
     <button type="submit">Generate My Plan</button>
   </form>
@@ -458,6 +488,11 @@ function init() {
   const addGymButton = document.getElementById('addGymButton');
   const gymsBlock = document.getElementById('gymsBlock');
   const preferMachinesEl = document.getElementById('preferMachines');
+  // Supplements (optional)
+  const weightKgEl = document.getElementById('weightKg');
+  const dietTypeEl = document.getElementById('dietType');
+  const budgetTierEl = document.getElementById('budgetTier');
+
   const locRadios = Array.from(document.querySelectorAll('input[name="loc"]'));
 
   function addGymField(value = '') {
@@ -610,12 +645,25 @@ function init() {
     // Strukturovaný plán (v2: dny, cviky, alternativy)
     const planObj = collectPlanJSON();
 
+    // ===== Supplements profile (optional) =====
+const weightKgRaw = (weightKgEl?.value || '').trim();
+const weightKg = parseFloat(weightKgRaw);
+const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
+
+const supplementProfile = {
+  weightKg: Number.isFinite(weightKg) ? weightKg : null,
+  dietType: (dietTypeEl?.value || '').trim() || null,
+  budget: (budgetTierEl?.value || '').trim() || null,
+  issues: suppIssues
+};
+// ===== /Supplements profile =====
     // Payload – planJson posíláme jako OBJEKT (žádné dvojí stringify)
     const payload = {
       userName,
       trainingPlan,   // text pro zpětnou kompatibilitu
       gymNames,
       planJson: planObj,
+      supplementProfile,
       meta: {
         version: 2,
         location: loc,
