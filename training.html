@@ -651,11 +651,13 @@ const weightKg = parseFloat(weightKgRaw);
 const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
 
 const supplementProfile = {
+  mode: "minimal", // ✅ NEW: default minimal pills
   weightKg: Number.isFinite(weightKg) ? weightKg : null,
   dietType: (dietTypeEl?.value || '').trim() || null,
   budget: (budgetTierEl?.value || '').trim() || null,
   issues: suppIssues
 };
+
 // ===== /Supplements profile =====
     // Payload – planJson posíláme jako OBJEKT (žádné dvojí stringify)
     const payload = {
