@@ -138,6 +138,28 @@ select,input,textarea{
   outline: none;
   transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
+  /* ===== DARK SELECT FIX (Windows) ===== */
+select{
+  color-scheme: dark;           /* důležité */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink-dim) 50%),
+    linear-gradient(135deg, var(--ink-dim) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 38px;
+}
+
+/* rozbalené položky (ne všude 100%, ale často pomůže) */
+select option{
+  background: #15151b;
+  color: var(--ink);
+}
 select:focus,input:focus,textarea:focus{
   border-color: rgba(255,140,0,.45);
   background: rgba(255,255,255,.06);
@@ -659,14 +681,23 @@ function parseExercise(el) {
   const altStr = (parts[1] || '').trim();
 
   // rozdělení názvu a rozsahu – en-dash (–) nebo pomlčka (-)
-  let name = main;
-  let range = '';
-  const dashIdx = main.indexOf('–') >= 0 ? main.indexOf('–') : main.indexOf(' - ');
-  const dashSimple = dashIdx < 0 ? main.indexOf('-') : dashIdx;
-  if (dashSimple > -1) {
-    name = main.slice(0, dashSimple).trim();
-    range = main.slice(dashSimple + 1).trim();
-  }
+let name = main;
+let range = '';
+
+// split only on separators that are very likely "name — range"
+const sepCandidates = [' – ', ' - '];
+let cut = -1;
+let sepLen = 0;
+
+for (const sep of sepCandidates) {
+  const idx = main.indexOf(sep);
+  if (idx > -1) { cut = idx; sepLen = sep.length; break; }
+}
+
+if (cut > -1) {
+  name = main.slice(0, cut).trim();
+  range = main.slice(cut + sepLen).trim();
+}
 
   const alternatives = altStr
     ? altStr.split(',').map(s => s.trim()).filter(Boolean)
@@ -716,8 +747,8 @@ function updateTrainingPlanContentInTextarea() {
   if (!days || days.length === 0) { textarea.value = ''; return; }
 
   const out = [];
-  const gymNames = window.formData?.gymNames?.join(', ') || 'None';
-  out.push(`Gyms: ${gymNames}`, '');
+// IMPORTANT: keep text format stable for legacy parsers in Apps Script
+// (do not add headers like "Gyms:", because it shifts row mapping)
 
   days.forEach((day, i) => {
     const title = day.querySelector('h3')?.innerText.trim() || `Day ${i + 1}`;
