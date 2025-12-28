@@ -4,45 +4,281 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Self-Coaching Plan — Webbyfe</title>
-  <style>
-    :root{
-      --bg: #0d0d0d; --bg2:#141414; --card:#1b1b1b; --line:#2b2b2b;
-      --fg:#eaeaea; --muted:#bdbdbd; --brand:#ff8c00; --accent:#ffd27a;
-    }
-    *{box-sizing:border-box}
-    body{margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg);}
-    a{color:var(--brand); text-decoration:none}
-    .wrap{max-width:960px; margin:0 auto; padding:2rem 1.25rem;}
-    .hero{
-      margin-top:2rem; background:#121212; border:1px solid var(--line); border-radius:12px; padding:2rem;
-    }
-    .hero h1{margin:0 0 .5rem 0; color:var(--brand); font-size:2.2rem; line-height:1.2;}
-    .hero p{margin:.25rem 0; color:var(--muted); font-size:1.05rem;}
-    .cta{margin-top:1rem; display:flex; gap:.75rem; flex-wrap:wrap}
-    .btn{background:var(--brand); color:#121212; padding:.85rem 1.1rem; border-radius:10px; font-weight:700; display:inline-block}
-    .btn.ghost{background:transparent; color:var(--brand); border:1px solid var(--brand)}
-    .grid{display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem}
-    @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
-    .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1rem;}
-    .card h3{color:var(--accent); margin:.25rem 0 .5rem 0}
-    .muted{color:var(--muted)}
-    .disclaimer{background:#1b1710; border:1px solid #5a3; color:#ffd27a; border-radius:10px; padding:1rem; margin-top:1rem}
-    footer{opacity:.7; font-size:.9rem; padding:2rem 0; text-align:center}
-  </style>
+<style>
+  :root{
+    --bg:#0b0b0f;
+    --bg-2:#101016;
+    --panel:rgba(21,21,27,.92);
+    --card:rgba(255,255,255,.03);
+    --line:rgba(255,255,255,.10);
+    --line-2:rgba(255,255,255,.07);
+    --ink:#f2f2f3;
+    --ink-dim:#b9b9c3;
+    --brand:#ff8c00;
+    --brand-2:#ffb14a;
+
+    --r-lg:16px;
+    --r-md:12px;
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(255,140,0,.22), transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, rgba(153,69,255,.18), transparent 55%),
+      radial-gradient(700px 400px at 40% 95%, rgba(0,255,136,.10), transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  }
+
+  /* subtle grain overlay */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.08;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+
+  a{color:var(--brand); text-decoration:none}
+  .wrap{max-width:980px; margin:0 auto; padding:42px 18px 70px;}
+  @media (min-width:900px){ .wrap{padding:60px 22px 90px;} }
+
+  /* HERO */
+  .hero{
+    border-radius:var(--r-lg);
+    border:1px solid var(--line);
+    background:var(--panel);
+    backdrop-filter: blur(10px);
+    box-shadow:var(--shadow);
+    padding:22px;
+    overflow:hidden;
+    position:relative;
+  }
+  @media (min-width:900px){ .hero{padding:28px;} }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    background:
+      radial-gradient(520px 260px at 18% 18%, rgba(255,140,0,.18), transparent 65%),
+      radial-gradient(520px 260px at 85% 25%, rgba(153,69,255,.14), transparent 65%);
+    pointer-events:none;
+    opacity:.9;
+  }
+
+  .hero-inner{
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    z-index:1;
+  }
+  @media(min-width:900px){
+    .hero-inner{grid-template-columns: 1.2fr .8fr; align-items:center; gap:22px;}
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:rgba(255,255,255,.03);
+    color:var(--ink-dim);
+    font-weight:800;
+    letter-spacing:.2px;
+    font-size:12px;
+    width:max-content;
+  }
+
+  .hero h1{
+    margin:10px 0 8px 0;
+    font-size:34px;
+    line-height:1.08;
+    letter-spacing:-.6px;
+    color:var(--ink);
+  }
+  @media(min-width:900px){ .hero h1{font-size:40px;} }
+
+  .hero p{margin:0 0 10px 0; color:var(--ink-dim); max-width:62ch; line-height:1.55;}
+  .hero .subline{margin-top:2px; opacity:.95;}
+
+  .cta{
+    margin-top:14px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px 14px;
+    border-radius:14px;
+    font-weight:900;
+    letter-spacing:.2px;
+    border:1px solid transparent;
+    transition: transform .12s ease, filter .12s ease, background .12s ease, border-color .12s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); filter:brightness(1.05); }
+
+  .btn.primary{
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+    color:#121212;
+    box-shadow: 0 12px 28px rgba(255,140,0,.18);
+  }
+  .btn.link{
+    background:transparent;
+    border:1px solid var(--line-2);
+    color:var(--ink);
+    opacity:.92;
+  }
+  .btn.link:hover{
+    border-color: rgba(255,140,0,.35);
+    background: rgba(255,255,255,.03);
+  }
+
+  .mini{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:10px;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(255,140,0,.10);
+    border:1px solid rgba(255,140,0,.18);
+    color:var(--brand-2);
+    font-weight:800;
+    font-size:12px;
+  }
+
+  /* GRID */
+  .grid{display:grid; grid-template-columns:1fr; gap:14px; margin-top:14px;}
+  @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr;} }
+  
+  .section{ margin-top:14px; }
+  @media(min-width:900px){ .section{ margin-top:18px; } }
+
+  .card{
+    background:var(--panel);
+    backdrop-filter: blur(10px);
+    border:1px solid var(--line);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow);
+    padding:16px;
+  }
+  .card h3{
+    margin:0 0 10px 0;
+    color:var(--brand-2);
+    letter-spacing:-.2px;
+  }
+  .muted{color:var(--ink-dim); line-height:1.6;}
+  ul,ol{margin:10px 0 0 18px; color:var(--ink-dim); line-height:1.6;}
+  code{background:rgba(255,255,255,.06); padding:.12rem .35rem; border-radius:8px; border:1px solid var(--line-2); color:var(--ink);}
+
+  /* small “value blocks” inside cards */
+  .keypoints{
+    display:grid;
+    gap:10px;
+    margin-top:10px;
+  }
+  .kp{
+    border:1px solid var(--line-2);
+    background:rgba(255,255,255,.03);
+    border-radius:14px;
+    padding:12px;
+  }
+  .kp b{color:var(--ink)}
+  .kp p{margin:6px 0 0 0; color:var(--ink-dim);}
+
+  /* Disclaimer - softer */
+  .disclaimer{
+    margin-top:14px;
+    border-radius:var(--r-lg);
+    border:1px solid rgba(255,140,0,.18);
+    background:rgba(255,140,0,.06);
+    color:var(--ink-dim);
+    padding:14px 16px;
+    font-size:.92rem;
+    line-height:1.55;
+  }
+  .disclaimer strong{color:var(--brand-2);}
+
+  footer{
+    opacity:.7;
+    font-size:.9rem;
+    padding:26px 0 0;
+    text-align:center;
+    color:var(--ink-dim);
+  }
+</style>
+
 </head>
 <body>
   <main class="wrap">
     <section class="hero">
-      <h1>Coach yourself — faster, cheaper, and trainer-friendly</h1>
-      <p>No subscriptions to view your data. Generate a plan, log your sets, and get instant feedback.</p>
-      <p class="muted">A smart runway for beginners and a clean data layer for future collaboration with a coach.</p>
-      <div class="cta">
-        <a class="btn" href="training.html">Open the Generator</a>
-        <a class="btn ghost" href="#how">See how it works</a>
-      </div>
-    </section>
+  <div class="hero-inner">
+    <div>
+      <div class="badge">Webbyfe • Self-Coach</div>
 
-    <section id="why" class="grid" style="margin-top:1rem">
+      <h1>Build your training system.<br>Not just another plan.</h1>
+
+      <p>
+        Generate a plan, log your sets, and get instant feedback — in a clean Google Sheets logbook you own.
+      </p>
+      <p class="subline muted">
+        Start solo now. Bring clean data to a coach later.
+      </p>
+
+      <div class="cta">
+        <a class="btn primary" href="training.html">Start building my plan</a>
+        <a class="btn link" href="#how">See how it works →</a>
+      </div>
+
+      <div class="mini">
+        <span class="pill">Plan</span>
+        <span class="pill">Logbook</span>
+        <span class="pill">Feedback</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin:0; box-shadow:none;">
+      <h3 style="margin-bottom:8px;">What you’ll feel in week 1</h3>
+      <div class="keypoints">
+        <div class="kp">
+          <b>Clarity</b>
+          <p>No guesswork: up / hold / down based on your last comparable session.</p>
+        </div>
+        <div class="kp">
+          <b>Consistency</b>
+          <p>A simple plan that’s easy to execute — and easy to track.</p>
+        </div>
+        <div class="kp">
+          <b>Transferable data</b>
+          <p>When you hire a coach, you already have clean logs and trends.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <section id="why" class="grid section">
       <div class="card">
         <h3>Why it’s different</h3>
         <ul>
@@ -61,7 +297,7 @@
       </div>
     </section>
 
-    <section id="how" class="grid" style="margin-top:1rem">
+    <section id="how" class="grid section">
       <div class="card">
         <h3>How it works</h3>
         <ol>
@@ -80,17 +316,12 @@
       </div>
     </section>
 
-    <section class="disclaimer">
+    <section class="disclaimer section">
       <strong>Health & Legal Notice</strong><br>
       The Self-Coaching Plan is for educational purposes only and is not medical advice.
       Consult a qualified professional before starting any exercise program, especially if you
       have injuries, conditions, or concerns about exercise readiness. Use at your own risk.
     </section>
-
-    <div class="cta" style="margin-top:1rem">
-      <a class="btn" href="training.html">Start for free</a>
-      <a class="btn ghost" href="training.html#how-it-works">Learn more</a>
-    </div>
 
     <footer>
       © <script>document.write(new Date().getFullYear())</script> Webbyfe — Self-Coaching Plan
