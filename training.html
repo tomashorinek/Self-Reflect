@@ -337,6 +337,49 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 #how-it-works .chip{
   border-radius: 12px;
 }
+  .issue-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+  margin-top: 8px;
+}
+@media (min-width: 620px){
+  .issue-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.pill{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid var(--line-2);
+  background: rgba(255,255,255,.03);
+  cursor:pointer;
+  user-select:none;
+  margin:0; /* důležité proti default label marginům */
+}
+.pill input{ 
+  width:18px; height:18px;
+  accent-color: var(--brand);
+  margin:0;
+}
+.pill span{
+  font-weight:800;
+  color: var(--ink);
+  line-height:1.2;
+}
+.pill:has(input:checked){
+  border-color: rgba(255,140,0,.45);
+  background: rgba(255,140,0,.12);
+}
+  .pill:hover{
+  background: rgba(255,255,255,.05);
+  transform: translateY(-1px);
+}
+.pill{
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
 </style>
 <!-- Sortable.js (for DnD in planLogic.js) -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -391,11 +434,10 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 </div>
 
 <div class="row">
-  <label class="switch-row">
-    <input id="preferMachines" type="checkbox" checked>
-    <span class="switch-ui" aria-hidden="true"></span>
-    <span class="switch-text">Prefer machines in the first 4–8 weeks</span>
-  </label>
+  <div class="advice-card" style="margin-top:12px;">
+    <b>Beginner tip</b><br>
+    Start with machines for 4–8 weeks to learn control & full ROM.
+  </div>
 </div>
 
 
@@ -412,14 +454,15 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 <input type="number" id="weightKg" min="30" max="250" step="0.1" placeholder="e.g., 82.5" />
 
 <label>What do you want help with? (optional)</label>
-<div class="row">
-  <label class="inline"><input type="checkbox" class="suppIssue" value="sleep"> Sleep</label>
-  <label class="inline"><input type="checkbox" class="suppIssue" value="stress"> Stress</label>
-  <label class="inline"><input type="checkbox" class="suppIssue" value="cramps"> Cramps</label>
-  <label class="inline"><input type="checkbox" class="suppIssue" value="lowBP"> Low blood pressure</label>
-  <label class="inline"><input type="checkbox" class="suppIssue" value="highBP"> High blood pressure</label>
-  <label class="inline"><input type="checkbox" class="suppIssue" value="digestion"> Digestion issues</label>
+<div class="issue-grid">
+  <label class="pill"><input type="checkbox" class="suppIssue" value="sleep"><span>Sleep</span></label>
+  <label class="pill"><input type="checkbox" class="suppIssue" value="stress"><span>Stress</span></label>
+  <label class="pill"><input type="checkbox" class="suppIssue" value="cramps"><span>Cramps</span></label>
+  <label class="pill"><input type="checkbox" class="suppIssue" value="lowBP"><span>Low blood pressure</span></label>
+  <label class="pill"><input type="checkbox" class="suppIssue" value="highBP"><span>High blood pressure</span></label>
+  <label class="pill"><input type="checkbox" class="suppIssue" value="digestion"><span>Digestion issues</span></label>
 </div>
+
 
 <label for="dietType">Diet type (optional)</label>
 <select id="dietType">
@@ -729,7 +772,7 @@ function init() {
   const gymFields = document.getElementById('gymFields');
   const addGymButton = document.getElementById('addGymButton');
   const gymsBlock = document.getElementById('gymsBlock');
-  const preferMachinesEl = document.getElementById('preferMachines');
+  const preferMachinesEl = document.getElementById('preferMachines'); // může být null (tip-only UI)
   // Supplements (optional)
   const weightKgEl = document.getElementById('weightKg');
   const dietTypeEl = document.getElementById('dietType');
@@ -830,7 +873,7 @@ function init() {
       meta: {
         trainingLocation: loc,
         gymName: (loc === 'home') ? 'Home' : (gymNames[0] || 'My Gym'),
-        preferMachinesFirstBlock: !!preferMachinesEl.checked
+        ppreferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
       }
     };
 
@@ -912,7 +955,7 @@ const supplementProfile = {
       meta: {
         version: 2,
         location: loc,
-        preferMachinesFirstBlock: !!preferMachinesEl.checked
+        preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
       },
       flags: {
         createDropdowns: true,
