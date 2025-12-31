@@ -257,6 +257,65 @@ select:focus,input:focus,textarea:focus{
   border:1px solid var(--line-2);
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
+  /* ===== Export notice (premium loader) ===== */
+.export-notice{
+  border: 1px solid rgba(255,140,0,.22);
+  background: rgba(255,140,0,.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+.export-notice__top{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.export-dot{
+  width:10px; height:10px;
+  border-radius:999px;
+  margin-top:6px;
+  background: var(--brand);
+  box-shadow: 0 0 0 6px rgba(255,140,0,.15);
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+@keyframes pulseDot{
+  0%,100%{ transform: scale(1); opacity:.9; }
+  50%{ transform: scale(1.15); opacity:1; }
+}
+.export-notice__title{
+  font-weight: 950;
+}
+.export-notice__sub{
+  color: var(--ink-dim);
+  margin-top:2px;
+}
+.export-notice__meta{
+  margin-top:10px;
+  font-size:12px;
+  color: var(--ink-dim);
+  font-weight:700;
+}
+.export-bar{
+  margin-top:10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.export-bar__fill{
+  height:100%;
+  width: 8%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+  transition: width .6s ease;
+}
+.export-notice__tips{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+  font-size:13px;
+}
 .remove-btn:hover{
   background: rgba(255,51,51,.18);
   border-color: rgba(255,51,51,.35);
@@ -402,6 +461,69 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 .pill{
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
+  /* ===== Export notice (premium loader) ===== */
+.export-notice{
+  border: 1px solid rgba(255,140,0,.22);
+  background: rgba(255,140,0,.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+.export-notice__top{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.export-dot{
+  width:10px; height:10px;
+  border-radius:999px;
+  margin-top:6px;
+  background: var(--brand);
+  box-shadow: 0 0 0 6px rgba(255,140,0,.15);
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+@keyframes pulseDot{
+  0%,100%{ transform: scale(1); opacity:.9; }
+  50%{ transform: scale(1.15); opacity:1; }
+}
+.export-notice__title{
+  font-weight: 950;
+  letter-spacing: -.2px;
+}
+.export-notice__sub{
+  color: var(--ink-dim);
+  margin-top:2px;
+  line-height: 1.25;
+}
+.export-notice__meta{
+  margin-top:10px;
+  color: var(--ink-dim);
+  font-weight: 750;
+  font-size: 12px;
+}
+.export-bar{
+  margin-top:10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.export-bar__fill{
+  height:100%;
+  width: 8%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+  transition: width .6s ease;
+}
+.export-notice__tips{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+  color: rgba(242,242,243,.92);
+  font-size: 13px;
+}
+
 </style>
 <!-- Sortable.js (for DnD in planLogic.js) -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -507,25 +629,50 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
   </form>
 
   <div class="output" id="outputBox" style="display:none">
-    <div id="starterAdviceMount"></div>  <!-- advice appears here after generation -->
-    <h2>Your Training Plan</h2>
+  <div id="starterAdviceMount"></div>  <!-- advice appears here after generation -->
+  <h2>Your Training Plan</h2>
 
-    <div id="training-container"></div>
-    <textarea id="trainingPlanContent" readonly></textarea>
-    <button id="continueButton">Export Plan</button>
-    <div id="finalStatus"></div>
+  <div id="training-container"></div>
+  <textarea id="trainingPlanContent" readonly></textarea>
 
-    <!-- Brief explainer -->
-    <details style="margin-top:1rem">
-      <summary><b>How this works (quick)</b></summary>
-      <div style="margin-top:.5rem;opacity:.9">
-        <p><b>Logging:</b> write sets as <code>weight x reps</code> (e.g., <code>60x10 / 60x9</code>).</p>
-        <p><b>Performance chip:</b> Highly Progressive / Progressive / Maintaining / Temporary Setback — based on volume/weight/reps vs. your previous comparable session (same gym).</p>
-        <p><b>Progression:</b> add a rep or small load with full ROM & control; if form slips, hold or reduce.</p>
-        <p><b>Export:</b> copy the plan, copy JSON, or send to your Logbook Google Sheet.</p>
+  <button id="continueButton" type="button">Export Plan</button>
+  <div id="finalStatus"></div>
+
+  <div id="exportNotice" style="display:none; margin-top:10px;">
+    <div class="export-notice">
+      <div class="export-notice__top">
+        <span class="export-dot"></span>
+        <div>
+          <div class="export-notice__title">Creating your Logbook…</div>
+          <div class="export-notice__sub">
+            This step can take <b>30–70 seconds</b>. Please keep this tab open.
+          </div>
+        </div>
       </div>
-    </details>
+
+      <div class="export-notice__meta" id="exportMeta">0s • sending request</div>
+
+      <div class="export-bar">
+        <div class="export-bar__fill" id="exportBarFill"></div>
+      </div>
+
+      <div class="export-notice__tips">
+        <span>✅ Your plan is being generated in Google Sheets</span>
+        <span>⛔ Don’t refresh or close the page</span>
+      </div>
+    </div>
   </div>
+
+  <!-- Brief explainer -->
+  <details style="margin-top:1rem">
+    <summary><b>How this works (quick)</b></summary>
+    <div style="margin-top:.5rem;opacity:.9">
+      <p><b>Logging:</b> write sets as <code>weight x reps</code> (e.g., <code>60x10 / 60x9</code>).</p>
+      <p><b>Performance chip:</b> Highly Progressive / Progressive / Maintaining / Temporary Setback — based on volume/weight/reps vs. your previous comparable session (same gym).</p>
+      <p><b>Progression:</b> add a rep or small load with full ROM & control; if form slips, hold or reduce.</p>
+      <p><b>Export:</b> copy the plan, copy JSON, or send to your Logbook Google Sheet.</p>
+    </div>
+  </details>
 </div>
 
 <!-- Template for advice (injected only after generation) -->
@@ -904,7 +1051,7 @@ function init() {
       meta: {
         trainingLocation: loc,
         gymName: (loc === 'home') ? 'Home' : (gymNames[0] || 'My Gym'),
-        ppreferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
+        preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
       }
     };
 
@@ -934,12 +1081,54 @@ function init() {
   finalStatus.textContent = '';
   finalStatus.style.color = '#ffa500';
 
+  // Loader UI refs
+  const exportBtn = document.getElementById('continueButton');
+  const exportNotice = document.getElementById('exportNotice');
+  const exportMeta = document.getElementById('exportMeta');
+  const exportBarFill = document.getElementById('exportBarFill');
+
+  // UI: start loading state
+  exportBtn.disabled = true;
+  const oldBtnText = exportBtn.textContent;
+  exportBtn.textContent = 'Exporting…';
+  exportBtn.style.opacity = '0.85';
+
+  const noticeTimer = setTimeout(() => {
+    exportNotice.style.display = 'block';
+  }, 600);
+
+  const tStart = Date.now();
+  const tick = () => {
+    const s = Math.floor((Date.now() - tStart) / 1000);
+    const pct = Math.min(95, Math.max(8, Math.floor((s / 70) * 100)));
+    exportBarFill.style.width = pct + '%';
+
+    let msg = 'sending request';
+    if (s >= 8) msg = 'creating your sheet copy';
+    if (s >= 20) msg = 'importing your plan';
+    if (s >= 40) msg = 'applying styling & finalizing';
+    if (s >= 65) msg = 'almost there…';
+
+    exportMeta.textContent = `${s}s • ${msg}`;
+  };
+
+  tick();
+  const intervalId = setInterval(tick, 1000);
+
   // vždy nejdřív znovu poskládej textové znění
   updateTrainingPlanContentInTextarea();
 
   const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
   if (!trainingPlan) {
-    finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first, or ensure it contains exercises.';
+    clearInterval(intervalId);
+    clearTimeout(noticeTimer);
+
+    exportBtn.disabled = false;
+    exportBtn.textContent = oldBtnText;
+    exportBtn.style.opacity = '';
+    exportNotice.style.display = 'none';
+
+    finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first.';
     finalStatus.style.color = '#ff3333';
     return;
   }
@@ -958,28 +1147,24 @@ function init() {
   try {
     finalStatus.textContent = '📤 Uploading plan...';
 
-    // Strukturovaný plán (v2: dny, cviky, alternativy)
     const planObj = collectPlanJSON();
 
-    // ===== Supplements profile (optional) =====
-const weightKgRaw = (weightKgEl?.value || '').trim();
-const weightKg = parseFloat(weightKgRaw);
-const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
+    const weightKgRaw = (weightKgEl?.value || '').trim();
+    const weightKg = parseFloat(weightKgRaw);
+    const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
 
-const supplementProfile = {
-  mode: "minimal", // ✅ NEW: default minimal pills
-  weightKg: Number.isFinite(weightKg) ? weightKg : null,
-  dietType: (dietTypeEl?.value || '').trim() || null,
-  budget: (budgetTierEl?.value || '').trim() || null,
-  issues: suppIssues
-};
+    const supplementProfile = {
+      mode: "minimal",
+      weightKg: Number.isFinite(weightKg) ? weightKg : null,
+      dietType: (dietTypeEl?.value || '').trim() || null,
+      budget: (budgetTierEl?.value || '').trim() || null,
+      issues: suppIssues
+    };
 
-// ===== /Supplements profile =====
-    // Payload – planJson posíláme jako OBJEKT (žádné dvojí stringify)
     const payload = {
-       action: "createAndImport",
+      action: "createAndImport",
       userName,
-      trainingPlan,   // text pro zpětnou kompatibilitu
+      trainingPlan,
       gymNames,
       planJson: planObj,
       supplementProfile,
@@ -1004,11 +1189,24 @@ const supplementProfile = {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const json = await res.json();
-    if (json.success) {
-      finalStatus.innerHTML = `✅ <a href="${json.url}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
+
+    if (json.ok || json.success) {
+      const sheetUrl = json.url || (json.data && json.data.url) || '';
+
+      finalStatus.innerHTML = `✅ <a href="${sheetUrl}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
       finalStatus.style.color = '#00ff88';
 
-      // ulož cache pro "Last plan loaded from cache"
+      clearInterval(intervalId);
+      clearTimeout(noticeTimer);
+
+      exportBarFill.style.width = '100%';
+      exportMeta.textContent = 'Done • opening link';
+      exportNotice.style.display = 'none';
+
+      exportBtn.disabled = false;
+      exportBtn.textContent = 'Export again';
+      exportBtn.style.opacity = '';
+
       try {
         localStorage.setItem('lastPlan', JSON.stringify(planObj));
         localStorage.setItem('lastFormData', JSON.stringify(window.formData || {}));
@@ -1016,12 +1214,23 @@ const supplementProfile = {
     } else {
       throw new Error(json.error || 'Unexpected server error.');
     }
+
   } catch (err) {
+    clearInterval(intervalId);
+    clearTimeout(noticeTimer);
+
+    exportBtn.disabled = false;
+    exportBtn.textContent = oldBtnText;
+    exportBtn.style.opacity = '';
+
+    exportMeta.textContent = 'Error • please try again';
+    exportBarFill.style.width = '12%';
+    exportNotice.style.display = 'block';
+
     finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
     finalStatus.style.color = '#ff3333';
   }
 });
-}
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
@@ -1031,5 +1240,6 @@ if (document.readyState === 'loading') {
 
 console.log('[conditioning] loaded', window.conditioningFrequencies && Object.keys(window.conditioningFrequencies));
 </script>
+</div>
 </body>
 </html>
