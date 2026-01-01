@@ -1161,10 +1161,13 @@ function init() {
 
       const supplementProfile = {
         mode: "minimal",
-        weightKg: Number.isFinite(weightKg) ? weightKg : null,
-        dietType: (dietTypeEl?.value || '').trim() || null,
-        budget: (budgetTierEl?.value || '').trim() || null,
-        issues: suppIssues
+        // starší skripty často nesnáší null → radši '' nebo číslo
+        weightKg: Number.isFinite(weightKg) ? weightKg : '',
+        dietType: (dietTypeEl?.value || '').trim(),
+        budget: (budgetTierEl?.value || '').trim(),
+        // necháme i array, ale přidáme i textovou verzi
+        issues: suppIssues,
+        issuesText: suppIssues.join(',')
       };
 
 const payload = {
@@ -1174,10 +1177,17 @@ const payload = {
   gymNames,
   planJson: planObj,
 
-  // ✅ posíláme kompatibilně i pro starší backendy
+  // ✅ nested (nový způsob)
   supplementProfile,
   supplements: supplementProfile,
   supplement_profile: supplementProfile,
+
+  // ✅ flat (staré backendy / Apps Script často čeká tohle)
+  weightKg: supplementProfile.weightKg,
+  dietType: supplementProfile.dietType,
+  budget: supplementProfile.budget,
+  issues: supplementProfile.issuesText,     // string "sleep,stress"
+  issuesArr: supplementProfile.issues,      // array pro novější logiku
 
   meta: {
     version: 2,
@@ -1190,6 +1200,7 @@ const payload = {
     baseColHeader: 'base_exercise'
   }
 };
+
      
       console.log('[export payload]', payload);
       console.log('[supplementProfile]', payload.supplementProfile);
