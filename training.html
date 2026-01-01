@@ -1077,160 +1077,162 @@ function init() {
   });
 
   document.getElementById('continueButton').addEventListener('click', async () => {
-  const finalStatus = document.getElementById('finalStatus');
-  finalStatus.textContent = '';
-  finalStatus.style.color = '#ffa500';
+    const finalStatus = document.getElementById('finalStatus');
+    finalStatus.textContent = '';
+    finalStatus.style.color = '#ffa500';
 
-  // Loader UI refs
-  const exportBtn = document.getElementById('continueButton');
-  const exportNotice = document.getElementById('exportNotice');
-  const exportMeta = document.getElementById('exportMeta');
-  const exportBarFill = document.getElementById('exportBarFill');
+    // Loader UI refs
+    const exportBtn = document.getElementById('continueButton');
+    const exportNotice = document.getElementById('exportNotice');
+    const exportMeta = document.getElementById('exportMeta');
+    const exportBarFill = document.getElementById('exportBarFill');
 
-  // UI: start loading state
-  exportBtn.disabled = true;
-  const oldBtnText = exportBtn.textContent;
-  exportBtn.textContent = 'Exporting…';
-  exportBtn.style.opacity = '0.85';
+    // UI: start loading state
+    exportBtn.disabled = true;
+    const oldBtnText = exportBtn.textContent;
+    exportBtn.textContent = 'Exporting…';
+    exportBtn.style.opacity = '0.85';
 
-  const noticeTimer = setTimeout(() => {
-    exportNotice.style.display = 'block';
-  }, 600);
+    const noticeTimer = setTimeout(() => {
+      exportNotice.style.display = 'block';
+    }, 600);
 
-  const tStart = Date.now();
-  const tick = () => {
-    const s = Math.floor((Date.now() - tStart) / 1000);
-    const pct = Math.min(95, Math.max(8, Math.floor((s / 70) * 100)));
-    exportBarFill.style.width = pct + '%';
+    const tStart = Date.now();
+    const tick = () => {
+      const s = Math.floor((Date.now() - tStart) / 1000);
+      const pct = Math.min(95, Math.max(8, Math.floor((s / 70) * 100)));
+      exportBarFill.style.width = pct + '%';
 
-    let msg = 'sending request';
-    if (s >= 8) msg = 'creating your sheet copy';
-    if (s >= 20) msg = 'importing your plan';
-    if (s >= 40) msg = 'applying styling & finalizing';
-    if (s >= 65) msg = 'almost there…';
+      let msg = 'sending request';
+      if (s >= 8) msg = 'creating your sheet copy';
+      if (s >= 20) msg = 'importing your plan';
+      if (s >= 40) msg = 'applying styling & finalizing';
+      if (s >= 65) msg = 'almost there…';
 
-    exportMeta.textContent = `${s}s • ${msg}`;
-  };
-
-  tick();
-  const intervalId = setInterval(tick, 1000);
-
-  // vždy nejdřív znovu poskládej textové znění
-  updateTrainingPlanContentInTextarea();
-
-  const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
-  if (!trainingPlan) {
-    clearInterval(intervalId);
-    clearTimeout(noticeTimer);
-
-    exportBtn.disabled = false;
-    exportBtn.textContent = oldBtnText;
-    exportBtn.style.opacity = '';
-    exportNotice.style.display = 'none';
-
-    finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first.';
-    finalStatus.style.color = '#ff3333';
-    return;
-  }
-
-  const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
-  let gymNames = [];
-  if (loc === 'home') {
-    gymNames = ['Home'];
-  } else {
-    gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
-    if (!gymNames.length) gymNames = ['My Gym'];
-  }
-
-  const userName = email.value.trim() || 'Anonymous';
-
-  try {
-    finalStatus.textContent = '📤 Uploading plan...';
-
-    const planObj = collectPlanJSON();
-
-    const weightKgRaw = (weightKgEl?.value || '').trim();
-    const weightKg = parseFloat(weightKgRaw);
-    const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
-
-    const supplementProfile = {
-      mode: "minimal",
-      weightKg: Number.isFinite(weightKg) ? weightKg : null,
-      dietType: (dietTypeEl?.value || '').trim() || null,
-      budget: (budgetTierEl?.value || '').trim() || null,
-      issues: suppIssues
+      exportMeta.textContent = `${s}s • ${msg}`;
     };
 
-    const payload = {
-      action: "createAndImport",
-      userName,
-      trainingPlan,
-      gymNames,
-      planJson: planObj,
-      supplementProfile,
-      meta: {
-        version: 2,
-        location: loc,
-        preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
-      },
-      flags: {
-        createDropdowns: true,
-        writeBaseCol: 'AA',
-        baseColHeader: 'base_exercise'
-      }
-    };
+    tick();
+    const intervalId = setInterval(tick, 1000);
 
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    // vždy nejdřív znovu poskládej textové znění
+    updateTrainingPlanContentInTextarea();
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const json = await res.json();
-
-    if (json.ok || json.success) {
-      const sheetUrl = json.url || (json.data && json.data.url) || '';
-
-      finalStatus.innerHTML = `✅ <a href="${sheetUrl}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
-      finalStatus.style.color = '#00ff88';
-
+    const trainingPlan = document.getElementById('trainingPlanContent').value.trim();
+    if (!trainingPlan) {
       clearInterval(intervalId);
       clearTimeout(noticeTimer);
 
-      exportBarFill.style.width = '100%';
-      exportMeta.textContent = 'Done • opening link';
+      exportBtn.disabled = false;
+      exportBtn.textContent = oldBtnText;
+      exportBtn.style.opacity = '';
       exportNotice.style.display = 'none';
 
-      exportBtn.disabled = false;
-      exportBtn.textContent = 'Export again';
-      exportBtn.style.opacity = '';
-
-      try {
-        localStorage.setItem('lastPlan', JSON.stringify(planObj));
-        localStorage.setItem('lastFormData', JSON.stringify(window.formData || {}));
-      } catch (_) {}
-    } else {
-      throw new Error(json.error || 'Unexpected server error.');
+      finalStatus.textContent = '❌ Training plan is empty. Please generate a plan first.';
+      finalStatus.style.color = '#ff3333';
+      return;
     }
 
-  } catch (err) {
-    clearInterval(intervalId);
-    clearTimeout(noticeTimer);
+    const loc = (document.querySelector('input[name="loc"]:checked') || {}).value || 'gym';
+    let gymNames = [];
+    if (loc === 'home') {
+      gymNames = ['Home'];
+    } else {
+      gymNames = Array.from(document.querySelectorAll('.gymName')).map(x => x.value.trim()).filter(Boolean);
+      if (!gymNames.length) gymNames = ['My Gym'];
+    }
 
-    exportBtn.disabled = false;
-    exportBtn.textContent = oldBtnText;
-    exportBtn.style.opacity = '';
+    const userName = email.value.trim() || 'Anonymous';
 
-    exportMeta.textContent = 'Error • please try again';
-    exportBarFill.style.width = '12%';
-    exportNotice.style.display = 'block';
+    try {
+      finalStatus.textContent = '📤 Uploading plan...';
 
-    finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
-    finalStatus.style.color = '#ff3333';
-  }
-});
+      const planObj = collectPlanJSON();
+
+      const weightKgRaw = (weightKgEl?.value || '').trim();
+      const weightKg = parseFloat(weightKgRaw);
+      const suppIssues = Array.from(document.querySelectorAll('.suppIssue:checked')).map(x => x.value);
+
+      const supplementProfile = {
+        mode: "minimal",
+        weightKg: Number.isFinite(weightKg) ? weightKg : null,
+        dietType: (dietTypeEl?.value || '').trim() || null,
+        budget: (budgetTierEl?.value || '').trim() || null,
+        issues: suppIssues
+      };
+
+      const payload = {
+        action: "createAndImport",
+        userName,
+        trainingPlan,
+        gymNames,
+        planJson: planObj,
+        supplementProfile,
+        meta: {
+          version: 2,
+          location: loc,
+          preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
+        },
+        flags: {
+          createDropdowns: true,
+          writeBaseCol: 'AA',
+          baseColHeader: 'base_exercise'
+        }
+      };
+
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const json = await res.json();
+
+      if (json.ok || json.success) {
+        const sheetUrl = json.url || (json.data && json.data.url) || '';
+
+        finalStatus.innerHTML = `✅ <a href="${sheetUrl}" target="_blank" rel="noopener noreferrer">Open Logbook</a>`;
+        finalStatus.style.color = '#00ff88';
+
+        clearInterval(intervalId);
+        clearTimeout(noticeTimer);
+
+        exportBarFill.style.width = '100%';
+        exportMeta.textContent = 'Done • opening link';
+        exportNotice.style.display = 'none';
+
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export again';
+        exportBtn.style.opacity = '';
+
+        try {
+          localStorage.setItem('lastPlan', JSON.stringify(planObj));
+          localStorage.setItem('lastFormData', JSON.stringify(window.formData || {}));
+        } catch (_) {}
+      } else {
+        throw new Error(json.error || 'Unexpected server error.');
+      }
+
+    } catch (err) {
+      clearInterval(intervalId);
+      clearTimeout(noticeTimer);
+
+      exportBtn.disabled = false;
+      exportBtn.textContent = oldBtnText;
+      exportBtn.style.opacity = '';
+
+      exportMeta.textContent = 'Error • please try again';
+      exportBarFill.style.width = '12%';
+      exportNotice.style.display = 'block';
+
+      finalStatus.textContent = `❌ ${err.message}. Please check your Apps Script deployment and logs.`;
+      finalStatus.style.color = '#ff3333';
+    }
+  });
+
+} // ✅ DŮLEŽITÉ: tímhle zavíráš init()
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
