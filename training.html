@@ -1194,15 +1194,32 @@ const payload = {
       console.log('[export payload]', payload);
       console.log('[supplementProfile]', payload.supplementProfile);
 
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+            console.log('[export] apiUrl =', apiUrl);
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let res;
+      try {
+        res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (netErr) {
+        console.error('[export] Network error (Failed to fetch):', netErr);
+        throw new Error('Network error (Failed to fetch). Likely CORS, wrong URL, or Worker is down.');
+      }
 
-      const json = await res.json();
+      const rawText = await res.text().catch(() => '');
+      console.log('[export] status =', res.status);
+      console.log('[export] raw response =', rawText);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${rawText || 'No response body'}`);
+
+      let json = {};
+      try {
+        json = rawText ? JSON.parse(rawText) : {};
+      } catch (e) {
+        throw new Error('Response is not valid JSON. Raw: ' + (rawText || '(empty)'));
+      }
 
       if (json.ok || json.success) {
         const sheetUrl = json.url || (json.data && json.data.url) || '';
