@@ -955,6 +955,12 @@ function init() {
   const weightKgEl = document.getElementById('weightKg');
   const dietTypeEl = document.getElementById('dietType');
   const budgetTierEl = document.getElementById('budgetTier');
+  console.log('[supp elements]', {
+  weightKgEl: !!weightKgEl,
+  dietTypeEl: !!dietTypeEl,
+  budgetTierEl: !!budgetTierEl,
+  issuesFound: document.querySelectorAll('.suppIssue').length
+});
 
   const locRadios = Array.from(document.querySelectorAll('input[name="loc"]'));
 
@@ -1161,24 +1167,32 @@ function init() {
         issues: suppIssues
       };
 
-      const payload = {
-        action: "createAndImport",
-        userName,
-        trainingPlan,
-        gymNames,
-        planJson: planObj,
-        supplementProfile,
-        meta: {
-          version: 2,
-          location: loc,
-          preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
-        },
-        flags: {
-          createDropdowns: true,
-          writeBaseCol: 'AA',
-          baseColHeader: 'base_exercise'
-        }
-      };
+const payload = {
+  action: "createAndImport",
+  userName,
+  trainingPlan,
+  gymNames,
+  planJson: planObj,
+
+  // ✅ posíláme kompatibilně i pro starší backendy
+  supplementProfile,
+  supplements: supplementProfile,
+  supplement_profile: supplementProfile,
+
+  meta: {
+    version: 2,
+    location: loc,
+    preferMachinesFirstBlock: !!(preferMachinesEl && preferMachinesEl.checked)
+  },
+  flags: {
+    createDropdowns: true,
+    writeBaseCol: 'AA',
+    baseColHeader: 'base_exercise'
+  }
+};
+     
+      console.log('[export payload]', payload);
+      console.log('[supplementProfile]', payload.supplementProfile);
 
       const res = await fetch(apiUrl, {
         method: 'POST',
