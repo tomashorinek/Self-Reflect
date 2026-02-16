@@ -523,6 +523,133 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
   color: rgba(242,242,243,.92);
   font-size: 13px;
 }
+/* ===== GLOBAL ANTI-HORIZONTAL SCROLL ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, svg, video, canvas { max-width: 100%; height: auto; display: block; }
+
+/* ===== SHOTS (screenshots) – safe defaults ===== */
+.shots{
+  display: grid;
+  gap: 14px;
+}
+.shots figure{
+  margin: 0;
+  max-width: 100%;
+}
+.shots a{
+  display: block;
+  max-width: 100%;
+}
+.shots img{
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--line-2);
+  background: rgba(255,255,255,.02);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+}
+.shots figcaption{
+  margin-top: 10px;
+  color: var(--ink-dim);
+  line-height: 1.35;
+}
+/* ===== Landing width: ať to není úzký jak formulář ===== */
+.container { max-width: 1100px; }           /* doteď 720px, to je moc úzké na SaaS */
+.hero, form, .output, #how-it-works.info-wrap { max-width: 720px; margin-left:auto; margin-right:auto; }
+#how-it-works.info-wrap { max-width: 1100px; } /* info/landing může být širší */
+
+/* ===== Feature shots ===== */
+.feature-shots{
+  margin-top: 22px;
+  display: grid;
+  gap: 14px;
+}
+
+.feature{
+  display: grid;
+  grid-template-columns: 1.05fr 1.35fr;
+  gap: 14px;
+  align-items: center;
+
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,.02);
+}
+  .feature{
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.feature:hover{
+  border-color: rgba(255,140,0,.35);
+  background: rgba(255,140,0,.04);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 920px){
+  .feature{ grid-template-columns: 1fr; }
+}
+
+.feature-copy h3{
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  letter-spacing: -.2px;
+}
+.feature-copy p{
+  margin: 0 0 10px 0;
+  color: var(--ink-dim);
+  line-height: 1.35;
+}
+.feature-list{
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(242,242,243,.92);
+}
+.feature-list li{ margin: 6px 0; }
+
+/* “device frame” look */
+.shot-frame{
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  box-shadow: 0 18px 55px rgba(0,0,0,.50);
+}
+
+.shot-frame::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(600px 260px at 20% 0%, rgba(255,140,0,.20), transparent 60%),
+              radial-gradient(600px 260px at 80% 10%, rgba(153,69,255,.18), transparent 60%);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.shot-frame img{
+  position: relative;
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* tiny label chip */
+.kicker{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  font-size:12px;
+  font-weight:900;
+  color: rgba(242,242,243,.9);
+  margin-bottom: 8px;
+}
+.k-dot{
+  width: 9px; height: 9px;
+  border-radius: 999px;
+  background: var(--brand);
+  box-shadow: 0 0 0 6px rgba(255,140,0,.14);
+}
 
 </style>
 <!-- Sortable.js (for DnD in planLogic.js) -->
@@ -534,8 +661,11 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
   <header class="hero">
     <div class="hero-top">
       <div class="badge">Self-Coach</div>
-      <h1>Build your training system</h1>
-      <p>Answer a few questions. We generate your plan + logbook.</p>
+      <h1>Your training. One system.</h1>
+      <p>
+      Generate a structured plan, log every session,
+      and get clear feedback on whether you’re actually progressing.
+     </p>
       <div class="chips">
         <span class="chip">Plan</span>
         <span class="chip">Logbook</span>
@@ -672,6 +802,31 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
       <p><b>Progression:</b> add a rep or small load with full ROM & control; if form slips, hold or reduce.</p>
       <p><b>Export:</b> copy the plan, copy JSON, or send to your Logbook Google Sheet.</p>
     </div>
+       <h3>What happens when you click <em>Generate</em></h3>
+      <ol>
+        <li>We load a curated exercise library that matches your goal (Gym/Home) and weekly frequency.</li>
+        <li>We assemble days with a sensible exercise order and attach <b>Alternatives</b> to every item.</li>
+        <li>If “Prefer machines” is on, the first 4–8 weeks bias to isolation/machines for safer skill-building.</li>
+        <li><b>Editing & swaps happen on the web</b> (Generated Training). The Google Sheet is for logging and reports.</li>
+      </ol>
+      <div class="note" style="margin-top:.75rem;">
+        <strong>Starter advice (appears after generation):</strong><br>
+        Favor machine-based/isolation work for 4–8 weeks to learn control & ROM, then re-introduce more free-weight compounds.
+      </div>
+          <h3>How the performance chip works</h3>
+      <ul>
+        <li>Each session gets graded vs your <b>last comparable session in the same gym</b>.</li>
+        <li>We look at <b>total volume</b>, <b>top set weight</b>, and <b>max reps</b> across your sets.</li>
+        <li>Result is mapped to one of four chips (DV-safe text):</li>
+      </ul>
+      <div class="card" style="margin-top:1rem;">
+    <h3>Auto-fill & logging basics</h3>
+    <p>
+      When a session is synced from the web — or when you paste performed sets (e.g., <code>60x10 / 60x9</code>) — the log row can
+      <b>auto-stamp the Date and compute Performance</b> vs your last comparable session in the same gym.
+      If the exercise differs from the last comparable one (e.g., you switched to an Alternative), that day is scored as
+      <b>Maintaining (score 0)</b> to avoid false negatives. Next time with the same exercise, it will compare normally.
+    </p>
   </details>
 </div>
 
@@ -689,22 +844,15 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 
 <!-- ===== HOW IT WORKS / INFO (under the generator) ===== -->
 <section id="how-it-works" class="info-wrap">
-  <h2>How the Self-Coaching Plan works</h2>
-  <p>
-    Pick a goal and training frequency, choose <strong>Gym</strong> or <strong>Home</strong>, then generate your plan.
-    You can reorder exercises and rotate <em>Alternatives</em> on the web. When you export, your Google Sheet tracks sessions and
-    shows a <em>performance chip</em> so you instantly know if you’re trending up.
-  </p>
-
+<h2>How it works</h2>
+<p>
+Answer a few questions.
+Edit your plan on the web.
+Log sessions in Google Sheets.
+The system handles progression and feedback.
+</p>
   <div class="grid">
     <div class="card">
-      <h3>What happens when you click <em>Generate</em></h3>
-      <ol>
-        <li>We load a curated exercise library that matches your goal (Gym/Home) and weekly frequency.</li>
-        <li>We assemble days with a sensible exercise order and attach <b>Alternatives</b> to every item.</li>
-        <li>If “Prefer machines” is on, the first 4–8 weeks bias to isolation/machines for safer skill-building.</li>
-        <li><b>Editing & swaps happen on the web</b> (Generated Training). The Google Sheet is for logging and reports.</li>
-      </ol>
       <div class="note" style="margin-top:.75rem;">
         <strong>Starter advice (appears after generation):</strong><br>
         Favor machine-based/isolation work for 4–8 weeks to learn control & ROM, then re-introduce more free-weight compounds.
@@ -712,12 +860,7 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
     </div>
 
     <div class="card">
-      <h3>How the performance chip works</h3>
-      <ul>
-        <li>Each session gets graded vs your <b>last comparable session in the same gym</b>.</li>
-        <li>We look at <b>total volume</b>, <b>top set weight</b>, and <b>max reps</b> across your sets.</li>
-        <li>Result is mapped to one of four chips (DV-safe text):</li>
-      </ul>
+
       <div class="legend">
         <div class="chip high">🟢 Highly Progressive</div>
         <div class="chip mid">🟢 Progressive</div>
@@ -729,84 +872,103 @@ button:hover{ transform: translateY(-1px); filter: brightness(1.05); }
       </p>
     </div>
   </div>
-
-  <!-- Extra explainer for auto-fill -->
-  <div class="card" style="margin-top:1rem;">
-    <h3>Auto-fill & logging basics</h3>
-    <p>
-      When a session is synced from the web — or when you paste performed sets (e.g., <code>60x10 / 60x9</code>) — the log row can
-      <b>auto-stamp the Date and compute Performance</b> vs your last comparable session in the same gym.
-      If the exercise differs from the last comparable one (e.g., you switched to an Alternative), that day is scored as
-      <b>Maintaining (score 0)</b> to avoid false negatives. Next time with the same exercise, it will compare normally.
-    </p>
   </div>
 
   <!-- ===== Screenshots with captions ===== -->
-  <div class="shots" style="margin-top:1rem;">
-    <!-- Plan/logbook view -->
-    <figure>
-      <a href="Assets/screen-plan-drag.png.png" target="_blank" rel="noopener">
-        <img src="Assets/screen-plan-drag.png.png"
-             alt="Logbook view with generated plan rows and weekly window"
-             loading="lazy" decoding="async">
-      </a>
-      <figcaption><b>Logbook view.</b> Your generated plan as rows in the Sheet. Editing and alternatives are done on the web; the log keeps your performed sets and performance results.</figcaption>
-    </figure>
+<div class="features">
 
-    <!-- Daily Log with performance chip -->
-    <figure>
-      <a href="Assets/screen-daily-log.png.png" target="_blank" rel="noopener">
-        <img src="Assets/screen-daily-log.png.png"
-             alt="Daily Log sheet with date, weight, sleep, adherence, performance chip, calories, mood, stress"
-             loading="lazy" decoding="async">
-      </a>
-      <figcaption><b>Daily Log.</b> One row per day with dropdowns (Sleep, Food Adherence, Performance, Mood, Stress) plus Calories and Weight for weekly roll-ups.</figcaption>
-    </figure>
+  <!-- DAILY LOG -->
+  <section class="feature">
+    <div class="feature__copy">
+      <div class="kicker"><span class="k-dot"></span>Source of truth</div>
+      <h3>Daily Log</h3>
+      <p>
+        One row per day. Sleep, food adherence, stress and performance in one place.
+      </p>
+      <ul class="feature-list">
+        <li>Quick daily inputs</li>
+        <li>Performance chip per session</li>
+        <li>Clean history for weekly trends</li>
+      </ul>
+    </div>
 
-    <!-- Weekly feedback roll-up -->
-    <figure>
-      <a href="Assets/screen-weekly-feedback.png.png" target="_blank" rel="noopener">
-        <img src="Assets/screen-weekly-feedback.png.png"
-             alt="Weekly Feedback summary with averages and Performance Index"
-             loading="lazy" decoding="async">
+    <div class="feature__media">
+      <a class="shot-frame" href="Assets/screen-daily-log.png.png" target="_blank">
+        <img src="Assets/screen-daily-log.png.png" alt="Daily Log">
       </a>
-      <figcaption><b>Weekly Feedback.</b> Averages, total calories, a Performance Index and short, phase-aware recommendations for weight & intake.</figcaption>
-    </figure>
+    </div>
+  </section>
 
-    <!-- Daily reports (export/success context) -->
-    <figure>
-      <a href="Assets/screen-daily-reports.png.png" target="_blank" rel="noopener">
-        <img src="Assets/screen-daily-reports.png.png"
-             alt="Auto-generated Daily Feedback reports in the sheet"
-             loading="lazy" decoding="async">
-      </a>
-      <figcaption><b>Daily Feedback Reports.</b> The newest daily summary always lands on top (A2). Clear “Focus today” items help you act the same day.</figcaption>
-    </figure>
+  <!-- DAILY FEEDBACK -->
+  <section class="feature is-reverse">
+    <div class="feature__copy">
+      <div class="kicker"><span class="k-dot"></span>Coach output</div>
+      <h3>Daily Feedback</h3>
+      <p>
+        Clear priorities for today. Not motivation — direction.
+      </p>
+      <ul class="feature-list">
+        <li>Actionable daily focus</li>
+        <li>Recovery & sleep flags</li>
+        <li>No overreaction to noise</li>
+      </ul>
+    </div>
 
-    <!-- Optional: Config -->
-    <figure>
-      <a href="Assets/Config.png" target="_blank" rel="noopener">
-        <img src="Assets/Config.png"
-             alt="Config sheet — control center with phase, time rules and toggles"
-             loading="lazy" decoding="async">
+    <div class="feature__media">
+      <a class="shot-frame" href="Assets/screen-daily-reports.png.png" target="_blank">
+        <img src="Assets/screen-daily-reports.png.png" alt="Daily Feedback">
       </a>
-      <figcaption><b>Config.</b> Control center: phase, time rules, manual toggles and the auto-weekly switch.</figcaption>
-    </figure>
+    </div>
+  </section>
 
-    <!-- Optional: Web training -->
-    <figure>
-      <a href="Assets/WebTraining.png" target="_blank" rel="noopener">
-        <img src="Assets/WebTraining.png"
-             alt="Web Generated Training list with alternatives and swap icons"
-             loading="lazy" decoding="async">
+  <!-- WEEKLY FEEDBACK -->
+  <section class="feature">
+    <div class="feature__copy">
+      <div class="kicker"><span class="k-dot"></span>Long-term view</div>
+      <h3>Weekly Feedback</h3>
+      <p>
+        See trends. Adjust calories, volume or recovery with confidence.
+      </p>
+      <ul class="feature-list">
+        <li>Weekly averages</li>
+        <li>Clear direction, not guesswork</li>
+        <li>Performance overview</li>
+      </ul>
+    </div>
+
+    <div class="feature__media">
+      <a class="shot-frame" href="Assets/screen-weekly-feedback.png.png" target="_blank">
+        <img src="Assets/screen-weekly-feedback.png.png" alt="Weekly Feedback">
       </a>
-      <figcaption><b>Web — Generated Training.</b> Edit order, rotate Alternatives and then export to the logbook.</figcaption>
-    </figure>
-  </div>
+    </div>
+  </section>
+
+  <!-- WEB TRAINING -->
+  <section class="feature is-reverse">
+    <div class="feature__copy">
+      <div class="kicker"><span class="k-dot"></span>Control layer</div>
+      <h3>Generated Training (Web)</h3>
+      <p>
+        Reorder exercises. Swap alternatives. Export on one click.
+      </p>
+      <ul class="feature-list">
+        <li>Drag & drop order</li>
+        <li>Alternative swaps</li>
+        <li>One-click export to Logbook</li>
+      </ul>
+    </div>
+
+    <div class="feature__media">
+      <a class="shot-frame" href="Assets/WebTraining.png" target="_blank">
+        <img src="Assets/WebTraining.png" alt="Web Training Editor">
+      </a>
+    </div>
+  </section>
+
+</div>
 
   <div class="cta-row">
-    <a class="btn" href="#trackerForm">Generate my plan</a>
-    <a class="btn ghost" href="#trainingPlanContent">See my current output</a>
+ <a class="btn" href="#trackerForm">Generate my system</a>
   </div>
 </section>
 <!-- ===== /HOW IT WORKS ===== -->
